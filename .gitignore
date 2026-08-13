@@ -1,0 +1,68 @@
+# Flutter & Dart dependencies & build output
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Android build outputs & local configs
+android/.gradle/
+android/.kotlin/
+android/captures/
+android/local.properties
+android/key.properties
+android/app/build/
+android/.cxx/
+
+# iOS & macOS build outputs & generated files
+ios/Pods/
+ios/.symlinks/
+ios/DerivedData/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+ios/Runner/GeneratedPluginRegistrant.*
+xcuserdata/
+macOS/Flutter/ephemeral/
+
+# Windows & Linux specific
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Environment & secrets
+.env
+.env.*
+google-services.json
+**/google-services.json
+GoogleService-Info.plist
+**/GoogleService-Info.plist
+local.properties
+**/local.properties
+key.properties
+**/key.properties
+*.pem
+*.key
+*.jks
+*.keystore
+
+# Logs
+*.log
+
+# OS & IDE junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
