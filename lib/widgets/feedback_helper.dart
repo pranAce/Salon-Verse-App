@@ -17,11 +17,7 @@ class AppFeedback {
     _show(context, message, _FeedbackType.warning);
   }
 
-  static void _show(
-    BuildContext context,
-    String message,
-    _FeedbackType type,
-  ) {
+  static void _show(BuildContext context, String message, _FeedbackType type) {
     if (!context.mounted) return;
 
     final theme = Theme.of(context);

@@ -92,7 +92,9 @@ class StylistModel {
       specialties: specs,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       reviewCount: json['reviewCount'] as int? ?? 0,
-      portfolioImages: List<String>.from(json['portfolioImages'] ?? json['portfolio'] ?? []),
+      portfolioImages: List<String>.from(
+        json['portfolioImages'] ?? json['portfolio'] ?? [],
+      ),
     );
   }
 }
@@ -170,7 +172,6 @@ class SalonModel {
   }
 
   factory SalonModel.fromJson(Map<String, dynamic> json) {
-    // Parse GeoJSON coordinates [longitude, latitude]
     double lat = 27.7172;
     double lng = 85.3240;
 
@@ -181,8 +182,12 @@ class SalonModel {
         lat = (coords[1] as num).toDouble();
       }
     } else {
-      if (json['latitude'] != null) lat = (json['latitude'] as num).toDouble();
-      if (json['longitude'] != null) lng = (json['longitude'] as num).toDouble();
+      if (json['latitude'] != null) {
+        lat = (json['latitude'] as num).toDouble();
+      }
+      if (json['longitude'] != null) {
+        lng = (json['longitude'] as num).toDouble();
+      }
     }
 
     return SalonModel(

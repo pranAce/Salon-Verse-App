@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:salonverse/controllers/booking_provider.dart';
 import 'package:salonverse/controllers/settings_provider.dart';
@@ -18,18 +19,24 @@ class PaymentConfirmationPage extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final bookingProvider = context.watch<BookingProvider>();
 
-    // Retrieve last booking from state to display in receipt
     final bookings = bookingProvider.bookings;
     final lastBooking = bookings.isNotEmpty ? bookings.first : null;
 
     final String salonName = lastBooking?.salonName ?? "Glow Beauty Lounge";
-    final String salonAddress = lastBooking?.salonAddress ?? "Thamel, Kathmandu";
-    final String salonImageUrl = lastBooking?.salonImageUrl ?? "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80";
+    final String salonAddress =
+        lastBooking?.salonAddress ?? "Thamel, Kathmandu";
+    final String salonImageUrl =
+        lastBooking?.salonImageUrl ??
+        "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80";
     final String dateStr = lastBooking?.date ?? "Fri, Nov 14";
     final String timeStr = lastBooking?.timeSlot ?? "02:30 PM";
     final String serviceName = lastBooking?.serviceName ?? "Signature Haircut";
     final String stylistName = lastBooking?.stylistName ?? "Priya S.";
-    final String bookingId = lastBooking != null ? "SV-${lastBooking.id.substring(0, 6).toUpperCase()}" : "SV-284071";
+    final String bookingId = lastBooking != null
+        ? (lastBooking.id.length >= 6
+              ? "SV-${lastBooking.id.substring(0, 6).toUpperCase()}"
+              : "SV-${lastBooking.id.toUpperCase()}")
+        : "SV-284071";
 
     return Scaffold(
       body: SafeArea(
@@ -38,8 +45,7 @@ class PaymentConfirmationPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 28),
-              
-              // 1. Success checkmark icon (circular pink gradient)
+
               Center(
                 child: Container(
                   width: 90,
@@ -70,13 +76,15 @@ class PaymentConfirmationPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               Text(
                 'Booking Confirmed!',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: 24,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -84,22 +92,23 @@ class PaymentConfirmationPage extends StatelessWidget {
                 'Your appointment is secured.\nA confirmation has been sent to your phone.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                   height: 1.4,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
 
-              // 2. Receipt Card details matching 5.jpeg
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1E1C1B)
-                      : Colors.white,
+                  color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
                   border: Border.all(
-                    color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
+                    color: theme.colorScheme.outline.withAlpha(
+                      isDark ? 30 : 60,
+                    ),
                   ),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
@@ -113,7 +122,6 @@ class PaymentConfirmationPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Salon row info
                     Row(
                       children: [
                         ClipRRect(
@@ -123,7 +131,11 @@ class PaymentConfirmationPage extends StatelessWidget {
                             width: 60,
                             height: 60,
                             fit: BoxFit.cover,
-                            errorWidget: (c, u, e) => Container(color: Colors.grey, width: 60, height: 60),
+                            errorWidget: (c, u, e) => Container(
+                              color: Colors.grey,
+                              width: 60,
+                              height: 60,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -132,11 +144,20 @@ class PaymentConfirmationPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary.withAlpha(15),
+                                  color: theme.colorScheme.primary.withAlpha(
+                                    15,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: theme.colorScheme.primary.withAlpha(30)),
+                                  border: Border.all(
+                                    color: theme.colorScheme.primary.withAlpha(
+                                      30,
+                                    ),
+                                  ),
                                 ),
                                 child: Text(
                                   "VERIFIED SALON",
@@ -151,55 +172,69 @@ class PaymentConfirmationPage extends StatelessWidget {
                               const SizedBox(height: 6),
                               Text(
                                 salonName,
-                                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 15,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 salonAddress,
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    
+
                     const Divider(height: 32),
 
-                    // Date & Time side-by-side
                     Row(
                       children: [
-                        // Date block
                         Expanded(
                           child: _buildReceiptBlock(
                             context,
                             theme,
-                            Icon(Icons.calendar_today_rounded, color: theme.colorScheme.primary, size: 16),
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              color: theme.colorScheme.primary,
+                              size: 16,
+                            ),
                             "DATE",
                             dateStr,
                           ),
                         ),
                         const SizedBox(width: 16),
-                        // Time block
                         Expanded(
                           child: _buildReceiptBlock(
                             context,
                             theme,
-                            Icon(Icons.access_time_rounded, color: theme.colorScheme.primary, size: 16),
+                            Icon(
+                              Icons.access_time_rounded,
+                              color: theme.colorScheme.primary,
+                              size: 16,
+                            ),
                             "TIME",
                             timeStr,
                           ),
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 20),
 
-                    // Service block
                     _buildReceiptBlock(
                       context,
                       theme,
-                      Icon(Icons.content_cut_rounded, color: theme.colorScheme.primary, size: 16),
+                      Icon(
+                        Icons.content_cut_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 16,
+                      ),
                       "SERVICE",
                       serviceName,
                       subtitle: "with $stylistName",
@@ -207,11 +242,15 @@ class PaymentConfirmationPage extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    // Booking ID with copy button
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF161514) : Colors.grey.shade50,
+                        color: isDark
+                            ? const Color(0xFF161514)
+                            : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -219,19 +258,30 @@ class PaymentConfirmationPage extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.tag_rounded, color: theme.colorScheme.primary, size: 16),
+                              Icon(
+                                Icons.tag_rounded,
+                                color: theme.colorScheme.primary,
+                                size: 16,
+                              ),
                               const SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
                                     "BOOKING ID",
-                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey),
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     bookingId,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -240,10 +290,16 @@ class PaymentConfirmationPage extends StatelessWidget {
                           GestureDetector(
                             onTap: () {
                               Clipboard.setData(ClipboardData(text: bookingId));
-                              AppFeedback.success(context, "Booking ID copied!");
+                              AppFeedback.success(
+                                context,
+                                "Booking ID copied!",
+                              );
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
@@ -251,7 +307,11 @@ class PaymentConfirmationPage extends StatelessWidget {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.copy_rounded, color: theme.colorScheme.primary, size: 12),
+                                  Icon(
+                                    Icons.copy_rounded,
+                                    color: theme.colorScheme.primary,
+                                    size: 12,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     "Copy",
@@ -271,10 +331,9 @@ class PaymentConfirmationPage extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 36),
 
-              // 3. Add to Calendar button (Solid Pink)
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -282,33 +341,101 @@ class PaymentConfirmationPage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
-                  onPressed: () {
-                    AppFeedback.success(context, "Added to device calendar!");
+                  onPressed: () async {
+                    try {
+                      final title = Uri.encodeComponent(
+                        "Salon Appointment: $serviceName at $salonName",
+                      );
+                      final details = Uri.encodeComponent(
+                        "SalonVerse Booking $bookingId with stylist $stylistName. Address: $salonAddress",
+                      );
+                      final location = Uri.encodeComponent(salonAddress);
+                      final now = DateTime.now();
+                      final startFormatted =
+                          "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}T100000Z";
+                      final endFormatted =
+                          "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}T110000Z";
+
+                      final googleCalendarUrl = Uri.parse(
+                        "https://calendar.google.com/calendar/render?action=TEMPLATE&text=$title&details=$details&location=$location&dates=$startFormatted/$endFormatted",
+                      );
+
+                      if (await canLaunchUrl(googleCalendarUrl)) {
+                        await launchUrl(
+                          googleCalendarUrl,
+                          mode: LaunchMode.externalApplication,
+                        );
+                        if (context.mounted) {
+                          AppFeedback.success(
+                            context,
+                            "Opening device calendar...",
+                          );
+                        }
+                      } else {
+                        Clipboard.setData(
+                          ClipboardData(
+                            text:
+                                "$serviceName at $salonName on $dateStr at $timeStr. Location: $salonAddress",
+                          ),
+                        );
+                        if (context.mounted) {
+                          AppFeedback.success(
+                            context,
+                            "Appointment details copied to clipboard!",
+                          );
+                        }
+                      }
+                    } catch (_) {
+                      Clipboard.setData(
+                        ClipboardData(
+                          text:
+                              "$serviceName at $salonName on $dateStr at $timeStr. Location: $salonAddress",
+                        ),
+                      );
+                      if (context.mounted) {
+                        AppFeedback.success(
+                          context,
+                          "Appointment details copied to clipboard!",
+                        );
+                      }
+                    }
                   },
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.calendar_today_rounded, size: 16),
                       SizedBox(width: 8),
-                      Text("Add to Calendar", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text(
+                        "Add to Calendar",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 12),
-              
-              // 4. Back to Home button (Outline pink)
+
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: theme.colorScheme.primary,
-                    side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   onPressed: () {
                     context.read<SettingsProvider>().setPage(0);
@@ -319,7 +446,13 @@ class PaymentConfirmationPage extends StatelessWidget {
                     children: [
                       Icon(Icons.home_outlined, size: 16),
                       SizedBox(width: 8),
-                      Text("Back to Home", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text(
+                        "Back to Home",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -360,12 +493,19 @@ class PaymentConfirmationPage extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 2),

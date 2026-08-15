@@ -34,7 +34,7 @@ class TargetModel {
   final String id;
   final String salonId;
   final String title;
-  final String targetType; // monthly, weekly, custom
+  final String targetType;
   final String startDate;
   final String endDate;
   final double targetAmount;
@@ -43,7 +43,7 @@ class TargetModel {
   final int progressPercent;
   final int daysRemaining;
   final double requiredDailyRevenue;
-  final String status; // on_track, at_risk, achieved, exceeded, archived
+  final String status;
   final String notes;
   final List<StaffContributionModel> staffContributions;
 
@@ -75,7 +75,9 @@ class TargetModel {
     }
 
     final staffList = (json['staffContributions'] as List? ?? [])
-        .map((e) => StaffContributionModel.fromJson(Map<String, dynamic>.from(e)))
+        .map(
+          (e) => StaffContributionModel.fromJson(Map<String, dynamic>.from(e)),
+        )
         .toList();
 
     return TargetModel(
@@ -90,7 +92,8 @@ class TargetModel {
       remainingRevenue: (json['remainingRevenue'] as num?)?.toDouble() ?? 0.0,
       progressPercent: (json['progressPercent'] as num?)?.toInt() ?? 0,
       daysRemaining: (json['daysRemaining'] as num?)?.toInt() ?? 0,
-      requiredDailyRevenue: (json['requiredDailyRevenue'] as num?)?.toDouble() ?? 0.0,
+      requiredDailyRevenue:
+          (json['requiredDailyRevenue'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] ?? 'on_track',
       notes: json['notes'] ?? '',
       staffContributions: staffList,

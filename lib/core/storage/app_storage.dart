@@ -1,11 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
-class AppServices {
+class AppStorage {
+  AppStorage._();
+
   static final InternetConnectionChecker connectionChecker =
       InternetConnectionChecker.createInstance(
-    checkTimeout: const Duration(seconds: 3),
-  );
+        checkTimeout: const Duration(seconds: 3),
+      );
 
   static late SharedPreferences prefs;
 
@@ -21,3 +23,5 @@ class AppServices {
     }
   }
 }
+
+typedef AppServices = AppStorage;

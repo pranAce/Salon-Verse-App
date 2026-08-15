@@ -14,13 +14,12 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _liveGpsLocation = 'Locating...';
   bool _isFetchingGps = false;
   bool _locationPromptActive = false;
   double? _userLat;
   double? _userLng;
-  bool _filter5km = false;
   late TextEditingController _searchController;
 
   final List<Map<String, dynamic>> _categories = const [
@@ -65,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _searchController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchLiveGpsAndSalons();
@@ -73,8 +73,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationOnResume();
+    }
+  }
+
+  Future<void> _checkLocationOnResume() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final permission = await Geolocator.checkPermission();
+      if (serviceEnabled &&
+          permission != LocationPermission.denied &&
+          permission != LocationPermission.deniedForever) {
+        if (_locationPromptActive && mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          _locationPromptActive = false;
+        }
+        _fetchLiveGpsAndSalons();
+      }
+    } catch (_) {}
   }
 
   Future<void> _fetchLiveGpsAndSalons() async {
@@ -93,7 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
           });
           _promptForcedLocation(
             title: "Location Services Disabled",
-            message: "Location is required to discover local salons near you. Please turn on device location.",
+            message:
+                "Location is required to discover local salons near you. Please turn on device location.",
             isServiceDisabled: true,
           );
         }
@@ -110,7 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
             });
             _promptForcedLocation(
               title: "Location Permission Required",
-              message: "SalonVerse requires your device location to show nearby salons. Please grant permission to continue.",
+              message:
+                  "SalonVerse requires your device location to show nearby salons. Please grant permission to continue.",
               isServiceDisabled: false,
             );
           }
@@ -125,7 +151,8 @@ class _HomeScreenState extends State<HomeScreen> {
           });
           _promptForcedLocation(
             title: "Location Permission Blocked",
-            message: "Location permission is permanently denied. Please enable location permission in app settings to use SalonVerse.",
+            message:
+                "Location permission is permanently denied. Please enable location permission in app settings to use SalonVerse.",
             isServiceDisabled: false,
           );
         }
@@ -133,7 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
       _userLat = position.latitude;
       _userLng = position.longitude;
@@ -145,10 +174,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
-        final locality = place.locality ?? place.subAdministrativeArea ?? place.administrativeArea ?? 'Kathmandu';
-        final subLocality = place.subLocality ?? place.street ?? place.name ?? '';
+        final locality =
+            place.locality ??
+            place.subAdministrativeArea ??
+            place.administrativeArea ??
+            'Kathmandu';
+        final subLocality =
+            place.subLocality ?? place.street ?? place.name ?? '';
 
-        final formattedLocation = subLocality.isNotEmpty && !subLocality.contains('+')
+        final formattedLocation =
+            subLocality.isNotEmpty && !subLocality.contains('+')
             ? "$subLocality, $locality"
             : "$locality, ${place.country ?? 'Nepal'}";
 
@@ -163,7 +198,6 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<SalonProvider>().fetchSalons(
           lat: _userLat,
           lng: _userLng,
-          radius: _filter5km ? 5.0 : null,
           forceRefresh: true,
         );
       }
@@ -171,11 +205,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _liveGpsLocation = 'Kathmandu, Nepal';
+          _userLat = 27.7172;
+          _userLng = 85.3240;
         });
-        _promptForcedLocation(
-          title: "Location Unavailable",
-          message: "Unable to retrieve device GPS. Please turn on location services and try again.",
-          isServiceDisabled: true,
+        context.read<SalonProvider>().fetchSalons(
+          lat: 27.7172,
+          lng: 85.3240,
+          forceRefresh: true,
         );
       }
     } finally {
@@ -197,54 +233,67 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              const Icon(Icons.location_off_rounded, color: Color(0xFFEC4899), size: 28),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F2333)),
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            message,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF4B5563), height: 1.4),
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEC4899),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 44),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: () async {
-                Navigator.pop(ctx);
-                _locationPromptActive = false;
-                if (isServiceDisabled) {
-                  await Geolocator.openLocationSettings();
-                } else {
-                  await Geolocator.openAppSettings();
-                }
-                _fetchLiveGpsAndSalons();
-              },
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.location_off_rounded,
+              color: Color(0xFFEC4899),
+              size: 28,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
               child: Text(
-                isServiceDisabled ? 'Turn On Location Services' : 'Open Location Settings',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2333),
+                ),
               ),
             ),
           ],
         ),
+        content: Text(
+          message,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(0xFF4B5563),
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEC4899),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              _locationPromptActive = false;
+              if (isServiceDisabled) {
+                await Geolocator.openLocationSettings();
+              } else {
+                await Geolocator.openAppSettings();
+              }
+            },
+            child: Text(
+              isServiceDisabled
+                  ? 'Turn On Location Services'
+                  : 'Open Location Settings',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
-    );
+    ).then((_) {
+      _locationPromptActive = false;
+    });
   }
 
   @override
@@ -252,7 +301,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final auth = context.watch<AuthProvider>();
     final salonProv = context.watch<SalonProvider>();
     final user = auth.currentUser;
-    final userName = (user?.name ?? 'Aayush').trim().split(' ').first;
+    final userName = user != null && user.name.trim().isNotEmpty
+        ? user.name.trim().split(' ').first
+        : 'Guest';
     final isSearching = salonProv.searchQuery.isNotEmpty;
 
     return Scaffold(
@@ -267,7 +318,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Header Row - 100% Match to homepage.jpeg
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -302,7 +352,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: _fetchLiveGpsAndSalons,
                           child: Row(
                             children: [
-                              const Icon(Icons.location_on_outlined, size: 15, color: Color(0xFFEC4899)),
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 15,
+                                color: Color(0xFFEC4899),
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 _liveGpsLocation,
@@ -317,7 +371,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(
                                   width: 10,
                                   height: 10,
-                                  child: CircularProgressIndicator(strokeWidth: 1.5, color: Color(0xFFEC4899)),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1.5,
+                                    color: Color(0xFFEC4899),
+                                  ),
                                 ),
                               ],
                             ],
@@ -326,7 +383,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
 
-                    // Notification Bell Button - 100% Match to homepage.jpeg
                     Stack(
                       children: [
                         Container(
@@ -371,7 +427,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 20),
 
-                // Search Bar - 100% Match to homepage.jpeg
                 Container(
                   height: 52,
                   decoration: BoxDecoration(
@@ -387,19 +442,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: TextField(
                     controller: _searchController,
-                    onChanged: (q) => salonProv.updateSearchQuery(q, lat: _userLat, lng: _userLng),
-                    style: const TextStyle(fontSize: 14, color: Color(0xFF1F2333)),
+                    onChanged: (q) => salonProv.updateSearchQuery(
+                      q,
+                      lat: _userLat,
+                      lng: _userLng,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF1F2333),
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Search salons, services, stylists...',
-                      hintStyle: const TextStyle(color: Color(0xFFA5A9B8), fontSize: 14),
+                      hintStyle: const TextStyle(
+                        color: Color(0xFFA5A9B8),
+                        fontSize: 14,
+                      ),
                       prefixIcon: const Padding(
                         padding: EdgeInsets.only(left: 16, right: 10),
-                        child: Icon(Icons.search_rounded, color: Color(0xFFEC4899), size: 22),
+                        child: Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFFEC4899),
+                          size: 22,
+                        ),
                       ),
                       prefixIconConstraints: const BoxConstraints(minWidth: 40),
                       suffixIcon: isSearching
                           ? IconButton(
-                              icon: const Icon(Icons.close_rounded, color: Color(0xFF8B8FA3), size: 18),
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                color: Color(0xFF8B8FA3),
+                                size: 18,
+                              ),
                               onPressed: () {
                                 _searchController.clear();
                                 salonProv.clearSearch();
@@ -407,14 +480,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           : null,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 20),
 
-                // Search Results Section if searching
                 if (isSearching) ...[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -434,7 +509,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: const Text(
                           'Clear',
-                          style: TextStyle(fontSize: 14, color: Color(0xFFEC4899), fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFFEC4899),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -444,7 +523,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(color: Color(0xFFEC4899)),
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFEC4899),
+                        ),
                       ),
                     )
                   else if (salonProv.salons.isEmpty)
@@ -457,12 +538,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Column(
                         children: [
-                          const Icon(Icons.search_off_rounded, size: 48, color: Color(0xFFD1D5DB)),
+                          const Icon(
+                            Icons.search_off_rounded,
+                            size: 48,
+                            color: Color(0xFFD1D5DB),
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             'No salons found matching "${salonProv.searchQuery}"',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF4B5563)),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4B5563),
+                            ),
                           ),
                         ],
                       ),
@@ -483,178 +572,181 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   const SizedBox(height: 24),
                 ] else ...[
-                  // Glow Friday Offer Banner Card - 100% PRECISE MATCH TO homepage.jpeg
-                  Container(
-                    width: double.infinity,
-                    height: 185,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFFB7185), // Vibrant Coral Pink
-                          Color(0xFFEC4899), // Rich Pink
-                          Color(0xFFF472B6), // Soft Pastel Pink
+                  GestureDetector(
+                    onTap: () => context.push('/profile/offers'),
+                    child: Container(
+                      width: double.infinity,
+                      height: 185,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFFB7185),
+                            Color(0xFFEC4899),
+                            Color(0xFFF472B6),
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFFEC4899,
+                            ).withValues(alpha: 0.25),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
                         ],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFEC4899).withValues(alpha: 0.25),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        // Decorative Sparkles in Center-Top (Matching homepage.jpeg)
-                        Positioned(
-                          left: 170,
-                          top: 32,
-                          child: Icon(
-                            Icons.auto_awesome,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            size: 15,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            left: 170,
+                            top: 32,
+                            child: Icon(
+                              Icons.auto_awesome,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              size: 15,
+                            ),
                           ),
-                        ),
-                        Positioned(
-                          left: 190,
-                          top: 20,
-                          child: Icon(
-                            Icons.auto_awesome,
-                            color: Colors.white.withValues(alpha: 0.5),
-                            size: 10,
+                          Positioned(
+                            left: 190,
+                            top: 20,
+                            child: Icon(
+                              Icons.auto_awesome,
+                              color: Colors.white.withValues(alpha: 0.5),
+                              size: 10,
+                            ),
                           ),
-                        ),
 
-                        // Decorative Leaf Outline in Center-Bottom (Matching homepage.jpeg)
-                        Positioned(
-                          left: 150,
-                          bottom: 20,
-                          child: Icon(
-                            Icons.eco_outlined,
-                            color: Colors.white.withValues(alpha: 0.35),
-                            size: 36,
+                          Positioned(
+                            left: 150,
+                            bottom: 20,
+                            child: Icon(
+                              Icons.eco_outlined,
+                              color: Colors.white.withValues(alpha: 0.35),
+                              size: 36,
+                            ),
                           ),
-                        ),
 
-                        // Right Side Model Image - Seamless ShaderMask Soft Fade (Matching homepage.jpeg)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 170,
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(24)),
-                            child: ShaderMask(
-                              shaderCallback: (rect) {
-                                return const LinearGradient(
-                                  colors: [Colors.transparent, Colors.black],
-                                  stops: [0.0, 0.22],
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                ).createShader(rect);
-                              },
-                              blendMode: BlendMode.dstIn,
-                              child: Image.asset(
-                                'assets/images/model.png',
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
+                          Positioned(
+                            right: -30,
+                            top: 0,
+                            bottom: 0,
+                            width: 160,
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.horizontal(
+                                right: Radius.circular(24),
+                              ),
+                              child: ShaderMask(
+                                shaderCallback: (rect) {
+                                  return const LinearGradient(
+                                    colors: [Colors.transparent, Colors.black],
+                                    stops: [0.0, 0.28],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ).createShader(rect);
+                                },
+                                blendMode: BlendMode.dstIn,
+                                child: Image.asset(
+                                  'assets/images/model.png',
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topRight,
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        // Left Side Offer Text Content (Matching homepage.jpeg)
-                        Padding(
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // LIMITED OFFER Pill Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Text(
-                                  'LIMITED OFFER',
-                                  style: TextStyle(
-                                    color: Color(0xFFEC4899),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.5,
+                          Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 11,
+                                    vertical: 4,
                                   ),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-
-                              // Glow Friday Heading
-                              const Text(
-                                'Glow Friday',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-
-                              // Subtitle Text
-                              const Text(
-                                'Up to 30% off premium\nsalons this weekend',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  height: 1.2,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-
-                              // Explore Offer > Button
-                              GestureDetector(
-                                onTap: () => context.go('/salon-tab'),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Explore Offer',
-                                        style: TextStyle(
-                                          color: Color(0xFFEC4899),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      SizedBox(width: 4),
-                                      Icon(
-                                        Icons.chevron_right_rounded,
-                                        size: 16,
-                                        color: Color(0xFFEC4899),
-                                      ),
-                                    ],
+                                  child: const Text(
+                                    'LIMITED OFFER',
+                                    style: TextStyle(
+                                      color: Color(0xFFEC4899),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 6),
+
+                                const Text(
+                                  'Glow Friday',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+
+                                const Text(
+                                  'Up to 30% off premium\nsalons this weekend',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    height: 1.2,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+
+                                GestureDetector(
+                                  onTap: () => context.push('/profile/offers'),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 15,
+                                      vertical: 7,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Explore Offers',
+                                          style: TextStyle(
+                                            color: Color(0xFFEC4899),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                        SizedBox(width: 4),
+                                        Icon(
+                                          Icons.chevron_right_rounded,
+                                          size: 16,
+                                          color: Color(0xFFEC4899),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 
                   const SizedBox(height: 22),
 
-                  // Categories Section Header - 100% Match to homepage.jpeg
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -685,16 +777,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 12),
 
-                  // Compact 3x2 Categories Grid - Optimized Space Match
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 1.25,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: 1.25,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
                     itemCount: _categories.length,
                     itemBuilder: (context, index) {
                       final cat = _categories[index];
@@ -749,7 +841,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Nearby Salons Section Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -762,40 +853,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _filter5km = !_filter5km;
-                          });
-                          salonProv.fetchSalons(
-                            lat: _userLat,
-                            lng: _userLng,
-                            radius: _filter5km ? 5.0 : null,
-                            silent: false,
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _filter5km ? const Color(0xFFEC4899) : const Color(0xFFFDECEF),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.near_me_rounded,
-                                size: 12,
-                                color: _filter5km ? Colors.white : const Color(0xFFEC4899),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _filter5km ? 'Within 5 km' : 'All Salons',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: _filter5km ? Colors.white : const Color(0xFFEC4899),
-                                ),
-                              ),
-                            ],
+                        onTap: () => context.go('/salon-tab'),
+                        child: const Text(
+                          'See All',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFEC4899),
                           ),
                         ),
                       ),
@@ -804,12 +868,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 14),
 
-                  // Nearby Salons List
                   if (salonProv.isLoading)
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(color: Color(0xFFEC4899)),
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFEC4899),
+                        ),
                       ),
                     )
                   else if (salonProv.salons.isEmpty)
@@ -822,11 +887,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: const Column(
                         children: [
-                          Icon(Icons.storefront_outlined, size: 40, color: Color(0xFF9CA3AF)),
+                          Icon(
+                            Icons.storefront_outlined,
+                            size: 40,
+                            color: Color(0xFF9CA3AF),
+                          ),
                           SizedBox(height: 8),
                           Text(
                             'No nearby salons found.',
-                            style: TextStyle(color: Color(0xFF6B7280), fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -835,7 +907,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: salonProv.salons.length > 6 ? 6 : salonProv.salons.length,
+                      itemCount: salonProv.salons.length > 5
+                          ? 5
+                          : salonProv.salons.length,
                       itemBuilder: (context, index) {
                         final salon = salonProv.salons[index];
                         final distText = salon.distanceKm != null
@@ -887,10 +961,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         salon.imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.storefront, color: Color(0xFFEC4899), size: 32),
+                            const Icon(
+                              Icons.storefront,
+                              color: Color(0xFFEC4899),
+                              size: 32,
+                            ),
                       ),
                     )
-                  : const Icon(Icons.storefront, color: Color(0xFFEC4899), size: 32),
+                  : const Icon(
+                      Icons.storefront,
+                      color: Color(0xFFEC4899),
+                      size: 32,
+                    ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -908,23 +990,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 2),
                   Text(
                     '📍 ${salon.address} • $distText',
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF8B8FA3)),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF8B8FA3),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Color(0xFFEC4899), size: 14),
+                      const Icon(
+                        Icons.star,
+                        color: Color(0xFFEC4899),
+                        size: 14,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         salon.rating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         salon.priceRange,
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF8B8FA3)),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8B8FA3),
+                        ),
                       ),
                     ],
                   ),

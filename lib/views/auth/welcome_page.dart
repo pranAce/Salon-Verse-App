@@ -42,13 +42,10 @@ class _WelcomePageState extends State<WelcomePage>
         curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
       ),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
     _buttonsFade = CurvedAnimation(
       parent: _slideController,
       curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
@@ -78,7 +75,6 @@ class _WelcomePageState extends State<WelcomePage>
       child: Scaffold(
         body: Stack(
           children: [
-            // Background gradient
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -91,7 +87,6 @@ class _WelcomePageState extends State<WelcomePage>
               ),
             ),
 
-            // Decorative orbs
             Positioned(
               top: -size.width * 0.3,
               right: -size.width * 0.2,
@@ -127,16 +122,16 @@ class _WelcomePageState extends State<WelcomePage>
               ),
             ),
 
-            // Content
             SafeArea(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 24,
+                ),
                 child: Column(
                   children: [
                     const Spacer(flex: 2),
 
-                    // Logo & Brand
                     FadeTransition(
                       opacity: _fadeAnimation,
                       child: ScaleTransition(
@@ -144,7 +139,6 @@ class _WelcomePageState extends State<WelcomePage>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Logo icon
                             Container(
                               width: 88,
                               height: 88,
@@ -152,8 +146,9 @@ class _WelcomePageState extends State<WelcomePage>
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: theme.colorScheme.primary
-                                        .withAlpha(isDark ? 30 : 50),
+                                    color: theme.colorScheme.primary.withAlpha(
+                                      isDark ? 30 : 50,
+                                    ),
                                     blurRadius: 24,
                                     offset: const Offset(0, 6),
                                   ),
@@ -169,8 +164,7 @@ class _WelcomePageState extends State<WelcomePage>
                             const SizedBox(height: 24),
                             Text(
                               'SalonVerse',
-                              style:
-                                  theme.textTheme.displayLarge?.copyWith(
+                              style: theme.textTheme.displayLarge?.copyWith(
                                 fontSize: 44,
                                 fontWeight: FontWeight.w800,
                                 color: theme.colorScheme.primary,
@@ -180,8 +174,7 @@ class _WelcomePageState extends State<WelcomePage>
                             const SizedBox(height: 8),
                             Text(
                               'DISCOVER  ·  BOOK  ·  GLOW',
-                              style:
-                                  theme.textTheme.labelMedium?.copyWith(
+                              style: theme.textTheme.labelMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 letterSpacing: 4,
                                 fontWeight: FontWeight.w500,
@@ -194,7 +187,6 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const Spacer(flex: 2),
 
-                    // Tagline
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
@@ -205,23 +197,21 @@ class _WelcomePageState extends State<WelcomePage>
                             Text(
                               'Your premium beauty\nservices platform',
                               textAlign: TextAlign.center,
-                              style:
-                                  theme.textTheme.headlineMedium?.copyWith(
+                              style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 height: 1.3,
                               ),
                             ),
                             const SizedBox(height: 12),
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               child: Text(
                                 'Browse salons, book appointments, and manage your beauty business all in one place.',
                                 textAlign: TextAlign.center,
-                                style:
-                                    theme.textTheme.bodyMedium?.copyWith(
-                                  color:
-                                      theme.colorScheme.onSurfaceVariant,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                   height: 1.6,
                                 ),
                               ),
@@ -233,7 +223,6 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const Spacer(flex: 1),
 
-                    // Action Button (Get Started)
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
@@ -246,10 +235,14 @@ class _WelcomePageState extends State<WelcomePage>
                               backgroundColor: theme.colorScheme.primary,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.buttonRadius,
+                                ),
                               ),
                               elevation: 4,
-                              shadowColor: theme.colorScheme.primary.withAlpha(80),
+                              shadowColor: theme.colorScheme.primary.withAlpha(
+                                80,
+                              ),
                             ),
                             onPressed: () => context.go('/onboarding'),
                             child: const Row(

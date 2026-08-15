@@ -3,7 +3,7 @@ import 'package:salonverse/models/staff_model.dart';
 import 'package:salonverse/models/target_model.dart';
 import 'package:salonverse/services/admin_api_service.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/services/api_result.dart';
+import 'package:salonverse/core/network/api_result.dart';
 
 class SalonWorkspaceProvider extends ChangeNotifier {
   final _apiService = AdminApiService.instance;
@@ -29,7 +29,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetch live backend dashboard metrics for Salon Admin or Salon Staff
   Future<bool> fetchDashboardMetrics() async {
     _isLoading = true;
     _error = null;
@@ -49,7 +48,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Retrieve staff members assigned to a salon
   Future<bool> fetchStaff(String salonId) async {
     _isLoading = true;
     _error = null;
@@ -59,7 +57,9 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     _isLoading = false;
 
     if (result is Success<List<dynamic>>) {
-      _staffList = result.data.map((json) => StaffModel.fromJson(Map<String, dynamic>.from(json))).toList();
+      _staffList = result.data
+          .map((json) => StaffModel.fromJson(Map<String, dynamic>.from(json)))
+          .toList();
       notifyListeners();
       return true;
     } else {
@@ -69,7 +69,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Fetch Sales Targets from backend
   Future<bool> fetchTargets() async {
     _isLoading = true;
     _error = null;
@@ -89,7 +88,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Create a new Sales Target
   Future<bool> createTarget({
     required String title,
     required String targetType,
@@ -124,7 +122,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Update an existing Sales Target
   Future<bool> updateTarget({
     required String id,
     String? title,
@@ -159,7 +156,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Delete a Sales Target
   Future<bool> deleteTarget(String id) async {
     _isLoading = true;
     _error = null;
@@ -178,7 +174,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Create a new staff account (Salon Admin only)
   Future<bool> createStaff({
     required String salonId,
     required String email,
@@ -213,7 +208,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Update staff member details
   Future<bool> updateStaff({
     required String salonId,
     required String staffId,
@@ -248,7 +242,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Reset a staff member's password
   Future<bool> resetStaffPassword({
     required String salonId,
     required String staffId,
@@ -274,7 +267,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Update the status of a booking (Start Serving, Complete, Cancel)
   Future<bool> updateBookingStatus(String bookingId, String status) async {
     _error = null;
     final result = await _apiService.updateBookingStatus(
@@ -291,7 +283,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Save (create or update) a salon service (Salon Admin only)
   Future<bool> saveService({
     required String salonId,
     required String id,
@@ -326,7 +317,6 @@ class SalonWorkspaceProvider extends ChangeNotifier {
     }
   }
 
-  /// Delete a salon service (Salon Admin only)
   Future<bool> deleteService({
     required String salonId,
     required String serviceId,
@@ -350,5 +340,40 @@ class SalonWorkspaceProvider extends ChangeNotifier {
       return false;
     }
   }
-}
 
+  Future<bool> updateSalonProfile({
+    required String salonId,
+    required String name,
+    required String phone,
+    required String address,
+    required String city,
+    required String description,
+    required String priceRange,
+    String? imageUrl,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _appService.updateSalon(
+      salonId: salonId,
+      name: name,
+      phone: phone,
+      address: address,
+      city: city,
+      description: description,
+      priceRange: priceRange,
+      imageUrl: imageUrl,
+    );
+
+    _isLoading = false;
+    if (result is Success<void>) {
+      notifyListeners();
+      return true;
+    } else {
+      _error = (result as Failure).message;
+      notifyListeners();
+      return false;
+    }
+  }
+}

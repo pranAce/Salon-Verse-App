@@ -17,7 +17,8 @@ class SalonService {
     double? radius,
     bool forceRefresh = false,
   }) async {
-    final isAllFetch = (query == null || query.isEmpty) &&
+    final isAllFetch =
+        (query == null || query.isEmpty) &&
         (category == null || category == 'All') &&
         lat == null &&
         lng == null;
@@ -26,15 +27,23 @@ class SalonService {
     }
 
     final queryParams = <String>[];
-    if (query != null && query.isNotEmpty) queryParams.add('query=${Uri.encodeComponent(query)}');
-    if (category != null && category.isNotEmpty && category != 'All') queryParams.add('category=${Uri.encodeComponent(category)}');
+    if (query != null && query.isNotEmpty) {
+      queryParams.add('query=${Uri.encodeComponent(query)}');
+    }
+    if (category != null && category.isNotEmpty && category != 'All') {
+      queryParams.add('category=${Uri.encodeComponent(category)}');
+    }
     if (lat != null && lng != null) {
       queryParams.add('lat=$lat');
       queryParams.add('lng=$lng');
     }
-    if (radius != null) queryParams.add('radius=$radius');
+    if (radius != null) {
+      queryParams.add('radius=$radius');
+    }
 
-    final queryString = queryParams.isNotEmpty ? '?${queryParams.join('&')}' : '';
+    final queryString = queryParams.isNotEmpty
+        ? '?${queryParams.join('&')}'
+        : '';
 
     final result = await _client.request<List<SalonModel>>(
       "GET",
@@ -42,7 +51,9 @@ class SalonService {
       auth: false,
       onSuccess: (data) {
         final List list = data is List ? data : [];
-        return list.map((e) => SalonModel.fromJson(Map<String, dynamic>.from(e))).toList();
+        return list
+            .map((e) => SalonModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       },
     );
 
@@ -53,7 +64,10 @@ class SalonService {
   }
 
   Future<ApiResult<void>> toggleFavorite(
-      String salonId, UserModel? currentUser, Function(UserModel) onUserUpdated) async {
+    String salonId,
+    UserModel? currentUser,
+    Function(UserModel) onUserUpdated,
+  ) async {
     if (currentUser == null) return const Failure("User session not found.");
 
     final result = await _client.request(
@@ -68,10 +82,45 @@ class SalonService {
       onUserUpdated(result.data);
       return const Success(null);
     }
-    return Failure(result is Failure ? (result as Failure).message : "Failed to toggle favorite");
+    return Failure(
+      result is Failure
+          ? (result as Failure).message
+          : "Failed to toggle favorite",
+    );
   }
 
   void clearCache() {
     _cachedSalons = null;
+  }
+
+  Future<ApiResult<void>> updateSalon({
+    required String salonId,
+    required String name,
+    required String phone,
+    required String address,
+    required String city,
+    required String description,
+    required String priceRange,
+    String? imageUrl,
+  }) async {
+    final result = await _client.request<void>(
+      "PUT",
+      "/api/v1/salons/$salonId",
+      auth: true,
+      body: {
+        'name': name,
+        'phoneNumber': phone,
+        'address': address,
+        'city': city,
+        'description': description,
+        'priceRange': priceRange,
+        if (imageUrl != null && imageUrl.isNotEmpty) 'imageUrl': imageUrl,
+      },
+      onSuccess: (_) {},
+    );
+    if (result is Success) {
+      clearCache();
+    }
+    return result;
   }
 }

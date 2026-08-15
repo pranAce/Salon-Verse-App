@@ -33,13 +33,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
       parent: _animController,
       curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
     );
-    _headerSlide = Tween<Offset>(
-      begin: const Offset(0, -0.04),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOutCubic,
-    ));
+    _headerSlide =
+        Tween<Offset>(begin: const Offset(0, -0.04), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
     _animController.forward();
   }
 
@@ -54,8 +51,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    final success =
-        await authProvider.forgotPassword(_emailController.text.trim());
+    final success = await authProvider.forgotPassword(
+      _emailController.text.trim(),
+    );
 
     if (!mounted) return;
 
@@ -105,7 +103,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                     children: [
                       const SizedBox(height: 36),
 
-                      // Lock Icon Badge
                       Center(
                         child: Container(
                           width: 80,
@@ -142,7 +139,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                       ),
                       const SizedBox(height: 36),
 
-                      // Email Input
                       AppTextField(
                         controller: _emailController,
                         label: "Email Address",
@@ -160,7 +156,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                       ),
                       const SizedBox(height: 36),
 
-                      // Send Link Button
                       AppButton(
                         label: "Send Reset Link",
                         isLoading: authProvider.isLoading,

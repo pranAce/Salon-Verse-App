@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:salonverse/utils/app_services.dart';
-import 'package:salonverse/utils/constants.dart';
+import 'package:salonverse/core/storage/app_storage.dart';
+import 'package:salonverse/core/constants/app_constants.dart';
 
 class SettingsProvider extends ChangeNotifier {
   bool _isDarkMode = false;
-  String _accentColor = "salonverse"; // salonverse, glow_pink, bronze, rose_gold, glow_gold
+  String _accentColor =
+      "salonverse";
   int _selectedPage = 0;
 
   bool get isDarkMode => _isDarkMode;
@@ -17,7 +18,8 @@ class SettingsProvider extends ChangeNotifier {
 
   void _loadSettings() {
     _isDarkMode = AppServices.prefs.getBool(KConstants.themeModeKey) ?? false;
-    _accentColor = AppServices.prefs.getString(KConstants.accentColorKey) ?? "salonverse";
+    _accentColor =
+        AppServices.prefs.getString(KConstants.accentColorKey) ?? "salonverse";
     notifyListeners();
   }
 

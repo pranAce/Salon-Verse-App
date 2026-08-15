@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/services/api_result.dart';
+import 'package:salonverse/core/network/api_result.dart';
 import 'package:salonverse/models/support_ticket_model.dart';
 import 'package:salonverse/theme/app_theme.dart';
 import 'package:salonverse/widgets/feedback_helper.dart';
@@ -39,7 +39,10 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
   Future<void> _loadTicketDetail() async {
     final res = await AppService.instance.getSupportTickets();
     if (res is Success<List<SupportTicketModel>>) {
-      final match = res.data.firstWhere((t) => t.id == widget.ticketId);
+      SupportTicketModel? match;
+      try {
+        match = res.data.firstWhere((t) => t.id == widget.ticketId);
+      } catch (_) {}
       setState(() {
         _ticket = match;
         _isLoading = false;
@@ -74,87 +77,90 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.subject),
-      ),
+      appBar: AppBar(title: Text(widget.subject)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _ticket == null
-                ? const Center(child: Text("Ticket details could not be loaded."))
-                : Column(
-                    children: [
-                      // Chat Bubbles List
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.all(20),
-                          children: [
-                            // 1. Initial Message bubble
-                            _buildChatBubble(
-                              sender: 'user',
-                              message: _ticket!.message,
-                              sentAt: _ticket!.createdAt,
-                              isInitial: true,
-                            ),
-                            
-                            // 2. Ticket conversation list
-                            ..._ticket!.messages.map((msg) => _buildChatBubble(
-                                  sender: msg.sender,
-                                  message: msg.message,
-                                  sentAt: msg.sentAt,
-                                )),
-                          ],
+            ? const Center(child: Text("Ticket details could not be loaded."))
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(20),
+                      children: [
+                        _buildChatBubble(
+                          sender: 'user',
+                          message: _ticket!.message,
+                          sentAt: _ticket!.createdAt,
+                          isInitial: true,
+                        ),
+
+                        ..._ticket!.messages.map(
+                          (msg) => _buildChatBubble(
+                            sender: msg.sender,
+                            message: msg.message,
+                            sentAt: msg.sentAt,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: theme.colorScheme.outline.withAlpha(80),
+                          width: 1,
                         ),
                       ),
-
-                      // Input footer
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: theme.colorScheme.outline.withAlpha(80),
-                              width: 1,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: theme.brightness == Brightness.dark
+                                  ? AppColors.darkSurfaceElevated
+                                  : AppColors.lightSurfaceSecondary,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: TextField(
+                              controller: _msgController,
+                              decoration: const InputDecoration(
+                                hintText: "Type your reply...",
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                filled: false,
+                                contentPadding: EdgeInsets.zero,
+                              ),
                             ),
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: theme.brightness == Brightness.dark
-                                      ? AppColors.darkSurfaceElevated
-                                      : AppColors.lightSurfaceSecondary,
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: TextField(
-                                  controller: _msgController,
-                                  decoration: const InputDecoration(
-                                    hintText: "Type your reply...",
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    filled: false,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                ),
-                              ),
+                        const SizedBox(width: 8),
+                        CircleAvatar(
+                          backgroundColor: theme.colorScheme.primary,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.send_rounded,
+                              color: Colors.white,
+                              size: 20,
                             ),
-                            const SizedBox(width: 8),
-                            CircleAvatar(
-                              backgroundColor: theme.colorScheme.primary,
-                              child: IconButton(
-                                icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                                onPressed: _handleSend,
-                              ),
-                            ),
-                          ],
+                            onPressed: _handleSend,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                ],
+              ),
       ),
     );
   }
@@ -180,8 +186,8 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
           color: isMe
               ? theme.colorScheme.primary
               : theme.brightness == Brightness.dark
-                  ? AppColors.darkSurfaceElevated
-                  : AppColors.lightSurfaceSecondary,
+              ? AppColors.darkSurfaceElevated
+              : AppColors.lightSurfaceSecondary,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),

@@ -3,37 +3,37 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/utils/app_services.dart';
-import 'package:salonverse/utils/constants.dart';
+import 'package:salonverse/core/storage/app_storage.dart';
+import 'package:salonverse/core/constants/app_constants.dart';
 import 'package:salonverse/theme/app_theme.dart';
 
-// Auth Pages
 import 'package:salonverse/views/auth/welcome_page.dart';
 import 'package:salonverse/views/auth/onboarding_page.dart';
 import 'package:salonverse/views/auth/login_page.dart';
 import 'package:salonverse/views/auth/register_page.dart';
 import 'package:salonverse/views/auth/forgot_password_page.dart';
 
-// Customer Shell & Pages
 import 'package:salonverse/views/shell/main_shell.dart';
 import 'package:salonverse/views/home/home_screen.dart';
 import 'package:salonverse/views/booking/booking_history_page.dart';
 import 'package:salonverse/views/salon/salons_tab_page.dart';
 import 'package:salonverse/views/profile/profile_page.dart';
 
-// Salon Details & Booking
 import 'package:salonverse/views/salon/salon_detail_screen.dart';
 import 'package:salonverse/views/salon/booking_flow_page.dart';
 import 'package:salonverse/views/salon/payment_confirmation_page.dart';
 import 'package:salonverse/views/profile/account_page.dart';
 import 'package:salonverse/views/profile/refer_page.dart';
+import 'package:salonverse/views/profile/favorites_page.dart';
+import 'package:salonverse/views/profile/addresses_page.dart';
+import 'package:salonverse/views/profile/payments_page.dart';
+import 'package:salonverse/views/profile/offers_page.dart';
+import 'package:salonverse/views/notifications/notifications_page.dart';
 
-// Support
 import 'package:salonverse/views/support/support_page.dart';
 import 'package:salonverse/views/support/contact_support_page.dart';
 import 'package:salonverse/views/support/contact_detail_page.dart';
 
-// Salon Workspace
 import 'package:salonverse/views/admin_workspace/salon_admin_dashboard.dart';
 import 'package:salonverse/views/admin_workspace/salon_admin_services.dart';
 import 'package:salonverse/views/admin_workspace/salon_admin_staff.dart';
@@ -117,17 +117,13 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/welcome',
-      pageBuilder: (context, state) => _fadeTransitionPage(
-        child: const WelcomePage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _fadeTransitionPage(child: const WelcomePage(), state: state),
     ),
     GoRoute(
       path: '/onboarding',
-      pageBuilder: (context, state) => _fadeTransitionPage(
-        child: const OnboardingPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _fadeTransitionPage(child: const OnboardingPage(), state: state),
     ),
 
     GoRoute(
@@ -144,17 +140,13 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/auth/register',
-      pageBuilder: (context, state) => _fadeTransitionPage(
-        child: const RegisterPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _fadeTransitionPage(child: const RegisterPage(), state: state),
     ),
     GoRoute(
       path: '/auth/forgot-password',
-      pageBuilder: (context, state) => _slideRightPage(
-        child: const ForgotPasswordPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const ForgotPasswordPage(), state: state),
     ),
 
     ShellRoute(
@@ -163,10 +155,8 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/home',
-          pageBuilder: (context, state) => _fadeTransitionPage(
-            child: const HomeScreen(),
-            state: state,
-          ),
+          pageBuilder: (context, state) =>
+              _fadeTransitionPage(child: const HomeScreen(), state: state),
         ),
         GoRoute(
           path: '/bookings',
@@ -177,25 +167,20 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
           path: '/salon-tab',
-          pageBuilder: (context, state) => _fadeTransitionPage(
-            child: const SalonsTabPage(),
-            state: state,
-          ),
+          pageBuilder: (context, state) =>
+              _fadeTransitionPage(child: const SalonsTabPage(), state: state),
         ),
         GoRoute(
           path: '/profile',
-          pageBuilder: (context, state) => _fadeTransitionPage(
-            child: const ProfilePage(),
-            state: state,
-          ),
+          pageBuilder: (context, state) =>
+              _fadeTransitionPage(child: const ProfilePage(), state: state),
         ),
       ],
     ),
 
     ShellRoute(
       navigatorKey: _salonShellKey,
-      builder: (context, state, child) =>
-          _SalonWorkspaceShell(child: child),
+      builder: (context, state, child) => _SalonWorkspaceShell(child: child),
       routes: [
         GoRoute(
           path: '/salon-workspace/dashboard',
@@ -213,10 +198,8 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
           path: '/salon-workspace/staff',
-          pageBuilder: (context, state) => _fadeTransitionPage(
-            child: const SalonAdminStaff(),
-            state: state,
-          ),
+          pageBuilder: (context, state) =>
+              _fadeTransitionPage(child: const SalonAdminStaff(), state: state),
         ),
         GoRoute(
           path: '/salon-workspace/settings',
@@ -242,10 +225,8 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/booking-flow',
-      pageBuilder: (context, state) => _slideBottomPage(
-        child: const BookingFlowPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _slideBottomPage(child: const BookingFlowPage(), state: state),
     ),
     GoRoute(
       path: '/payment-confirmation',
@@ -256,32 +237,54 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/profile/account',
-      pageBuilder: (context, state) => _slideRightPage(
-        child: const AccountPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const AccountPage(), state: state),
     ),
     GoRoute(
       path: '/profile/refer',
-      pageBuilder: (context, state) => _slideRightPage(
-        child: const ReferPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const ReferPage(), state: state),
+    ),
+    GoRoute(
+      path: '/profile/favorites',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const FavoritesPage(), state: state),
+    ),
+    GoRoute(
+      path: '/profile/addresses',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const AddressesPage(), state: state),
+    ),
+    GoRoute(
+      path: '/profile/payments',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const PaymentsPage(), state: state),
+    ),
+    GoRoute(
+      path: '/profile/offers',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const OffersPage(), state: state),
+    ),
+    GoRoute(
+      path: '/offers',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const OffersPage(), state: state),
+    ),
+    GoRoute(
+      path: '/notifications',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const NotificationsPage(), state: state),
     ),
 
     GoRoute(
       path: '/support',
-      pageBuilder: (context, state) => _slideRightPage(
-        child: const SupportPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const SupportPage(), state: state),
     ),
     GoRoute(
       path: '/support/contact',
-      pageBuilder: (context, state) => _slideRightPage(
-        child: const ContactSupportPage(),
-        state: state,
-      ),
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const ContactSupportPage(), state: state),
     ),
     GoRoute(
       path: '/support/detail/:id',
@@ -336,7 +339,6 @@ class _SalonWorkspaceShell extends StatelessWidget {
     final selectedIndex = _calculateIndex(context);
     final user = AppService.instance.currentUser;
 
-    // Staff only see Dashboard (their appointments)
     final isStaffOnly = user?.isSalonStaff ?? false;
 
     final destinations = <NavigationDestination>[
@@ -391,8 +393,9 @@ class _SalonWorkspaceShell extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: theme.colorScheme.outline
-                        .withAlpha(isDark ? 40 : 80),
+                    color: theme.colorScheme.outline.withAlpha(
+                      isDark ? 40 : 80,
+                    ),
                     width: 1,
                   ),
                 ),

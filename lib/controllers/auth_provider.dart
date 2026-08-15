@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:salonverse/models/user_model.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/services/api_result.dart';
+import 'package:salonverse/core/network/api_result.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _service = AppService.instance;
@@ -13,7 +13,6 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  /// Tracks whether the initial auto-login attempt has completed.
   bool _autoLoginDone = false;
   bool get autoLoginDone => _autoLoginDone;
   final Completer<void> _autoLoginCompleter = Completer<void>();
@@ -55,10 +54,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -123,7 +119,11 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final result = await _service.updateProfile(name: name, phone: phone, homeLocation: homeLocation);
+    final result = await _service.updateProfile(
+      name: name,
+      phone: phone,
+      homeLocation: homeLocation,
+    );
 
     _isLoading = false;
     if (result is Success<UserModel>) {

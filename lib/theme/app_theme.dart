@@ -56,7 +56,6 @@ class AppSpacing {
     vertical: pagePaddingV,
   );
 
-  // Border Radii
   static const double radiusXs = 8;
   static const double radiusSm = 12;
   static const double radiusMd = 16;
@@ -64,7 +63,6 @@ class AppSpacing {
   static const double radiusXl = 24;
   static const double radiusFull = 100;
 
-  // Component Metrics
   static const double cardRadius = 16;
   static const double inputRadius = 14;
   static const double buttonRadius = 14;
@@ -75,7 +73,6 @@ class AppSpacing {
   static const double inputContentPaddingH = 18;
   static const double inputContentPaddingV = 16;
 
-  // Spacing Scale
   static const double xs = 4;
   static const double sm = 8;
   static const double md = 12;
@@ -112,18 +109,13 @@ class AppSpacing {
   }
 }
 
-// ─── Premium Gradients ───────────────────────────────────────────────────────
-
 class AppGradients {
   AppGradients._();
 
   static LinearGradient primary(BuildContext context) {
     final theme = Theme.of(context);
     return LinearGradient(
-      colors: [
-        theme.colorScheme.primary,
-        theme.colorScheme.secondary,
-      ],
+      colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
@@ -153,8 +145,6 @@ class AppGradients {
   }
 }
 
-// ─── Custom Page Transitions ──────────────────────────────────────────────────
-
 class AppPageTransitions {
   AppPageTransitions._();
 
@@ -162,38 +152,62 @@ class AppPageTransitions {
   static const Duration normal = Duration(milliseconds: 280);
   static const Duration slow = Duration(milliseconds: 400);
 
-  static Widget slideFromRight(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutExpo);
+  static Widget slideFromRight(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutExpo,
+    );
     return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0.08, 0), end: Offset.zero).animate(curved),
+      position: Tween<Offset>(
+        begin: const Offset(0.08, 0),
+        end: Offset.zero,
+      ).animate(curved),
       child: FadeTransition(opacity: curved, child: child),
     );
   }
 
-  static Widget fadeThrough(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  static Widget fadeThrough(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return FadeTransition(
       opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
       child: child,
     );
   }
 
-  static Widget slideFromBottom(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutExpo);
+  static Widget slideFromBottom(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutExpo,
+    );
     return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(curved),
+      position: Tween<Offset>(
+        begin: const Offset(0, 0.06),
+        end: Offset.zero,
+      ).animate(curved),
       child: FadeTransition(opacity: curved, child: child),
     );
   }
 }
 
-// ─── Input Decoration Theme ──────────────────────────────────────────────────
-
 InputDecorationTheme buildInputDecorationTheme(ColorScheme colorScheme) {
   final isDark = colorScheme.brightness == Brightness.dark;
-  final fillColor = isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary;
+  final fillColor = isDark
+      ? AppColors.darkSurfaceElevated
+      : AppColors.lightSurfaceSecondary;
   final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
 
   return InputDecorationTheme(
@@ -209,7 +223,10 @@ InputDecorationTheme buildInputDecorationTheme(ColorScheme colorScheme) {
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-      borderSide: BorderSide(color: borderColor.withAlpha(isDark ? 80 : 120), width: 1),
+      borderSide: BorderSide(
+        color: borderColor.withAlpha(isDark ? 80 : 120),
+        width: 1,
+      ),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
@@ -240,8 +257,6 @@ InputDecorationTheme buildInputDecorationTheme(ColorScheme colorScheme) {
   );
 }
 
-// ─── Button Themes ───────────────────────────────────────────────────────────
-
 ElevatedButtonThemeData buildElevatedButtonTheme(ColorScheme colorScheme) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
@@ -252,7 +267,11 @@ ElevatedButtonThemeData buildElevatedButtonTheme(ColorScheme colorScheme) {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
       ),
-      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2),
+      textStyle: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
+      ),
     ),
   );
 }
@@ -269,7 +288,11 @@ OutlinedButtonThemeData buildOutlinedButtonTheme(ColorScheme colorScheme) {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
       ),
-      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2),
+      textStyle: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
+      ),
     ),
   );
 }
@@ -281,12 +304,14 @@ FilledButtonThemeData buildFilledButtonTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
       ),
-      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2),
+      textStyle: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
+      ),
     ),
   );
 }
-
-// ─── Main Theme Builder ──────────────────────────────────────────────────────
 
 class AppThemeBuilder {
   AppThemeBuilder._();
@@ -335,7 +360,9 @@ class AppThemeBuilder {
     final accentMap = accents[accent]!;
 
     final primary = isDark ? accentMap["dark"]! : accentMap["light"]!;
-    final secondary = isDark ? accentMap["secondary_dark"]! : accentMap["secondary_light"]!;
+    final secondary = isDark
+        ? accentMap["secondary_dark"]!
+        : accentMap["secondary_light"]!;
 
     if (isDark) {
       return ColorScheme.dark(
@@ -370,14 +397,20 @@ class AppThemeBuilder {
     }
   }
 
-  static ThemeData buildTheme(Brightness brightness, {String accent = "salonverse"}) {
+  static ThemeData buildTheme(
+    Brightness brightness, {
+    String accent = "salonverse",
+  }) {
     final colorScheme = _getColorScheme(accent, brightness);
     final isDark = brightness == Brightness.dark;
-    final scaffoldColor = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+    final scaffoldColor = isDark
+        ? AppColors.darkBackground
+        : AppColors.lightBackground;
     final cardColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final navBarColor = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+    final navBarColor = isDark
+        ? AppColors.darkBackground
+        : AppColors.lightBackground;
 
-    // Premium fonts: Outfit for both Headings and Body text
     final baseTextTheme = GoogleFonts.outfitTextTheme(
       isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme,
     );
@@ -443,12 +476,16 @@ class AppThemeBuilder {
         fontWeight: FontWeight.w400,
         letterSpacing: -0.05,
         height: 1.5,
-        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+        color: isDark
+            ? AppColors.darkTextSecondary
+            : AppColors.lightTextSecondary,
       ),
       bodySmall: baseTextTheme.bodySmall?.copyWith(
         fontWeight: FontWeight.w400,
         height: 1.45,
-        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+        color: isDark
+            ? AppColors.darkTextTertiary
+            : AppColors.lightTextTertiary,
       ),
     );
 
@@ -470,8 +507,12 @@ class AppThemeBuilder {
         color: cardColor,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(AppSpacing.cardRadius)),
-          side: BorderSide(color: colorScheme.outline.withAlpha(isDark ? 60 : 80)),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(AppSpacing.cardRadius),
+          ),
+          side: BorderSide(
+            color: colorScheme.outline.withAlpha(isDark ? 60 : 80),
+          ),
         ),
       ),
       appBarTheme: AppBarTheme(
@@ -516,9 +557,13 @@ class AppThemeBuilder {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? AppColors.darkSurfaceElevated : colorScheme.inverseSurface,
+        backgroundColor: isDark
+            ? AppColors.darkSurfaceElevated
+            : colorScheme.inverseSurface,
         contentTextStyle: TextStyle(
-          color: isDark ? AppColors.darkTextPrimary : colorScheme.onInverseSurface,
+          color: isDark
+              ? AppColors.darkTextPrimary
+              : colorScheme.onInverseSurface,
           fontWeight: FontWeight.w500,
         ),
         shape: const RoundedRectangleBorder(
@@ -531,7 +576,9 @@ class AppThemeBuilder {
       filledButtonTheme: buildFilledButtonTheme(),
       bottomSheetTheme: BottomSheetThemeData(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.bottomSheetRadius)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.bottomSheetRadius),
+          ),
         ),
         showDragHandle: true,
         backgroundColor: cardColor,
@@ -562,11 +609,15 @@ class AppThemeBuilder {
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurfaceElevated : colorScheme.inverseSurface,
+          color: isDark
+              ? AppColors.darkSurfaceElevated
+              : colorScheme.inverseSurface,
           borderRadius: BorderRadius.circular(8),
         ),
         textStyle: TextStyle(
-          color: isDark ? AppColors.darkTextPrimary : colorScheme.onInverseSurface,
+          color: isDark
+              ? AppColors.darkTextPrimary
+              : colorScheme.onInverseSurface,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

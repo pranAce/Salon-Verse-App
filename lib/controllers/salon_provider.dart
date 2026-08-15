@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:salonverse/models/salon_model.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/services/api_result.dart';
+import 'package:salonverse/core/network/api_result.dart';
 
 class SalonProvider extends ChangeNotifier {
   final _service = AppService.instance;
@@ -79,7 +79,12 @@ class SalonProvider extends ChangeNotifier {
     _searchQuery = query;
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      fetchSalons(query: query, lat: lat ?? _userLat, lng: lng ?? _userLng, silent: true);
+      fetchSalons(
+        query: query,
+        lat: lat ?? _userLat,
+        lng: lng ?? _userLng,
+        silent: true,
+      );
     });
   }
 

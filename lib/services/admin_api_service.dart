@@ -9,7 +9,6 @@ class AdminApiService {
 
   bool get isMockMode => false;
 
-  /// Retrieve live dashboard metrics for Salon Admin or Salon Staff
   Future<ApiResult<Map<String, dynamic>>> getDashboardMetrics() async {
     return _client.request<Map<String, dynamic>>(
       "GET",
@@ -19,7 +18,6 @@ class AdminApiService {
     );
   }
 
-  /// Create a new salon staff account (Salon Admin only)
   Future<ApiResult<Map<String, dynamic>>> createStaff({
     required String salonId,
     required String email,
@@ -47,7 +45,6 @@ class AdminApiService {
     );
   }
 
-  /// Update an existing staff member's profile, services, schedule, or status
   Future<ApiResult<void>> updateStaff({
     required String salonId,
     required String staffId,
@@ -73,7 +70,6 @@ class AdminApiService {
     );
   }
 
-  /// Update the status of an appointment booking (e.g. Start Serving, Complete, Cancel)
   Future<ApiResult<void>> updateBookingStatus({
     required String bookingId,
     required String status,
@@ -87,8 +83,9 @@ class AdminApiService {
     );
   }
 
-  /// Get list of staff assigned to a salon with dynamic fallback
-  Future<ApiResult<List<dynamic>>> getStaffList({required String salonId}) async {
+  Future<ApiResult<List<dynamic>>> getStaffList({
+    required String salonId,
+  }) async {
     final result = await _client.request<List<dynamic>>(
       "GET",
       "/api/v1/admin/users?role=salon_staff",
@@ -100,16 +97,16 @@ class AdminApiService {
       return result;
     }
 
-    // Fallback: Fetch from stylists endpoint if users list is empty
     return _client.request<List<dynamic>>(
       "GET",
-      salonId.isNotEmpty ? "/api/v1/stylists/salon/$salonId" : "/api/v1/stylists",
+      salonId.isNotEmpty
+          ? "/api/v1/stylists/salon/$salonId"
+          : "/api/v1/stylists",
       auth: true,
       onSuccess: (data) => data is List ? data : [],
     );
   }
 
-  /// Reset password for a staff member
   Future<ApiResult<void>> resetStaffPassword({
     required String salonId,
     required String staffId,
@@ -124,7 +121,6 @@ class AdminApiService {
     );
   }
 
-  /// Create or update a service for a salon
   Future<ApiResult<void>> saveService({
     required String salonId,
     required String id,
@@ -136,13 +132,16 @@ class AdminApiService {
   }) async {
     final isNew = id.isEmpty;
     final method = isNew ? "POST" : "PUT";
-    final path = isNew ? "/api/v1/admin/services" : "/api/v1/admin/services/$id";
+    final path = isNew
+        ? "/api/v1/admin/services"
+        : "/api/v1/admin/services/$id";
 
     return _client.request<void>(
       method,
       path,
       auth: true,
       body: {
+        'salonId': salonId,
         'salon': salonId,
         'name': name,
         'price': price,
@@ -154,7 +153,6 @@ class AdminApiService {
     );
   }
 
-  /// Delete a service from a salon
   Future<ApiResult<void>> deleteService({
     required String salonId,
     required String serviceId,
@@ -163,6 +161,33 @@ class AdminApiService {
       "DELETE",
       "/api/v1/admin/services/$serviceId",
       auth: true,
+      onSuccess: (_) {},
+    );
+  }
+
+  Future<ApiResult<void>> updateSalon({
+    required String salonId,
+    required String name,
+    required String phone,
+    required String address,
+    required String city,
+    required String description,
+    required String priceRange,
+    String? imageUrl,
+  }) async {
+    return _client.request<void>(
+      "PUT",
+      "/api/v1/salons/$salonId",
+      auth: true,
+      body: {
+        'name': name,
+        'phoneNumber': phone,
+        'address': address,
+        'city': city,
+        'description': description,
+        'priceRange': priceRange,
+        if (imageUrl != null && imageUrl.isNotEmpty) 'imageUrl': imageUrl,
+      },
       onSuccess: (_) {},
     );
   }

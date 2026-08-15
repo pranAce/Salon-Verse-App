@@ -1,6 +1,3 @@
-/// Represents a staff member within a salon.
-/// Staff are also users (with role 'salon_staff') but have
-/// additional salon-specific fields like assigned services and schedule.
 class StaffModel {
   final String id;
   final String name;
@@ -9,7 +6,7 @@ class StaffModel {
   final String salonId;
   final List<String> assignedServices;
   final Map<String, DaySchedule> schedule;
-  final String status; // active, disabled
+  final String status;
   final String? createdAt;
   final String? createdBy;
 
@@ -83,7 +80,11 @@ class StaffModel {
       number: (json['phone'] ?? json['number'])?.toString(),
       salonId: (json['assignedSalons'] as List?)?.isNotEmpty == true
           ? (json['assignedSalons'] as List).first.toString()
-          : (json['salon'] is Map ? json['salon']['_id']?.toString() : json['salon']?.toString()) ?? json['salonId'] ?? '',
+          : (json['salon'] is Map
+                    ? json['salon']['_id']?.toString()
+                    : json['salon']?.toString()) ??
+                json['salonId'] ??
+                '',
       assignedServices: List<String>.from(json['assignedServices'] ?? []),
       schedule: schedule,
       status: json['status'] ?? 'active',
@@ -93,7 +94,6 @@ class StaffModel {
   }
 }
 
-/// Represents the working hours for a single day.
 class DaySchedule {
   final String open;
   final String close;
@@ -106,10 +106,10 @@ class DaySchedule {
   });
 
   Map<String, dynamic> toJson() => {
-        'open': open,
-        'close': close,
-        'isClosed': isClosed,
-      };
+    'open': open,
+    'close': close,
+    'isClosed': isClosed,
+  };
 
   factory DaySchedule.fromJson(Map<String, dynamic> json) {
     return DaySchedule(

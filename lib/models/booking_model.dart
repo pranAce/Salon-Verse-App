@@ -11,12 +11,12 @@ class BookingModel {
   final double servicePrice;
   final String stylistId;
   final String stylistName;
-  final String date; // YYYY-MM-DD
-  final String timeSlot; // e.g. "10:30 AM"
-  final String paymentMethod; // eSewa, Khalti, Fonepay, Card, Cash
-  final String paymentStatus; // Pending, Paid
-  final String status; // in_queue, serving, completed, cancelled
-  final int queuePosition; // Position in queue, 0 if serving or completed
+  final String date;
+  final String timeSlot;
+  final String paymentMethod;
+  final String paymentStatus;
+  final String status;
+  final int queuePosition;
   final String createdAt;
   final bool reviewed;
   final bool isHomeService;
@@ -138,7 +138,11 @@ class BookingModel {
       return json[fallbackKey]?.toString() ?? '';
     }
 
-    String extractName(dynamic field, String fallbackKey, [String nestedNameKey = 'name']) {
+    String extractName(
+      dynamic field,
+      String fallbackKey, [
+      String nestedNameKey = 'name',
+    ]) {
       if (field is Map && field[nestedNameKey] != null) {
         return field[nestedNameKey].toString();
       }
@@ -156,8 +160,11 @@ class BookingModel {
       userName: extractName(cust, 'userName'),
       salonId: extractId(sal, 'salonId'),
       salonName: extractName(sal, 'salonName'),
-      salonAddress: sal is Map && sal['address'] != null ? sal['address'].toString() : (json['salonAddress'] ?? ''),
-      salonImageUrl: sal is Map && (sal['coverImage'] != null || sal['logo'] != null)
+      salonAddress: sal is Map && sal['address'] != null
+          ? sal['address'].toString()
+          : (json['salonAddress'] ?? ''),
+      salonImageUrl:
+          sal is Map && (sal['coverImage'] != null || sal['logo'] != null)
           ? (sal['coverImage'] ?? sal['logo'] ?? '').toString()
           : (json['salonImageUrl'] ?? ''),
       serviceId: extractId(srv, 'serviceId'),
@@ -168,16 +175,22 @@ class BookingModel {
       stylistId: extractId(sty, 'stylistId'),
       stylistName: extractName(sty, 'stylistName'),
       date: json['date'] != null ? json['date'].toString().split('T')[0] : '',
-      timeSlot: json['timeSlot'] ?? (json['startTime'] != null ? '${json['startTime']} - ${json['endTime']}' : ''),
+      timeSlot:
+          json['timeSlot'] ??
+          (json['startTime'] != null
+              ? '${json['startTime']} - ${json['endTime']}'
+              : ''),
       paymentMethod: json['paymentMethod'] ?? 'Cash',
       paymentStatus: json['paymentStatus'] ?? 'Pending',
       status: json['status'] ?? 'in_queue',
       queuePosition: json['queuePosition'] as int? ?? 0,
       createdAt: json['createdAt']?.toString() ?? '',
       reviewed: json['reviewed'] as bool? ?? false,
-      isHomeService: json['isHomeService'] as bool? ?? (json['bookingType'] == 'home'),
+      isHomeService:
+          json['isHomeService'] as bool? ?? (json['bookingType'] == 'home'),
       homeAddress: json['homeAddress'] ?? '',
-      contactNumber: (json['contactNumber'] ?? json['contactPhone'])?.toString() ?? '',
+      contactNumber:
+          (json['contactNumber'] ?? json['contactPhone'])?.toString() ?? '',
     );
   }
 }

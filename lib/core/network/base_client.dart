@@ -21,8 +21,6 @@ class BaseClient {
     return prefs.getString(_tokenKey);
   }
 
-  /// Base request method matching csit-notes-hub pattern.
-  /// _client.request("GET", "/api/v1/salons", onSuccess: (data) => ...)
   Future<ApiResult<T>> request<T>(
     String method,
     String path, {
@@ -56,11 +54,17 @@ class BaseClient {
       if (method == "GET") {
         response = await http.get(url, headers: headers).timeout(_timeout);
       } else if (method == "POST") {
-        response = await http.post(url, headers: headers, body: encodedBody).timeout(_timeout);
+        response = await http
+            .post(url, headers: headers, body: encodedBody)
+            .timeout(_timeout);
       } else if (method == "PUT") {
-        response = await http.put(url, headers: headers, body: encodedBody).timeout(_timeout);
+        response = await http
+            .put(url, headers: headers, body: encodedBody)
+            .timeout(_timeout);
       } else if (method == "PATCH") {
-        response = await http.patch(url, headers: headers, body: encodedBody).timeout(_timeout);
+        response = await http
+            .patch(url, headers: headers, body: encodedBody)
+            .timeout(_timeout);
       } else if (method == "DELETE") {
         response = await http.delete(url, headers: headers).timeout(_timeout);
       } else {
@@ -70,7 +74,9 @@ class BaseClient {
       final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final data = json is Map<String, dynamic> && json.containsKey('data') ? json['data'] : json;
+        final data = json is Map<String, dynamic> && json.containsKey('data')
+            ? json['data']
+            : json;
         return Success(onSuccess(data));
       } else {
         final message = json is Map<String, dynamic>

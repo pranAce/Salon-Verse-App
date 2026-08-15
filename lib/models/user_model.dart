@@ -7,10 +7,12 @@ class UserModel {
   final List<String> favoriteSalons;
   final List<String> assignedSalons;
   final List<String> permissions;
-  final String status; // active, disabled
+  final String status;
   final String? createdAt;
   final String? homeLocationAddress;
   final String? homeLocationCity;
+  final double? homeLocationLat;
+  final double? homeLocationLng;
 
   UserModel({
     required this.id,
@@ -25,9 +27,9 @@ class UserModel {
     this.createdAt,
     this.homeLocationAddress,
     this.homeLocationCity,
+    this.homeLocationLat,
+    this.homeLocationLng,
   });
-
-  // ─── Role Helpers ──────────────────────────────────────────────────────────
 
   bool get isCustomer => role == 'user';
   bool get isSalonStaff => role == 'salon_staff';
@@ -35,15 +37,12 @@ class UserModel {
   bool get isSuperAdmin => role == 'super_admin';
   bool get isSalonRole => isSalonAdmin || isSalonStaff;
 
-  /// The primary salon ID for salon staff/admin. Null for customers.
   String? get salonId =>
       assignedSalons.isNotEmpty ? assignedSalons.first : null;
 
   bool hasPermission(String permission) {
     return permissions.contains('*') || permissions.contains(permission);
   }
-
-  // ─── Serialization ─────────────────────────────────────────────────────────
 
   UserModel copyWith({
     String? id,
@@ -58,6 +57,8 @@ class UserModel {
     String? createdAt,
     String? homeLocationAddress,
     String? homeLocationCity,
+    double? homeLocationLat,
+    double? homeLocationLng,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -72,6 +73,8 @@ class UserModel {
       createdAt: createdAt ?? this.createdAt,
       homeLocationAddress: homeLocationAddress ?? this.homeLocationAddress,
       homeLocationCity: homeLocationCity ?? this.homeLocationCity,
+      homeLocationLat: homeLocationLat ?? this.homeLocationLat,
+      homeLocationLng: homeLocationLng ?? this.homeLocationLng,
     );
   }
 
@@ -89,6 +92,8 @@ class UserModel {
       'createdAt': createdAt,
       'homeLocationAddress': homeLocationAddress,
       'homeLocationCity': homeLocationCity,
+      'homeLocationLat': homeLocationLat,
+      'homeLocationLng': homeLocationLng,
     };
   }
 
@@ -97,12 +102,15 @@ class UserModel {
 
     List<String> parseList(dynamic input) {
       if (input is! List) return [];
-      return input.map((item) {
-        if (item is Map) {
-          return (item['_id'] ?? item['id'] ?? '').toString();
-        }
-        return item.toString();
-      }).where((str) => str.isNotEmpty).toList();
+      return input
+          .map((item) {
+            if (item is Map) {
+              return (item['_id'] ?? item['id'] ?? '').toString();
+            }
+            return item.toString();
+          })
+          .where((str) => str.isNotEmpty)
+          .toList();
     }
 
     return UserModel(
@@ -116,8 +124,18 @@ class UserModel {
       permissions: parseList(json['permissions']),
       status: json['status'] ?? 'active',
       createdAt: json['createdAt']?.toString(),
-      homeLocationAddress: hl is Map ? hl['address']?.toString() : json['homeLocationAddress']?.toString(),
-      homeLocationCity: hl is Map ? hl['city']?.toString() : json['homeLocationCity']?.toString(),
+      homeLocationAddress: hl is Map
+          ? hl['address']?.toString()
+          : json['homeLocationAddress']?.toString(),
+      homeLocationCity: hl is Map
+          ? hl['city']?.toString()
+          : json['homeLocationCity']?.toString(),
+      homeLocationLat: hl is Map
+          ? (hl['latitude'] as num?)?.toDouble()
+          : (json['homeLocationLat'] as num?)?.toDouble(),
+      homeLocationLng: hl is Map
+          ? (hl['longitude'] as num?)?.toDouble()
+          : (json['homeLocationLng'] as num?)?.toDouble(),
     );
   }
 }

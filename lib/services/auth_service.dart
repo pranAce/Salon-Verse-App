@@ -12,7 +12,8 @@ class AuthService {
 
   UserModel? _currentUser;
   UserModel? get currentUser => _currentUser;
-  final ValueNotifier<UserModel?> currentUserNotifier = ValueNotifier<UserModel?>(null);
+  final ValueNotifier<UserModel?> currentUserNotifier =
+      ValueNotifier<UserModel?>(null);
   String? _token;
 
   String? get token => _token;
@@ -64,10 +65,7 @@ class AuthService {
     final result = await _client.request(
       "POST",
       "/api/v1/auth/login",
-      body: {
-        "email": email,
-        "password": password,
-      },
+      body: {"email": email, "password": password},
       onSuccess: (data) => data as Map<String, dynamic>,
     );
 
@@ -127,11 +125,11 @@ class AuthService {
   }
 
   Future<ApiResult<void>> resetPassword(String email) => _client.request(
-        "POST",
-        "/api/v1/users/forgot-password",
-        body: {"email": email},
-        onSuccess: (_) {},
-      );
+    "POST",
+    "/api/v1/users/forgot-password",
+    body: {"email": email},
+    onSuccess: (_) {},
+  );
 
   Future<ApiResult<UserModel>> updateProfile({
     String? name,

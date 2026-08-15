@@ -44,8 +44,7 @@ class MainShell extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: theme.colorScheme.outline
-                  .withAlpha(isDark ? 40 : 80),
+              color: theme.colorScheme.outline.withAlpha(isDark ? 40 : 80),
               width: 1,
             ),
           ),

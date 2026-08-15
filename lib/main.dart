@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:salonverse/theme/app_theme.dart';
 import 'package:salonverse/routes/app_router.dart';
-import 'package:salonverse/utils/app_services.dart';
+import 'package:salonverse/core/storage/app_storage.dart';
 import 'package:salonverse/controllers/settings_provider.dart';
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/controllers/salon_provider.dart';
@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Global Flutter framework error handling
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     if (kDebugMode) {
@@ -24,7 +23,6 @@ Future<void> main() async {
     }
   };
 
-  // Global async error handling
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
     if (kDebugMode) {
       debugPrint('[AsyncError] $error\n$stack');
@@ -40,7 +38,6 @@ Future<void> main() async {
     }
   }
 
-  // Pre-resolve auto-login so the router has the correct initial auth state.
   final authProvider = AuthProvider();
   try {
     await authProvider.tryAutoLogin();

@@ -5,14 +5,18 @@ import 'package:salonverse/models/review_model.dart';
 class ReviewService {
   final BaseClient _client = BaseClient.instance;
 
-  Future<ApiResult<List<ReviewModel>>> getReviewsForSalon(String salonId) async {
+  Future<ApiResult<List<ReviewModel>>> getReviewsForSalon(
+    String salonId,
+  ) async {
     return _client.request<List<ReviewModel>>(
       "GET",
       "/api/v1/reviews/salon/$salonId",
       auth: false,
       onSuccess: (data) {
         final List list = data is List ? data : [];
-        return list.map((e) => ReviewModel.fromJson(Map<String, dynamic>.from(e))).toList();
+        return list
+            .map((e) => ReviewModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       },
     );
   }
@@ -35,7 +39,8 @@ class ReviewService {
       "/api/v1/reviews",
       auth: true,
       body: body,
-      onSuccess: (data) => ReviewModel.fromJson(Map<String, dynamic>.from(data)),
+      onSuccess: (data) =>
+          ReviewModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 }

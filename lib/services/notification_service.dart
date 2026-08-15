@@ -12,7 +12,11 @@ class NotificationService {
       auth: true,
       onSuccess: (data) {
         final List list = data is List ? data : [];
-        return list.map((e) => NotificationModel.fromJson(Map<String, dynamic>.from(e))).toList();
+        return list
+            .map(
+              (e) => NotificationModel.fromJson(Map<String, dynamic>.from(e)),
+            )
+            .toList();
       },
     );
   }

@@ -16,7 +16,9 @@ class TargetService {
           targetsList = data['targets'];
         }
         final List list = targetsList is List ? targetsList : [];
-        return list.map((e) => TargetModel.fromJson(Map<String, dynamic>.from(e))).toList();
+        return list
+            .map((e) => TargetModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       },
     );
   }
@@ -45,7 +47,8 @@ class TargetService {
       "/api/v1/targets",
       auth: true,
       body: body,
-      onSuccess: (data) => TargetModel.fromJson(Map<String, dynamic>.from(data)),
+      onSuccess: (data) =>
+          TargetModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 
@@ -71,7 +74,8 @@ class TargetService {
       "/api/v1/targets/$id",
       auth: true,
       body: body,
-      onSuccess: (data) => TargetModel.fromJson(Map<String, dynamic>.from(data)),
+      onSuccess: (data) =>
+          TargetModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 

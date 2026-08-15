@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salonverse/theme/app_theme.dart';
-import 'package:salonverse/utils/app_services.dart';
-import 'package:salonverse/utils/constants.dart';
+import 'package:salonverse/core/storage/app_storage.dart';
+import 'package:salonverse/core/constants/app_constants.dart';
 import 'package:salonverse/widgets/app_button.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -21,21 +21,27 @@ class _OnboardingPageState extends State<OnboardingPage> {
     OnboardingSlide(
       icon: Icons.search_rounded,
       title: "Centralized Discovery",
-      description: "Find verified beauty salons across Nepal. Filter by location, specific service categories, and ratings to compare premium options.",
+      description:
+          "Find verified beauty salons across Nepal. Filter by location, specific service categories, and ratings to compare premium options.",
     ),
     OnboardingSlide(
       icon: Icons.calendar_month_rounded,
       title: "Real-Time Booking",
-      description: "Check live availability calendars for each salon and stylist. Book instantly and track your virtual queue position in real-time.",
+      description:
+          "Check live availability calendars for each salon and stylist. Book instantly and track your virtual queue position in real-time.",
     ),
     OnboardingSlide(
       icon: Icons.payments_outlined,
       title: "Transparent Pricing",
-      description: "Browse clear menu prices upfront with zero hidden costs. Complete payments seamlessly using eSewa, Khalti, or cash at the counter.",
+      description:
+          "Browse clear menu prices upfront with zero hidden costs. Complete payments seamlessly using eSewa, Khalti, or cash at the counter.",
     ),
   ];
 
-  Future<void> _selectRole(String routePath, {Map<String, dynamic>? extra}) async {
+  Future<void> _selectRole(
+    String routePath, {
+    Map<String, dynamic>? extra,
+  }) async {
     await AppServices.prefs.setBool(KConstants.onboardingSeenKey, true);
     if (mounted) {
       context.go(routePath, extra: extra);
@@ -59,7 +65,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: Scaffold(
         body: Stack(
           children: [
-            // Background gradient matches Welcome
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -71,7 +76,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
               ),
             ),
-            
+
             Positioned(
               top: -size.width * 0.2,
               left: -size.width * 0.1,
@@ -92,10 +97,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 16,
+                ),
                 child: Column(
                   children: [
-                    // Top Bar with Logo & Skip
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -144,7 +151,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ],
                     ),
 
-                    // PageView Content
                     Expanded(
                       child: PageView.builder(
                         controller: _pageController,
@@ -162,7 +168,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               double value = 1.0;
                               if (_pageController.position.haveDimensions) {
                                 value = _pageController.page! - index;
-                                value = (1 - (value.abs() * 0.15)).clamp(0.0, 1.0);
+                                value = (1 - (value.abs() * 0.15)).clamp(
+                                  0.0,
+                                  1.0,
+                                );
                               }
                               return Opacity(
                                 opacity: value,
@@ -175,7 +184,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Slide Icon Container with gradient ring
                                 Container(
                                   width: 148,
                                   height: 148,
@@ -184,20 +192,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     gradient: LinearGradient(
                                       colors: [
                                         theme.colorScheme.primary.withAlpha(20),
-                                        theme.colorScheme.secondary.withAlpha(12),
+                                        theme.colorScheme.secondary.withAlpha(
+                                          12,
+                                        ),
                                       ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
                                     border: Border.all(
-                                      color: theme.colorScheme.primary.withAlpha(30),
+                                      color: theme.colorScheme.primary
+                                          .withAlpha(30),
                                       width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: theme.colorScheme.primary.withAlpha(isDark ? 5 : 10),
+                                        color: theme.colorScheme.primary
+                                            .withAlpha(isDark ? 5 : 10),
                                         blurRadius: 24,
-                                      )
+                                      ),
                                     ],
                                   ),
                                   child: Center(
@@ -224,22 +236,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 48),
-                                
-                                // Slide Title
+
                                 Text(
                                   slide.title,
                                   textAlign: TextAlign.center,
-                                  style: theme.textTheme.headlineLarge?.copyWith(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.5,
-                                  ),
+                                  style: theme.textTheme.headlineLarge
+                                      ?.copyWith(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -0.5,
+                                      ),
                                 ),
                                 const SizedBox(height: 16),
-                                
-                                // Slide Description
+
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
                                   child: Text(
                                     slide.description,
                                     textAlign: TextAlign.center,
@@ -257,11 +270,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                     ),
 
-                    // Bottom Panel
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Dot Indicators
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: List.generate(_slides.length, (index) {
@@ -283,7 +294,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         const SizedBox(height: 36),
 
                         if (_currentIndex < 2) ...[
-                          // Action Button for slides 1 and 2
                           AppButton(
                             label: "Next",
                             onPressed: () {
@@ -294,13 +304,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             },
                           ),
                         ] else ...[
-                          // Role choice buttons on final slide
                           _WelcomeButton(
                             label: 'Continue as Customer',
                             subtitle: 'Browse salons & book appointments',
                             icon: Icons.explore_rounded,
                             isPrimary: true,
-                            onTap: () => _selectRole('/auth/login', extra: {'loginMode': 'customer'}),
+                            onTap: () => _selectRole(
+                              '/auth/login',
+                              extra: {'loginMode': 'customer'},
+                            ),
                           ),
                           const SizedBox(height: 14),
                           _WelcomeButton(
@@ -308,7 +320,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             subtitle: 'Manage your salon & staff operations',
                             icon: Icons.storefront_rounded,
                             isPrimary: false,
-                            onTap: () => _selectRole('/auth/login', extra: {'loginMode': 'salon'}),
+                            onTap: () => _selectRole(
+                              '/auth/login',
+                              extra: {'loginMode': 'salon'},
+                            ),
                           ),
                         ],
                       ],
@@ -336,8 +351,6 @@ class OnboardingSlide {
     required this.description,
   });
 }
-
-// ─── Welcome Button Widget ──────────────────────────────────────────────────
 
 class _WelcomeButton extends StatefulWidget {
   final String label;
@@ -372,7 +385,10 @@ class _WelcomeButtonState extends State<_WelcomeButton>
       lowerBound: 0.97,
       upperBound: 1.0,
     )..value = 1.0;
-    _pressScale = CurvedAnimation(parent: _pressController, curve: Curves.easeInOut);
+    _pressScale = CurvedAnimation(
+      parent: _pressController,
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -414,18 +430,22 @@ class _WelcomeButtonState extends State<_WelcomeButton>
             color: widget.isPrimary
                 ? null
                 : (isDark
-                    ? AppColors.darkSurfaceElevated
-                    : AppColors.lightSurface),
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.lightSurface),
             border: widget.isPrimary
                 ? null
                 : Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                     width: 1.5,
                   ),
             boxShadow: widget.isPrimary
                 ? [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withAlpha(isDark ? 30 : 50),
+                      color: theme.colorScheme.primary.withAlpha(
+                        isDark ? 30 : 50,
+                      ),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -445,7 +465,9 @@ class _WelcomeButtonState extends State<_WelcomeButton>
                 ),
                 child: Icon(
                   widget.icon,
-                  color: widget.isPrimary ? Colors.white : theme.colorScheme.primary,
+                  color: widget.isPrimary
+                      ? Colors.white
+                      : theme.colorScheme.primary,
                   size: 20,
                 ),
               ),
@@ -459,7 +481,9 @@ class _WelcomeButtonState extends State<_WelcomeButton>
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: widget.isPrimary ? Colors.white : theme.colorScheme.onSurface,
+                        color: widget.isPrimary
+                            ? Colors.white
+                            : theme.colorScheme.onSurface,
                         letterSpacing: -0.2,
                       ),
                     ),

@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:salonverse/utils/app_services.dart';
+import 'package:salonverse/core/storage/app_storage.dart';
 
-/// Animated connectivity banner that shows when offline.
-/// Auto-hides when connection is restored.
 class OfflineBanner extends StatefulWidget {
   const OfflineBanner({super.key});
 
@@ -35,29 +33,28 @@ class _OfflineBannerState extends State<OfflineBanner>
   }
 
   void _startMonitoring() {
-    _subscription = AppServices.connectionChecker.onStatusChange.listen(
-      (status) {
-        final isOffline = status.toString().contains('disconnected');
-        if (mounted) {
-          setState(() {
-            _wasOffline = _isOffline;
-            _isOffline = isOffline;
-          });
-          if (_isOffline) {
-            _animController.forward();
+    _subscription = AppServices.connectionChecker.onStatusChange.listen((
+      status,
+    ) {
+      final isOffline = status.toString().contains('disconnected');
+      if (mounted) {
+        setState(() {
+          _wasOffline = _isOffline;
+          _isOffline = isOffline;
+        });
+        if (_isOffline) {
+          _animController.forward();
+        } else {
+          if (_wasOffline) {
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) _animController.reverse();
+            });
           } else {
-            // Show "back online" briefly, then hide
-            if (_wasOffline) {
-              Future.delayed(const Duration(seconds: 2), () {
-                if (mounted) _animController.reverse();
-              });
-            } else {
-              _animController.reverse();
-            }
+            _animController.reverse();
           }
         }
-      },
-    );
+      }
+    });
   }
 
   @override
@@ -82,17 +79,13 @@ class _OfflineBannerState extends State<OfflineBanner>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _isOffline
-                      ? Icons.wifi_off_rounded
-                      : Icons.wifi_rounded,
+                  _isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
                   size: 16,
                   color: Colors.white,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _isOffline
-                      ? 'No internet connection'
-                      : 'Back online',
+                  _isOffline ? 'No internet connection' : 'Back online',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,

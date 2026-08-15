@@ -17,23 +17,27 @@ class FavoritesPage extends StatelessWidget {
     final user = context.watch<AuthProvider>().currentUser;
     final salonProvider = context.watch<SalonProvider>();
 
-    final favsList = salonProvider.getFavoriteSalons(user?.favoriteSalons ?? []);
+    final favsList = salonProvider.getFavoriteSalons(
+      user?.favoriteSalons ?? [],
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Saved Salons'),
-      ),
+      appBar: AppBar(title: const Text('Saved Salons')),
       body: SafeArea(
         child: favsList.isEmpty
             ? EmptyState(
                 icon: Icons.favorite_border_rounded,
                 title: 'No saved salons',
-                subtitle: 'Bookmark your favorite beauty spots to access them quickly.',
+                subtitle:
+                    'Bookmark your favorite beauty spots to access them quickly.',
                 actionLabel: 'Explore Salons',
                 onAction: () => context.go('/home'),
               )
             : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 itemCount: favsList.length,
                 itemBuilder: (context, index) {
                   final salon = favsList[index];
@@ -57,7 +61,9 @@ class FavoritesPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
           border: theme.cardTheme.shape is RoundedRectangleBorder
-              ? Border.fromBorderSide((theme.cardTheme.shape as RoundedRectangleBorder).side)
+              ? Border.fromBorderSide(
+                  (theme.cardTheme.shape as RoundedRectangleBorder).side,
+                )
               : null,
           borderRadius: BorderRadius.circular(16),
           boxShadow: AppSpacing.cardShadow(context),
@@ -80,7 +86,11 @@ class FavoritesPage extends StatelessWidget {
                   width: 80,
                   height: 80,
                   color: theme.colorScheme.surfaceContainer,
-                  child: const Icon(Icons.storefront_rounded, size: 24, color: Colors.grey),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    size: 24,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),
@@ -125,11 +135,18 @@ class FavoritesPage extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 14,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             salon.rating.toString(),
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),

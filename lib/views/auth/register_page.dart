@@ -38,13 +38,10 @@ class _RegisterPageState extends State<RegisterPage>
       parent: _animController,
       curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
     );
-    _headerSlide = Tween<Offset>(
-      begin: const Offset(0, -0.05),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOutCubic,
-    ));
+    _headerSlide =
+        Tween<Offset>(begin: const Offset(0, -0.05), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
     _animController.forward();
   }
 
@@ -77,8 +74,7 @@ class _RegisterPageState extends State<RegisterPage>
       AppFeedback.success(context, "Registration successful!");
       context.go('/home');
     } else {
-      AppFeedback.error(
-          context, authProvider.error ?? "Registration failed.");
+      AppFeedback.error(context, authProvider.error ?? "Registration failed.");
     }
   }
 
@@ -115,7 +111,6 @@ class _RegisterPageState extends State<RegisterPage>
                     children: [
                       const SizedBox(height: 48),
 
-                      // Logo Badge
                       Center(
                         child: Container(
                           width: 76,
@@ -159,7 +154,6 @@ class _RegisterPageState extends State<RegisterPage>
                       ),
                       const SizedBox(height: 36),
 
-                      // Full Name
                       AppTextField(
                         controller: _nameController,
                         label: "Full Name",
@@ -174,7 +168,6 @@ class _RegisterPageState extends State<RegisterPage>
                       ),
                       const SizedBox(height: 16),
 
-                      // Email
                       AppTextField(
                         controller: _emailController,
                         label: "Email Address",
@@ -192,7 +185,6 @@ class _RegisterPageState extends State<RegisterPage>
                       ),
                       const SizedBox(height: 16),
 
-                      // Phone
                       AppTextField(
                         controller: _phoneController,
                         label: "Phone Number",
@@ -210,7 +202,6 @@ class _RegisterPageState extends State<RegisterPage>
                       ),
                       const SizedBox(height: 16),
 
-                      // Password
                       AppTextField(
                         controller: _passwordController,
                         label: "Password",
@@ -241,7 +232,6 @@ class _RegisterPageState extends State<RegisterPage>
                       ),
                       const SizedBox(height: 32),
 
-                      // Register Button
                       AppButton(
                         label: "Sign Up",
                         isLoading: authProvider.isLoading,
@@ -249,7 +239,6 @@ class _RegisterPageState extends State<RegisterPage>
                       ),
                       const SizedBox(height: 24),
 
-                      // Footer link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

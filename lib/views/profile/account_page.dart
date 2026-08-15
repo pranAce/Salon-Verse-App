@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/widgets/app_button.dart';
@@ -21,6 +21,8 @@ class _AccountPageState extends State<AccountPage> {
   late TextEditingController _phoneController;
   late TextEditingController _locationAddressController;
   late TextEditingController _locationCityController;
+  double _lat = 27.7172;
+  double _lng = 85.3240;
   bool _isFetchingGps = false;
 
   @override
@@ -29,8 +31,14 @@ class _AccountPageState extends State<AccountPage> {
     final user = context.read<AuthProvider>().currentUser;
     _nameController = TextEditingController(text: user?.name);
     _phoneController = TextEditingController(text: user?.number);
-    _locationAddressController = TextEditingController(text: user?.homeLocationAddress ?? 'Thamel, Kathmandu');
-    _locationCityController = TextEditingController(text: user?.homeLocationCity ?? 'Kathmandu');
+    _locationAddressController = TextEditingController(
+      text: user?.homeLocationAddress ?? 'Thamel, Kathmandu',
+    );
+    _locationCityController = TextEditingController(
+      text: user?.homeLocationCity ?? 'Kathmandu',
+    );
+    _lat = user?.homeLocationLat ?? 27.7172;
+    _lng = user?.homeLocationLng ?? 85.3240;
   }
 
   @override
@@ -48,20 +56,25 @@ class _AccountPageState extends State<AccountPage> {
     });
 
     try {
-      final res = await http.get(Uri.parse('http://ip-api.com/json')).timeout(const Duration(seconds: 5));
-      if (res.statusCode == 200) {
-        final data = json.decode(res.body);
-        final city = data['city'] ?? 'Kathmandu';
-        final region = data['regionName'] ?? 'Bagmati';
-        final country = data['country'] ?? 'Nepal';
+      final pos = await Geolocator.getCurrentPosition();
+      _lat = pos.latitude;
+      _lng = pos.longitude;
+      final placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        final p = placemarks.first;
+        final city = p.locality ?? 'Kathmandu';
+        final street = p.street ?? p.subLocality ?? 'Thamel';
 
         setState(() {
-          _locationAddressController.text = "$city, $region";
+          _locationAddressController.text = "$street, $city";
           _locationCityController.text = city;
         });
 
         if (mounted) {
-          AppFeedback.success(context, "Detected Live Location: $city, $country");
+          AppFeedback.success(context, "Detected GPS: $street, $city");
         }
       }
     } catch (_) {
@@ -83,21 +96,29 @@ class _AccountPageState extends State<AccountPage> {
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.updateProfile(
       name: _nameController.text.trim(),
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      phone: _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
       homeLocation: {
         'address': _locationAddressController.text.trim(),
         'city': _locationCityController.text.trim(),
-        'latitude': 27.7172,
-        'longitude': 85.3240,
+        'latitude': _lat,
+        'longitude': _lng,
       },
     );
 
     if (mounted) {
       if (success) {
-        AppFeedback.success(context, "Account & Home Location saved to server!");
+        AppFeedback.success(
+          context,
+          "Account & Home Location saved to server!",
+        );
         Navigator.pop(context);
       } else {
-        AppFeedback.error(context, authProvider.error ?? "Failed to save profile changes.");
+        AppFeedback.error(
+          context,
+          authProvider.error ?? "Failed to save profile changes.",
+        );
       }
     }
   }
@@ -107,9 +128,7 @@ class _AccountPageState extends State<AccountPage> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Account & Home Location'),
-      ),
+      appBar: AppBar(title: const Text('Edit Account & Home Location')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -118,7 +137,6 @@ class _AccountPageState extends State<AccountPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Full Name
                 AppTextField(
                   controller: _nameController,
                   label: "Full Name",
@@ -133,7 +151,6 @@ class _AccountPageState extends State<AccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Phone
                 AppTextField(
                   controller: _phoneController,
                   label: "Phone Number",
@@ -147,20 +164,37 @@ class _AccountPageState extends State<AccountPage> {
                   children: [
                     const Text(
                       "Home Location",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     TextButton.icon(
                       onPressed: _isFetchingGps ? null : _fetchGpsLocation,
                       icon: _isFetchingGps
-                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.my_location_rounded, size: 16, color: Color(0xFFE91E63)),
-                      label: const Text("Fetch Live GPS", style: TextStyle(color: Color(0xFFE91E63), fontWeight: FontWeight.bold, fontSize: 12)),
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(
+                              Icons.my_location_rounded,
+                              size: 16,
+                              color: Color(0xFFE91E63),
+                            ),
+                      label: const Text(
+                        "Fetch Live GPS",
+                        style: TextStyle(
+                          color: Color(0xFFE91E63),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
 
-                // Home Location Address
                 AppTextField(
                   controller: _locationAddressController,
                   label: "Street Address Location",
@@ -169,7 +203,6 @@ class _AccountPageState extends State<AccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // City
                 AppTextField(
                   controller: _locationCityController,
                   label: "City / District",
@@ -178,7 +211,6 @@ class _AccountPageState extends State<AccountPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // Action Button
                 AppButton(
                   label: "Save Home Location",
                   isLoading: authProvider.isLoading,

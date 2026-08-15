@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-/// Result returned when user confirms location on the map picker.
 class PickedLocation {
   final double latitude;
   final double longitude;
@@ -17,8 +16,6 @@ class PickedLocation {
   });
 }
 
-/// Uber/Pathao-style full-screen map location picker.
-/// Fixed center pin — user drags the map underneath.
 class MapLocationPicker extends StatefulWidget {
   final double? initialLat;
   final double? initialLng;
@@ -55,9 +52,10 @@ class _MapLocationPickerState extends State<MapLocationPicker>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _pinAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _pinController, curve: Curves.easeOut),
-    );
+    _pinAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _pinController, curve: Curves.easeOut));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _reverseGeocode(_currentCenter);
@@ -80,8 +78,10 @@ class _MapLocationPickerState extends State<MapLocationPicker>
       );
       if (placemarks.isNotEmpty && mounted) {
         final place = placemarks.first;
-        final subLocality = place.subLocality ?? place.street ?? place.name ?? '';
-        final locality = place.locality ??
+        final subLocality =
+            place.subLocality ?? place.street ?? place.name ?? '';
+        final locality =
+            place.locality ??
             place.subAdministrativeArea ??
             place.administrativeArea ??
             '';
@@ -96,7 +96,8 @@ class _MapLocationPickerState extends State<MapLocationPicker>
           main = locality;
           sub = country;
         } else {
-          main = '${latlng.latitude.toStringAsFixed(4)}, ${latlng.longitude.toStringAsFixed(4)}';
+          main =
+              '${latlng.latitude.toStringAsFixed(4)}, ${latlng.longitude.toStringAsFixed(4)}';
           sub = '';
         }
 
@@ -108,7 +109,8 @@ class _MapLocationPickerState extends State<MapLocationPicker>
     } catch (_) {
       if (mounted) {
         setState(() {
-          _addressText = '${latlng.latitude.toStringAsFixed(4)}, ${latlng.longitude.toStringAsFixed(4)}';
+          _addressText =
+              '${latlng.latitude.toStringAsFixed(4)}, ${latlng.longitude.toStringAsFixed(4)}';
           _subAddressText = '';
         });
       }
@@ -128,7 +130,9 @@ class _MapLocationPickerState extends State<MapLocationPicker>
               content: const Text('Please enable GPS location services'),
               backgroundColor: const Color(0xFFEC4899),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }
@@ -146,7 +150,9 @@ class _MapLocationPickerState extends State<MapLocationPicker>
       }
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       final newCenter = LatLng(position.latitude, position.longitude);
@@ -160,7 +166,9 @@ class _MapLocationPickerState extends State<MapLocationPicker>
             content: const Text('Failed to get current location'),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -179,11 +187,8 @@ class _MapLocationPickerState extends State<MapLocationPicker>
       backgroundColor: isDark ? const Color(0xFF0F0E0D) : Colors.white,
       body: Stack(
         children: [
-          // ═══════════════════════════════════════════
-          // MAP
-          // ═══════════════════════════════════════════
           Positioned.fill(
-            bottom: 200 + bottomPad, // Leave room for bottom panel
+            bottom: 200 + bottomPad,
             child: FlutterMap(
               mapController: _mapController,
               options: MapOptions(
@@ -204,7 +209,8 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                   }
                 },
                 onMapEvent: (event) {
-                  if (event is MapEventMoveEnd || event is MapEventFlingAnimationEnd) {
+                  if (event is MapEventMoveEnd ||
+                      event is MapEventFlingAnimationEnd) {
                     if (_isDragging) {
                       _pinController.reverse();
                       setState(() => _isDragging = false);
@@ -225,9 +231,6 @@ class _MapLocationPickerState extends State<MapLocationPicker>
             ),
           ),
 
-          // ═══════════════════════════════════════════
-          // FIXED CENTER PIN
-          // ═══════════════════════════════════════════
           Positioned(
             left: 0,
             right: 0,
@@ -244,7 +247,6 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Pin head
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             width: _isDragging ? 52 : 48,
@@ -261,9 +263,12 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 24),
+                            child: const Icon(
+                              Icons.location_on_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
-                          // Pin stem
                           Container(
                             width: 3,
                             height: 14,
@@ -272,13 +277,14 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
-                          // Ground shadow
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             width: _isDragging ? 20 : 12,
                             height: _isDragging ? 6 : 4,
                             decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(_isDragging ? 30 : 50),
+                              color: Colors.black.withAlpha(
+                                _isDragging ? 30 : 50,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -291,15 +297,17 @@ class _MapLocationPickerState extends State<MapLocationPicker>
             ),
           ),
 
-          // ═══════════════════════════════════════════
-          // TOP BAR — Back button + Title
-          // ═══════════════════════════════════════════
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 12),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.of(context).padding.top + 8,
+                16,
+                12,
+              ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -328,8 +336,11 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                           ),
                         ],
                       ),
-                      child: Icon(Icons.arrow_back_rounded,
-                          size: 20, color: isDark ? Colors.white : Colors.black87),
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        size: 20,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -346,9 +357,6 @@ class _MapLocationPickerState extends State<MapLocationPicker>
             ),
           ),
 
-          // ═══════════════════════════════════════════
-          // GPS FAB
-          // ═══════════════════════════════════════════
           Positioned(
             right: 16,
             bottom: 210 + bottomPad,
@@ -379,14 +387,15 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                           ),
                         ),
                       )
-                    : const Icon(Icons.my_location_rounded, color: pink, size: 22),
+                    : const Icon(
+                        Icons.my_location_rounded,
+                        color: pink,
+                        size: 22,
+                      ),
               ),
             ),
           ),
 
-          // ═══════════════════════════════════════════
-          // BOTTOM CONFIRM PANEL
-          // ═══════════════════════════════════════════
           Positioned(
             left: 0,
             right: 0,
@@ -395,7 +404,9 @@ class _MapLocationPickerState extends State<MapLocationPicker>
               padding: EdgeInsets.fromLTRB(20, 20, 20, bottomPad + 20),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1A1816) : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withAlpha(25),
@@ -407,7 +418,6 @@ class _MapLocationPickerState extends State<MapLocationPicker>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Handle bar
                   Container(
                     width: 36,
                     height: 4,
@@ -418,10 +428,8 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                   ),
                   const SizedBox(height: 18),
 
-                  // Address row
                   Row(
                     children: [
-                      // Location icon container
                       Container(
                         width: 46,
                         height: 46,
@@ -429,10 +437,13 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                           color: pink.withAlpha(15),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Icon(Icons.location_on_rounded, color: pink, size: 22),
+                        child: const Icon(
+                          Icons.location_on_rounded,
+                          color: pink,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(width: 14),
-                      // Address text
                       Expanded(
                         child: _isGeocoding
                             ? Column(
@@ -467,7 +478,9 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
-                                      color: isDark ? Colors.white : const Color(0xFF1F2333),
+                                      color: isDark
+                                          ? Colors.white
+                                          : const Color(0xFF1F2333),
                                     ),
                                   ),
                                   if (_subAddressText.isNotEmpty) ...[
@@ -486,7 +499,6 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                                 ],
                               ),
                       ),
-                      // Refresh button
                       GestureDetector(
                         onTap: () => _reverseGeocode(_currentCenter),
                         child: Container(
@@ -496,7 +508,11 @@ class _MapLocationPickerState extends State<MapLocationPicker>
                             color: pink.withAlpha(12),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.refresh_rounded, color: pink, size: 18),
+                          child: const Icon(
+                            Icons.refresh_rounded,
+                            color: pink,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ],
@@ -504,18 +520,26 @@ class _MapLocationPickerState extends State<MapLocationPicker>
 
                   const SizedBox(height: 14),
 
-                  // Coordinates chip
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withAlpha(6) : const Color(0xFFF9FAFB),
+                      color: isDark
+                          ? Colors.white.withAlpha(6)
+                          : const Color(0xFFF9FAFB),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.grey.withAlpha(30)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.gps_fixed_rounded, size: 13, color: Colors.grey.shade500),
+                        Icon(
+                          Icons.gps_fixed_rounded,
+                          size: 13,
+                          color: Colors.grey.shade500,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '${_currentCenter.latitude.toStringAsFixed(6)},  ${_currentCenter.longitude.toStringAsFixed(6)}',
@@ -533,7 +557,6 @@ class _MapLocationPickerState extends State<MapLocationPicker>
 
                   const SizedBox(height: 16),
 
-                  // Confirm button
                   SizedBox(
                     width: double.infinity,
                     height: 52,

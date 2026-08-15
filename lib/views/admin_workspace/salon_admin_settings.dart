@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/controllers/salon_provider.dart';
+import 'package:salonverse/controllers/salon_workspace_provider.dart';
 import 'package:salonverse/widgets/feedback_helper.dart';
 import 'package:salonverse/models/salon_model.dart';
 
@@ -16,7 +17,7 @@ class SalonAdminSettings extends StatefulWidget {
 
 class _SalonAdminSettingsState extends State<SalonAdminSettings> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _addressController;
@@ -46,9 +47,35 @@ class _SalonAdminSettingsState extends State<SalonAdminSettings> {
     setState(() => _isSaving = true);
 
     try {
-      await Future.delayed(const Duration(milliseconds: 400));
+      final success = await context
+          .read<SalonWorkspaceProvider>()
+          .updateSalonProfile(
+            salonId: salonId,
+            name: _nameController.text.trim(),
+            phone: _phoneController.text.trim(),
+            address: _addressController.text.trim(),
+            city: _cityController.text.trim(),
+            description: _descController.text.trim(),
+            priceRange: _priceRangeController.text.trim(),
+            imageUrl: _imageUrlController.text.trim().isNotEmpty
+                ? _imageUrlController.text.trim()
+                : null,
+          );
+
       if (mounted) {
-        AppFeedback.success(context, "Business settings updated successfully!");
+        if (success) {
+          AppFeedback.success(
+            context,
+            "Business settings updated & synced to server!",
+          );
+          context.read<SalonProvider>().fetchSalons(forceRefresh: true);
+        } else {
+          AppFeedback.error(
+            context,
+            context.read<SalonWorkspaceProvider>().error ??
+                "Failed to save settings.",
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -112,54 +139,83 @@ class _SalonAdminSettingsState extends State<SalonAdminSettings> {
               const SizedBox(height: 4),
               Text(
                 "Manage profile & operations for ${salon.name}",
-                style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 24),
 
-              Text("Basic Information", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                "Basic Information",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Salon Name", prefixIcon: Icon(Icons.store)),
+                decoration: const InputDecoration(
+                  labelText: "Salon Name",
+                  prefixIcon: Icon(Icons.store),
+                ),
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(labelText: "Phone Number", prefixIcon: Icon(Icons.phone)),
+                decoration: const InputDecoration(
+                  labelText: "Phone Number",
+                  prefixIcon: Icon(Icons.phone),
+                ),
               ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _addressController,
-                decoration: const InputDecoration(labelText: "Address", prefixIcon: Icon(Icons.location_on)),
+                decoration: const InputDecoration(
+                  labelText: "Address",
+                  prefixIcon: Icon(Icons.location_on),
+                ),
               ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _cityController,
-                decoration: const InputDecoration(labelText: "City", prefixIcon: Icon(Icons.location_city)),
+                decoration: const InputDecoration(
+                  labelText: "City",
+                  prefixIcon: Icon(Icons.location_city),
+                ),
               ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _priceRangeController,
-                decoration: const InputDecoration(labelText: "Price Range", prefixIcon: Icon(Icons.payments)),
+                decoration: const InputDecoration(
+                  labelText: "Price Range",
+                  prefixIcon: Icon(Icons.payments),
+                ),
               ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _descController,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: "Description", prefixIcon: Icon(Icons.description)),
+                decoration: const InputDecoration(
+                  labelText: "Description",
+                  prefixIcon: Icon(Icons.description),
+                ),
               ),
               const SizedBox(height: 12),
 
               TextFormField(
                 controller: _imageUrlController,
-                decoration: const InputDecoration(labelText: "Image URL", prefixIcon: Icon(Icons.image)),
+                decoration: const InputDecoration(
+                  labelText: "Image URL",
+                  prefixIcon: Icon(Icons.image),
+                ),
               ),
               const SizedBox(height: 24),
 
@@ -170,7 +226,10 @@ class _SalonAdminSettingsState extends State<SalonAdminSettings> {
                   onPressed: _isSaving ? null : () => _saveSettings(salonId),
                   child: _isSaving
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Save Changes", style: TextStyle(fontWeight: FontWeight.bold)),
+                      : const Text(
+                          "Save Changes",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -187,8 +246,12 @@ class _SalonAdminSettingsState extends State<SalonAdminSettings> {
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
-                    side: BorderSide(color: theme.colorScheme.error.withAlpha(120)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    side: BorderSide(
+                      color: theme.colorScheme.error.withAlpha(120),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: const Text(
                     "Sign Out Account",

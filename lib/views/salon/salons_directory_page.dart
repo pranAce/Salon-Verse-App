@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/controllers/salon_provider.dart';
 import 'package:salonverse/models/salon_model.dart';
+import 'package:salonverse/models/user_model.dart';
 import 'package:salonverse/theme/app_theme.dart';
 import 'package:salonverse/widgets/empty_state.dart';
 
@@ -32,7 +33,6 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
     final user = context.watch<AuthProvider>().currentUser;
     final salonProvider = context.watch<SalonProvider>();
 
-    // Filter salons locally for directory search
     final list = salonProvider.salons.where((salon) {
       final query = _searchQuery.toLowerCase();
       return salon.name.toLowerCase().contains(query) ||
@@ -41,14 +41,10 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Explore Salons'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Explore Salons'), elevation: 0),
       body: SafeArea(
         child: Column(
           children: [
-            // Search Input Row
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               child: Container(
@@ -77,7 +73,7 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                 ),
               ),
             ),
-            
+
             Expanded(
               child: list.isEmpty
                   ? EmptyState(
@@ -93,7 +89,10 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                       },
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
                       itemCount: list.length,
                       itemBuilder: (context, index) {
                         final salon = list[index];
@@ -107,7 +106,7 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
     );
   }
 
-  Widget _buildTile(BuildContext context, dynamic user, SalonModel salon) {
+  Widget _buildTile(BuildContext context, UserModel? user, SalonModel salon) {
     final theme = Theme.of(context);
     final isFav = user?.favoriteSalons.contains(salon.id) ?? false;
 
@@ -121,7 +120,9 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
           border: theme.cardTheme.shape is RoundedRectangleBorder
-              ? Border.fromBorderSide((theme.cardTheme.shape as RoundedRectangleBorder).side)
+              ? Border.fromBorderSide(
+                  (theme.cardTheme.shape as RoundedRectangleBorder).side,
+                )
               : null,
           borderRadius: BorderRadius.circular(16),
           boxShadow: AppSpacing.cardShadow(context),
@@ -144,7 +145,11 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                   width: 80,
                   height: 80,
                   color: theme.colorScheme.surfaceContainer,
-                  child: const Icon(Icons.storefront_rounded, size: 24, color: Colors.grey),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    size: 24,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),
@@ -169,7 +174,9 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                           context.read<AuthProvider>().toggleFavorite(salon.id);
                         },
                         child: Icon(
-                          isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                          isFav
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
                           color: isFav ? Colors.red : theme.colorScheme.primary,
                           size: 20,
                         ),
@@ -189,11 +196,18 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 14,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             salon.rating.toString(),
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),

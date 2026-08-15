@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/controllers/salon_workspace_provider.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/services/api_result.dart';
+import 'package:salonverse/core/network/api_result.dart';
 import 'package:salonverse/models/booking_model.dart';
 import 'package:salonverse/models/target_model.dart';
 import 'package:salonverse/theme/app_theme.dart';
@@ -18,25 +19,42 @@ class SalonAdminDashboard extends StatefulWidget {
 }
 
 class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
+  late final StreamController<List<Map<String, dynamic>>>
+  _bookingsStreamController;
+  Timer? _pollingTimer;
+
   @override
   void initState() {
     super.initState();
+    _bookingsStreamController =
+        StreamController<List<Map<String, dynamic>>>.broadcast();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SalonWorkspaceProvider>().fetchDashboardMetrics();
       context.read<SalonWorkspaceProvider>().fetchTargets();
+      _pollBookings();
+      _pollingTimer = Timer.periodic(
+        const Duration(seconds: 4),
+        (_) => _pollBookings(),
+      );
     });
   }
 
-  Stream<List<Map<String, dynamic>>> _streamBookings() async* {
-    while (true) {
-      try {
-        final res = await AppService.instance.getBookings();
-        if (res is Success<List<BookingModel>>) {
-          yield res.data.map((b) => b.toJson()).toList();
-        }
-      } catch (_) {}
-      await Future.delayed(const Duration(seconds: 3));
-    }
+  Future<void> _pollBookings() async {
+    if (!mounted || _bookingsStreamController.isClosed) return;
+    try {
+      final res = await AppService.instance.getBookings();
+      if (res is Success<List<BookingModel>> &&
+          !_bookingsStreamController.isClosed) {
+        _bookingsStreamController.add(res.data.map((b) => b.toJson()).toList());
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    _bookingsStreamController.close();
+    super.dispose();
   }
 
   @override
@@ -60,8 +78,14 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             ),
             const SizedBox(height: 2),
             Text(
-              isStaff ? 'My Schedule & Live Queue' : 'Dashboard & Operations Queue',
-              style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.normal),
+              isStaff
+                  ? 'My Schedule & Live Queue'
+                  : 'Dashboard & Operations Queue',
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontWeight: FontWeight.normal,
+              ),
             ),
           ],
         ),
@@ -70,6 +94,7 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               workspaceProvider.fetchDashboardMetrics();
+              _pollBookings();
               AppFeedback.success(context, "Dashboard metrics updated live.");
             },
             tooltip: 'Refresh Metrics',
@@ -77,50 +102,63 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
         ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _streamBookings(),
+        stream: _bookingsStreamController.stream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: Text("Error: ${snapshot.error}", style: TextStyle(color: theme.colorScheme.error)),
+                child: Text(
+                  "Error: ${snapshot.error}",
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
               ),
             );
           }
 
           final allSalonBookings = snapshot.data ?? [];
 
-          // Deduplicate bookings by ID to prevent duplicate items in queue
           final Map<String, Map<String, dynamic>> uniqueBookingsMap = {};
           for (var b in allSalonBookings) {
-            final bId = b['id']?.toString() ?? '${b['userId']}_${b['date']}_${b['timeSlot']}';
+            final bId =
+                b['id']?.toString() ??
+                '${b['userId']}_${b['date']}_${b['timeSlot']}';
             if (!uniqueBookingsMap.containsKey(bId)) {
               uniqueBookingsMap[bId] = b;
             }
           }
           final cleanAllBookings = uniqueBookingsMap.values.toList();
 
-          // Filter for staff members if logged in as staff
           if (isStaff) {
-            debugPrint('[STAFF FILTER] id=${user?.id}, name=${user?.name}, email=${user?.email}');
+            debugPrint(
+              '[STAFF FILTER] id=${user?.id}, name=${user?.name}, email=${user?.email}',
+            );
             if (cleanAllBookings.isNotEmpty) {
               final sample = cleanAllBookings.first;
-              debugPrint('[STAFF FILTER] Sample booking stylistId=${sample['stylistId']}, stylistName=${sample['stylistName']}');
+              debugPrint(
+                '[STAFF FILTER] Sample booking stylistId=${sample['stylistId']}, stylistName=${sample['stylistName']}',
+              );
             }
           }
           final bookingsList = isStaff
               ? cleanAllBookings.where((b) {
-                  final sId = (b['stylistId']?.toString() ?? '').trim().toLowerCase();
-                  final sName = (b['stylistName']?.toString() ?? '').trim().toLowerCase();
+                  final sId = (b['stylistId']?.toString() ?? '')
+                      .trim()
+                      .toLowerCase();
+                  final sName = (b['stylistName']?.toString() ?? '')
+                      .trim()
+                      .toLowerCase();
                   final uId = (user?.id ?? '').trim().toLowerCase();
                   final uName = (user?.name ?? '').trim().toLowerCase();
                   final uEmail = (user?.email ?? '').trim().toLowerCase();
-                  final uEmailPrefix = uEmail.contains('@') ? uEmail.split('@')[0] : '';
+                  final uEmailPrefix = uEmail.contains('@')
+                      ? uEmail.split('@')[0]
+                      : '';
 
-                  // Match by: exact ID, name contains, email, email prefix, or "any_stylist"
                   return sId == uId ||
                       sId == uEmail ||
                       (uEmailPrefix.isNotEmpty && sId == uEmailPrefix) ||
@@ -132,14 +170,26 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 }).toList()
               : cleanAllBookings;
 
-          // Sort bookings locally by creation time
-          bookingsList.sort((a, b) => b['createdAt'].toString().compareTo(a['createdAt'].toString()));
+          bookingsList.sort(
+            (a, b) =>
+                b['createdAt'].toString().compareTo(a['createdAt'].toString()),
+          );
 
-          final activeQueue = bookingsList.where((b) => b['status'] == 'in_queue' || b['status'] == 'confirmed' || b['status'] == 'pending').toList();
-          final servingNow = bookingsList.where((b) => b['status'] == 'serving').toList();
-          final completed = bookingsList.where((b) => b['status'] == 'completed').toList();
+          final activeQueue = bookingsList
+              .where(
+                (b) =>
+                    b['status'] == 'in_queue' ||
+                    b['status'] == 'confirmed' ||
+                    b['status'] == 'pending',
+              )
+              .toList();
+          final servingNow = bookingsList
+              .where((b) => b['status'] == 'serving')
+              .toList();
+          final completed = bookingsList
+              .where((b) => b['status'] == 'completed')
+              .toList();
 
-          // Sort queue by date, time slot, then position ascending
           activeQueue.sort((a, b) {
             final aDate = a['date'] as String? ?? '';
             final bDate = b['date'] as String? ?? '';
@@ -151,26 +201,31 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             int timeComp = aTime.compareTo(bTime);
             if (timeComp != 0) return timeComp;
 
-            return (a['queuePosition'] as int? ?? 0).compareTo(b['queuePosition'] as int? ?? 0);
+            return (a['queuePosition'] as int? ?? 0).compareTo(
+              b['queuePosition'] as int? ?? 0,
+            );
           });
 
-          // Compute Revenue
           double dailyRevenue = 0.0;
           for (var b in completed) {
-            dailyRevenue += (b['servicePrice'] as num?)?.toDouble() ?? (b['price'] as num?)?.toDouble() ?? 0.0;
+            dailyRevenue +=
+                (b['servicePrice'] as num?)?.toDouble() ??
+                (b['price'] as num?)?.toDouble() ??
+                0.0;
           }
 
           return CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              // 1. Dashboard Metrics Summary matching 6.jpeg
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Grid of 4 cards
                       GridView.count(
                         crossAxisCount: 2,
                         shrinkWrap: true,
@@ -179,7 +234,6 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                         mainAxisSpacing: 16,
                         childAspectRatio: 1.25,
                         children: [
-                          // Card 1: Revenue
                           _buildMetricCard(
                             theme,
                             isDark,
@@ -190,7 +244,6 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                             isPinkGradient: true,
                             icon: Icons.payments_rounded,
                           ),
-                          // Card 2: Appointments
                           _buildMetricCard(
                             theme,
                             isDark,
@@ -202,19 +255,20 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                             isPinkGradient: false,
                             icon: Icons.calendar_month_rounded,
                           ),
-                          // Card 3: Stylists / Staff
                           _buildMetricCard(
                             theme,
                             isDark,
-                            label: isStaff ? "Active Stylist" : "Salon Stylists",
-                            value: "${metrics?['staffCount'] ?? metrics?['content']?['stylists'] ?? 1}",
+                            label: isStaff
+                                ? "Active Stylist"
+                                : "Salon Stylists",
+                            value:
+                                "${metrics?['staffCount'] ?? metrics?['content']?['stylists'] ?? 1}",
                             badge: isStaff ? "Assigned" : "Active Roster",
                             badgeColor: const Color(0xFFE8F5E9),
                             badgeTextColor: const Color(0xFF2E7D32),
                             isPinkGradient: false,
                             icon: Icons.people_outline_rounded,
                           ),
-                          // Card 4: Services Available
                           _buildMetricCard(
                             theme,
                             isDark,
@@ -233,16 +287,20 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 ),
               ),
 
-              // 2. Weekly Revenue line chart widget matching 6.jpeg
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 8,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
+                        color: theme.colorScheme.outline.withAlpha(
+                          isDark ? 30 : 60,
+                        ),
                       ),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
@@ -261,13 +319,17 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                           children: [
                             Text(
                               "Weekly Revenue",
-                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            Icon(Icons.more_horiz_rounded, color: Colors.grey.shade400),
+                            Icon(
+                              Icons.more_horiz_rounded,
+                              color: Colors.grey.shade400,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 20),
-                        // Custom Painter Line Chart Widget
                         SizedBox(
                           height: 160,
                           child: WeeklyRevenueChart(bookings: cleanAllBookings),
@@ -278,12 +340,15 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 ),
               ),
 
-              // 2b. Sales Targets Tracker Section
               SliverToBoxAdapter(
-                child: _buildSalesTargetsSection(context, theme, isDark, workspaceProvider),
+                child: _buildSalesTargetsSection(
+                  context,
+                  theme,
+                  isDark,
+                  workspaceProvider,
+                ),
               ),
 
-              // 3. Queue operations (Serving & Queue list)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
@@ -298,34 +363,60 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                         ),
                       ),
                       Text(
-                        isStaff ? "Track your assigned slots and bookings" : "Real-time salon slot queue monitor board",
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        isStaff
+                            ? "Track your assigned slots and bookings"
+                            : "Real-time salon slot queue monitor board",
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       if (servingNow.isNotEmpty) ...[
                         Row(
                           children: [
-                            const Icon(Icons.play_circle_fill_rounded, size: 16, color: Colors.blue),
+                            const Icon(
+                              Icons.play_circle_fill_rounded,
+                              size: 16,
+                              color: Colors.blue,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               "Serving Now",
-                              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        ...servingNow.map((b) => _buildBookingCard(context, theme, b, isServing: true)),
+                        ...servingNow.map(
+                          (b) => _buildBookingCard(
+                            context,
+                            theme,
+                            b,
+                            isServing: true,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                       ],
 
                       Row(
                         children: [
-                          Icon(Icons.format_list_bulleted_rounded, size: 16, color: theme.colorScheme.primary),
+                          Icon(
+                            Icons.format_list_bulleted_rounded,
+                            size: 16,
+                            color: theme.colorScheme.primary,
+                          ),
                           const SizedBox(width: 6),
                           Text(
-                            isStaff ? "My Appointment Queue (${activeQueue.length})" : "Waiting Queue (${activeQueue.length})",
-                            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                            isStaff
+                                ? "My Appointment Queue (${activeQueue.length})"
+                                : "Waiting Queue (${activeQueue.length})",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -343,11 +434,18 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.airline_seat_recline_extra_rounded, size: 40, color: Colors.grey),
+                          Icon(
+                            Icons.airline_seat_recline_extra_rounded,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                           SizedBox(height: 12),
                           Text(
                             "Queue is clear",
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
                           ),
                         ],
                       ),
@@ -358,16 +456,18 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final b = activeQueue[index];
-                        return _buildBookingCard(context, theme, b, isServing: false);
-                      },
-                      childCount: activeQueue.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final b = activeQueue[index];
+                      return _buildBookingCard(
+                        context,
+                        theme,
+                        b,
+                        isServing: false,
+                      );
+                    }, childCount: activeQueue.length),
                   ),
                 ),
-              
+
               const SliverToBoxAdapter(child: SizedBox(height: 48)),
             ],
           );
@@ -393,15 +493,22 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
         borderRadius: BorderRadius.circular(24),
         gradient: isPinkGradient
             ? LinearGradient(
-                colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+                colors: [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.secondary,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
             : null,
-        color: isPinkGradient ? null : (isDark ? const Color(0xFF1E1C1B) : Colors.white),
+        color: isPinkGradient
+            ? null
+            : (isDark ? const Color(0xFF1E1C1B) : Colors.white),
         border: isPinkGradient
             ? null
-            : Border.all(color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 60)),
+            : Border.all(
+                color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
+              ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(isDark ? 0 : 4),
@@ -419,7 +526,9 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             children: [
               Icon(
                 icon,
-                color: isPinkGradient ? Colors.white70 : theme.colorScheme.primary,
+                color: isPinkGradient
+                    ? Colors.white70
+                    : theme.colorScheme.primary,
                 size: 20,
               ),
               Container(
@@ -433,7 +542,9 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
-                    color: isPinkGradient ? Colors.white : (badgeTextColor ?? theme.colorScheme.primary),
+                    color: isPinkGradient
+                        ? Colors.white
+                        : (badgeTextColor ?? theme.colorScheme.primary),
                   ),
                 ),
               ),
@@ -447,7 +558,9 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
-                  color: isPinkGradient ? Colors.white : (isDark ? Colors.white : Colors.black),
+                  color: isPinkGradient
+                      ? Colors.white
+                      : (isDark ? Colors.white : Colors.black),
                 ),
               ),
               const SizedBox(height: 2),
@@ -466,7 +579,12 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
     );
   }
 
-  Widget _buildBookingCard(BuildContext context, ThemeData theme, Map<String, dynamic> b, {required bool isServing}) {
+  Widget _buildBookingCard(
+    BuildContext context,
+    ThemeData theme,
+    Map<String, dynamic> b, {
+    required bool isServing,
+  }) {
     final status = b['status'] as String;
     final pos = b['queuePosition'] as int? ?? 0;
     final isDark = theme.brightness == Brightness.dark;
@@ -484,8 +602,8 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
           color: isHomeService
               ? Colors.amber.withAlpha(isDark ? 100 : 180)
               : isServing
-                  ? Colors.blue.withAlpha(60)
-                  : theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
+              ? Colors.blue.withAlpha(60)
+              : theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
           width: isHomeService ? 1.5 : 1.0,
         ),
         borderRadius: BorderRadius.circular(20),
@@ -509,7 +627,10 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                     Flexible(
                       child: Text(
                         b['userName'] ?? 'Customer',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -517,16 +638,26 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                     if (isHomeService) ...[
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.amber.withAlpha(30),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.amber.shade700, width: 1),
+                          border: Border.all(
+                            color: Colors.amber.shade700,
+                            width: 1,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.home_work_rounded, color: Colors.amber, size: 12),
+                            const Icon(
+                              Icons.home_work_rounded,
+                              color: Colors.amber,
+                              size: 12,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               "Home Service 🏠",
@@ -545,11 +676,16 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               ),
               if (!isServing && status == 'in_queue')
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary.withAlpha(15),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.colorScheme.primary.withAlpha(30)),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withAlpha(30),
+                    ),
                   ),
                   child: Text(
                     "Pos #$pos",
@@ -562,7 +698,10 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 ),
               if (isServing)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withAlpha(15),
                     borderRadius: BorderRadius.circular(8),
@@ -589,12 +728,15 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             "Stylist: ${b['stylistName']}   |   Slot: ${b['timeSlot']}",
             style: const TextStyle(color: Colors.grey, fontSize: 11),
           ),
-          if (isHomeService && (homeAddress.isNotEmpty || contactNumber.isNotEmpty)) ...[
+          if (isHomeService &&
+              (homeAddress.isNotEmpty || contactNumber.isNotEmpty)) ...[
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isDark ? Colors.black38 : Colors.amber.shade50.withAlpha(120),
+                color: isDark
+                    ? Colors.black38
+                    : Colors.amber.shade50.withAlpha(120),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.amber.withAlpha(40)),
               ),
@@ -605,12 +747,19 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.location_on_rounded, size: 14, color: Colors.amber),
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 14,
+                          color: Colors.amber,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             "Address: $homeAddress",
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -620,11 +769,19 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                   if (contactNumber.isNotEmpty)
                     Row(
                       children: [
-                        const Icon(Icons.phone_rounded, size: 14, color: Colors.green),
+                        const Icon(
+                          Icons.phone_rounded,
+                          size: 14,
+                          color: Colors.green,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           "Contact: $contactNumber",
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
                         ),
                       ],
                     ),
@@ -639,19 +796,29 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               if (status == 'in_queue') ...[
                 TextButton(
                   onPressed: () async {
-                    final workspaceProv = context.read<SalonWorkspaceProvider>();
-                    final success = await workspaceProv.updateBookingStatus(b['id'], 'cancelled');
+                    final workspaceProv = context
+                        .read<SalonWorkspaceProvider>();
+                    final success = await workspaceProv.updateBookingStatus(
+                      b['id'],
+                      'cancelled',
+                    );
                     if (context.mounted) {
                       if (success) {
                         AppFeedback.success(context, "Appointment cancelled.");
                       } else {
-                        AppFeedback.error(context, workspaceProv.error ?? "Failed to cancel.");
+                        AppFeedback.error(
+                          context,
+                          workspaceProv.error ?? "Failed to cancel.",
+                        );
                       }
                     }
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -660,13 +827,20 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () async {
-                    final workspaceProv = context.read<SalonWorkspaceProvider>();
-                    final success = await workspaceProv.updateBookingStatus(b['id'], 'serving');
+                    final workspaceProv = context
+                        .read<SalonWorkspaceProvider>();
+                    final success = await workspaceProv.updateBookingStatus(
+                      b['id'],
+                      'serving',
+                    );
                     if (context.mounted) {
                       if (success) {
                         AppFeedback.success(context, "Serving client now.");
                       } else {
-                        AppFeedback.error(context, workspaceProv.error ?? "Failed to start serving.");
+                        AppFeedback.error(
+                          context,
+                          workspaceProv.error ?? "Failed to start serving.",
+                        );
                       }
                     }
                   },
@@ -674,23 +848,41 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text("Start Serving", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Start Serving",
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ] else if (status == 'serving') ...[
                 ElevatedButton(
                   onPressed: () async {
-                    final workspaceProv = context.read<SalonWorkspaceProvider>();
-                    final success = await workspaceProv.updateBookingStatus(b['id'], 'completed');
+                    final workspaceProv = context
+                        .read<SalonWorkspaceProvider>();
+                    final success = await workspaceProv.updateBookingStatus(
+                      b['id'],
+                      'completed',
+                    );
                     if (context.mounted) {
                       if (success) {
-                        AppFeedback.success(context, "Service completed successfully!");
+                        AppFeedback.success(
+                          context,
+                          "Service completed successfully!",
+                        );
                       } else {
-                        AppFeedback.error(context, workspaceProv.error ?? "Failed to complete service.");
+                        AppFeedback.error(
+                          context,
+                          workspaceProv.error ?? "Failed to complete service.",
+                        );
                       }
                     }
                   },
@@ -698,12 +890,20 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text("Complete", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Complete",
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ],
@@ -767,20 +967,35 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.ads_click_rounded, color: Color(0xFFEC4899), size: 20),
+                    const Icon(
+                      Icons.ads_click_rounded,
+                      color: Color(0xFFEC4899),
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       "Sales Targets Tracker",
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
                 TextButton.icon(
-                  onPressed: () => _showAddTargetDialog(context, workspaceProvider),
-                  icon: const Icon(Icons.add_rounded, size: 18, color: Color(0xFFEC4899)),
+                  onPressed: () =>
+                      _showAddTargetDialog(context, workspaceProvider),
+                  icon: const Icon(
+                    Icons.add_rounded,
+                    size: 18,
+                    color: Color(0xFFEC4899),
+                  ),
                   label: const Text(
                     "Add Target",
-                    style: TextStyle(color: Color(0xFFEC4899), fontWeight: FontWeight.bold, fontSize: 13),
+                    style: TextStyle(
+                      color: Color(0xFFEC4899),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],
@@ -792,7 +1007,11 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.flag_outlined, size: 36, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.flag_outlined,
+                        size: 36,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 8),
                       const Text(
                         "No sales targets defined yet",
@@ -803,9 +1022,12 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEC4899),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        onPressed: () => _showAddTargetDialog(context, workspaceProvider),
+                        onPressed: () =>
+                            _showAddTargetDialog(context, workspaceProvider),
                         child: const Text("Set Monthly Sales Target"),
                       ),
                     ],
@@ -814,7 +1036,17 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               )
             else
               Column(
-                children: targets.map((target) => _buildTargetCard(context, theme, isDark, target, workspaceProvider)).toList(),
+                children: targets
+                    .map(
+                      (target) => _buildTargetCard(
+                        context,
+                        theme,
+                        isDark,
+                        target,
+                        workspaceProvider,
+                      ),
+                    )
+                    .toList(),
               ),
           ],
         ),
@@ -871,33 +1103,58 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               Expanded(
                 child: Text(
                   target.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withAlpha(20),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   statusText,
-                  style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.grey),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: Colors.grey,
+                ),
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: const Text("Delete Target"),
-                      content: const Text("Are you sure you want to delete this target?"),
+                      content: const Text(
+                        "Are you sure you want to delete this target?",
+                      ),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
-                        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Delete", style: TextStyle(color: Colors.red))),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -914,11 +1171,18 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             children: [
               Text(
                 "Rs. ${target.achievedRevenue.round()} of Rs. ${target.targetAmount.round()}",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
               Text(
                 "${target.progressPercent}%",
-                style: TextStyle(fontWeight: FontWeight.w900, color: statusColor, fontSize: 13),
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: statusColor,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),
@@ -928,7 +1192,9 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             child: LinearProgressIndicator(
               value: (target.progressPercent / 100).clamp(0.0, 1.0),
               minHeight: 8,
-              backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+              backgroundColor: isDark
+                  ? Colors.grey.shade800
+                  : Colors.grey.shade200,
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
           ),
@@ -943,7 +1209,11 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               if (target.requiredDailyRevenue > 0)
                 Text(
                   "Req. Daily: Rs. ${target.requiredDailyRevenue.round()}",
-                  style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
             ],
           ),
@@ -952,7 +1222,10 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
     );
   }
 
-  void _showAddTargetDialog(BuildContext context, SalonWorkspaceProvider workspaceProvider) {
+  void _showAddTargetDialog(
+    BuildContext context,
+    SalonWorkspaceProvider workspaceProvider,
+  ) {
     final titleController = TextEditingController(text: "Monthly Sales Target");
     final amountController = TextEditingController();
     final notesController = TextEditingController();
@@ -968,7 +1241,10 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
           children: [
             Icon(Icons.ads_click_rounded, color: Color(0xFFEC4899)),
             SizedBox(width: 8),
-            Text("Set Sales Target", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              "Set Sales Target",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
           ],
         ),
         content: SingleChildScrollView(
@@ -983,12 +1259,17 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: "Target Amount (Rs.)", hintText: "e.g. 50000"),
+                decoration: const InputDecoration(
+                  labelText: "Target Amount (Rs.)",
+                  hintText: "e.g. 50000",
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: notesController,
-                decoration: const InputDecoration(labelText: "Notes (Optional)"),
+                decoration: const InputDecoration(
+                  labelText: "Notes (Optional)",
+                ),
               ),
             ],
           ),
@@ -1002,7 +1283,9 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEC4899),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () async {
               final amount = double.tryParse(amountController.text.trim());
@@ -1021,9 +1304,15 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
               );
               if (ctx.mounted) {
                 if (success) {
-                  AppFeedback.success(ctx, "Sales target created successfully!");
+                  AppFeedback.success(
+                    ctx,
+                    "Sales target created successfully!",
+                  );
                 } else {
-                  AppFeedback.error(ctx, workspaceProvider.error ?? "Failed to create target.");
+                  AppFeedback.error(
+                    ctx,
+                    workspaceProvider.error ?? "Failed to create target.",
+                  );
                 }
               }
             },
@@ -1035,7 +1324,6 @@ class _SalonAdminDashboardState extends State<SalonAdminDashboard> {
   }
 }
 
-// ─── Custom Painter Weekly Revenue Chart ───
 class WeeklyRevenueChart extends StatelessWidget {
   final List<Map<String, dynamic>> bookings;
 
@@ -1046,22 +1334,35 @@ class WeeklyRevenueChart extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Calculate live daily revenue for Mon(1) to Sun(7)
-    final Map<int, double> dailyTotals = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0};
+    final Map<int, double> dailyTotals = {
+      1: 0.0,
+      2: 0.0,
+      3: 0.0,
+      4: 0.0,
+      5: 0.0,
+      6: 0.0,
+      7: 0.0,
+    };
 
     for (var b in bookings) {
       if (b['status'] == 'completed') {
         final dateStr = b['date'] as String? ?? '';
         try {
           final parsedDate = DateTime.parse(dateStr);
-          final weekday = parsedDate.weekday; // 1 = Mon, 7 = Sun
-          final price = (b['servicePrice'] as num?)?.toDouble() ?? (b['price'] as num?)?.toDouble() ?? 0.0;
+          final weekday = parsedDate.weekday;
+          final price =
+              (b['servicePrice'] as num?)?.toDouble() ??
+              (b['price'] as num?)?.toDouble() ??
+              0.0;
           dailyTotals[weekday] = (dailyTotals[weekday] ?? 0.0) + price;
         } catch (_) {}
       }
     }
 
-    double maxRevenue = dailyTotals.values.fold(0.0, (prev, val) => val > prev ? val : prev);
+    double maxRevenue = dailyTotals.values.fold(
+      0.0,
+      (prev, val) => val > prev ? val : prev,
+    );
     if (maxRevenue == 0) maxRevenue = 1000.0;
 
     final List<double> liveValues = [
@@ -1161,7 +1462,14 @@ class _ChartPainter extends CustomPainter {
       final p2 = points[i + 1];
       final controlPoint1 = Offset(p1.dx + (p2.dx - p1.dx) / 2, p1.dy);
       final controlPoint2 = Offset(p1.dx + (p2.dx - p1.dx) / 2, p2.dy);
-      pathBg.cubicTo(controlPoint1.dx, controlPoint1.dy, controlPoint2.dx, controlPoint2.dy, p2.dx, p2.dy);
+      pathBg.cubicTo(
+        controlPoint1.dx,
+        controlPoint1.dy,
+        controlPoint2.dx,
+        controlPoint2.dy,
+        p2.dx,
+        p2.dy,
+      );
     }
 
     pathBg.lineTo(points.last.dx, topPadding + chartHeight);
@@ -1184,7 +1492,14 @@ class _ChartPainter extends CustomPainter {
       final p2 = points[i + 1];
       final controlPoint1 = Offset(p1.dx + (p2.dx - p1.dx) / 2, p1.dy);
       final controlPoint2 = Offset(p1.dx + (p2.dx - p1.dx) / 2, p2.dy);
-      pathLine.cubicTo(controlPoint1.dx, controlPoint1.dy, controlPoint2.dx, controlPoint2.dy, p2.dx, p2.dy);
+      pathLine.cubicTo(
+        controlPoint1.dx,
+        controlPoint1.dy,
+        controlPoint2.dx,
+        controlPoint2.dy,
+        p2.dx,
+        p2.dy,
+      );
     }
 
     final linePaint = Paint()
@@ -1212,7 +1527,11 @@ class _ChartPainter extends CustomPainter {
     for (int i = 0; i < days.length; i++) {
       final textSpan = TextSpan(
         text: days[i],
-        style: TextStyle(color: textColor, fontSize: 10, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: textColor,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       );
       final textPainter = TextPainter(
         text: textSpan,
@@ -1224,14 +1543,20 @@ class _ChartPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(x, y));
     }
 
-    // Live Tooltip on peak day
     final Offset tooltipPoint = points[maxDayIndex];
     final double maxRevenue = amounts[maxDayIndex];
-    final String formattedText = maxRevenue >= 1000 ? "Rs. ${(maxRevenue / 1000).toStringAsFixed(1)}K" : "Rs. ${maxRevenue.round()}";
+    final String formattedText = maxRevenue >= 1000
+        ? "Rs. ${(maxRevenue / 1000).toStringAsFixed(1)}K"
+        : "Rs. ${maxRevenue.round()}";
 
-    final rect = Rect.fromLTWH(tooltipPoint.dx - 34, tooltipPoint.dy - 38, 68, 26);
+    final rect = Rect.fromLTWH(
+      tooltipPoint.dx - 34,
+      tooltipPoint.dy - 38,
+      68,
+      26,
+    );
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
-    
+
     final tooltipBgPaint = Paint()..color = lineColor;
     canvas.drawRRect(rrect, tooltipBgPaint);
 
@@ -1244,7 +1569,11 @@ class _ChartPainter extends CustomPainter {
 
     final tooltipSpan = TextSpan(
       text: formattedText,
-      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 9,
+        fontWeight: FontWeight.bold,
+      ),
     );
     final tooltipPainter = TextPainter(
       text: tooltipSpan,
@@ -1253,7 +1582,10 @@ class _ChartPainter extends CustomPainter {
 
     tooltipPainter.paint(
       canvas,
-      Offset(tooltipPoint.dx - (tooltipPainter.width / 2), tooltipPoint.dy - 31),
+      Offset(
+        tooltipPoint.dx - (tooltipPainter.width / 2),
+        tooltipPoint.dy - 31,
+      ),
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:salonverse/controllers/booking_provider.dart';
 import 'package:salonverse/models/booking_model.dart';
+import 'package:salonverse/services/receipt_pdf_helper.dart';
 import 'package:salonverse/theme/app_theme.dart';
 import 'package:salonverse/widgets/shimmer_loading.dart';
 import 'package:salonverse/widgets/empty_state.dart';
@@ -54,7 +55,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
             SizedBox(height: 2),
             Text(
               'Manage your appointments in one place',
-              style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.normal),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontWeight: FontWeight.normal,
+              ),
             ),
           ],
         ),
@@ -63,11 +68,16 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
             padding: const EdgeInsets.only(right: 12),
             child: CircleAvatar(
               radius: 20,
-              backgroundColor: isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100,
+              backgroundColor: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : Colors.grey.shade100,
               child: Stack(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_none_rounded, size: 20),
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      size: 20,
+                    ),
                     onPressed: () {},
                   ),
                   Positioned(
@@ -107,7 +117,10 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                 ),
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey.shade600,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
                 tabs: const [
                   Tab(text: "Upcoming"),
                   Tab(text: "Completed"),
@@ -124,7 +137,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildList(context, bookingProvider, ['pending', 'confirmed', 'in_queue', 'in_service', 'serving']),
+              _buildList(context, bookingProvider, [
+                'pending',
+                'confirmed',
+                'in_queue',
+                'in_service',
+                'serving',
+              ]),
               _buildList(context, bookingProvider, ['completed']),
               _buildList(context, bookingProvider, ['cancelled', 'no_show']),
             ],
@@ -134,7 +153,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
     );
   }
 
-  Widget _buildList(BuildContext context, BookingProvider provider, List<String> statuses) {
+  Widget _buildList(
+    BuildContext context,
+    BookingProvider provider,
+    List<String> statuses,
+  ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -152,8 +175,14 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
         icon: Icons.calendar_today_rounded,
         title: 'No bookings found',
         subtitle: 'No appointments under this tab currently.',
-        actionLabel: (statuses.contains('confirmed') || statuses.contains('in_queue')) ? 'Book a Session' : null,
-        onAction: (statuses.contains('confirmed') || statuses.contains('in_queue')) ? () => context.go('/home') : null,
+        actionLabel:
+            (statuses.contains('confirmed') || statuses.contains('in_queue'))
+            ? 'Book a Session'
+            : null,
+        onAction:
+            (statuses.contains('confirmed') || statuses.contains('in_queue'))
+            ? () => context.go('/home')
+            : null,
       );
     }
 
@@ -206,7 +235,6 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card Row
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -227,7 +255,10 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: statusBg,
                             borderRadius: BorderRadius.circular(6),
@@ -245,19 +276,29 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                         const SizedBox(height: 6),
                         Text(
                           booking.salonName,
-                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.location_on_outlined, color: Colors.grey, size: 12),
+                            const Icon(
+                              Icons.location_on_outlined,
+                              color: Colors.grey,
+                              size: 12,
+                            ),
                             const SizedBox(width: 2),
                             Expanded(
                               child: Text(
                                 booking.salonAddress,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ),
                           ],
@@ -267,23 +308,27 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                   ),
                 ],
               ),
-              
+
               const Divider(height: 24),
 
-              // Detail brief
               Text(
                 "${booking.serviceName} with ${booking.stylistName}",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 12),
 
-              // Date/Time pill boxes wrapped safely
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEC4899).withAlpha(10),
                       borderRadius: BorderRadius.circular(8),
@@ -291,7 +336,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.calendar_today_rounded, size: 12, color: Color(0xFFEC4899)),
+                        const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 12,
+                          color: Color(0xFFEC4899),
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           booking.date,
@@ -305,7 +354,10 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEC4899).withAlpha(10),
                       borderRadius: BorderRadius.circular(8),
@@ -313,7 +365,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFFEC4899)),
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: Color(0xFFEC4899),
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           booking.timeSlot,
@@ -329,26 +385,75 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                 ],
               ),
 
+              if (booking.isHomeService) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEC4899).withAlpha(12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFEC4899).withAlpha(30),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.home_work_rounded,
+                        color: Color(0xFFEC4899),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "Home Service: ${booking.homeAddress.isNotEmpty ? booking.homeAddress : 'Home Delivery'}",
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFEC4899),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const Divider(height: 28),
 
-              // Actions Row
               Row(
                 children: [
-                  if (statusLower != 'completed' && statusLower != 'cancelled' && statusLower != 'no_show') ...[
+                  if (statusLower != 'completed' &&
+                      statusLower != 'cancelled' &&
+                      statusLower != 'no_show') ...[
                     Expanded(
                       child: SizedBox(
                         height: 44,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFFEC4899),
-                            backgroundColor: const Color(0xFFEC4899).withAlpha(12),
+                            backgroundColor: const Color(
+                              0xFFEC4899,
+                            ).withAlpha(12),
                             side: BorderSide.none,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          onPressed: () {
-                            AppFeedback.success(context, "Reschedule request initiated.");
-                          },
-                          child: const Text("Reschedule", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          onPressed: () =>
+                              _showRescheduleBottomSheet(context, booking),
+                          child: const Text(
+                            "Reschedule",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -360,13 +465,21 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFEC4899),
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 0,
                           ),
                           onPressed: () {
                             context.push('/payment-confirmation');
                           },
-                          child: const Text("View Details", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          child: const Text(
+                            "View Details",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -378,17 +491,28 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.grey.shade600,
                             side: BorderSide(color: Colors.grey.shade300),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () {
-                            AppFeedback.success(context, "Receipt PDF downloaded!");
+                            ReceiptPdfHelper.generateAndDownloadReceipt(
+                              context: context,
+                              booking: booking,
+                            );
                           },
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.download_rounded, size: 14),
                               SizedBox(width: 4),
-                              Text("Receipt", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text(
+                                "Receipt PDF",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -400,9 +524,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                         height: 44,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: booking.reviewed ? Colors.grey : theme.colorScheme.primary,
+                            backgroundColor: booking.reviewed
+                                ? Colors.grey
+                                : theme.colorScheme.primary,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 0,
                           ),
                           onPressed: booking.reviewed
@@ -410,13 +538,15 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                               : () => _showReviewBottomSheet(context, booking),
                           child: Text(
                             booking.reviewed ? "Reviewed" : "Rate & Review",
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ] else ...[
-                    // Cancelled booking card details
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -427,7 +557,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                         ),
                         child: const Text(
                           "This appointment was cancelled.",
-                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -465,8 +599,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
               ),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                border: Border.all(color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 65)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 65),
+                ),
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -486,19 +624,27 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     const SizedBox(height: 20),
                     Text(
                       "Review Experience",
-                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       "Rate your service at ${booking.salonName}",
-                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    
-                    // Salon Rating
+
                     const Text(
                       "How was the salon service?",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -511,7 +657,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                             });
                           },
                           icon: Icon(
-                            salonRating >= starValue ? Icons.star_rounded : Icons.star_border_rounded,
+                            salonRating >= starValue
+                                ? Icons.star_rounded
+                                : Icons.star_border_rounded,
                             color: Colors.amber,
                             size: 32,
                           ),
@@ -520,10 +668,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     ),
                     const SizedBox(height: 16),
 
-                    // Stylist Rating
                     Text(
                       "Rate stylist ${booking.stylistName}?",
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -536,7 +686,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                             });
                           },
                           icon: Icon(
-                            stylistRating >= starValue ? Icons.star_rounded : Icons.star_border_rounded,
+                            stylistRating >= starValue
+                                ? Icons.star_rounded
+                                : Icons.star_border_rounded,
                             color: Colors.amber,
                             size: 32,
                           ),
@@ -545,10 +697,12 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     ),
                     const SizedBox(height: 20),
 
-                    // Review Comment Input
                     const Text(
                       "Your review",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     TextField(
@@ -557,8 +711,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                       maxLength: 150,
                       decoration: InputDecoration(
                         hintText: "Tell others about the salon and stylist...",
-                        hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
-                        fillColor: isDark ? const Color(0xFF161514) : Colors.grey.shade100,
+                        hintStyle: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
+                        fillColor: isDark
+                            ? const Color(0xFF161514)
+                            : Colors.grey.shade100,
                         filled: true,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -569,7 +728,6 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                     ),
                     const SizedBox(height: 20),
 
-                    // Submit Button
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -577,7 +735,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.colorScheme.primary,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 0,
                         ),
                         onPressed: isSubmitting
@@ -586,26 +746,43 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                                 setModalState(() {
                                   isSubmitting = true;
                                 });
-                                
+
                                 try {
-                                  await Future.delayed(const Duration(milliseconds: 300));
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 300),
+                                  );
                                   if (context.mounted) {
-                                    Navigator.pop(context); // Close bottom sheet
-                                    AppFeedback.success(context, "Thank you! Your review has been saved.");
-                                    context.read<BookingProvider>().fetchBookings();
+                                    Navigator.pop(
+                                      context,
+                                    );
+                                    AppFeedback.success(
+                                      context,
+                                      "Thank you! Your review has been saved.",
+                                    );
+                                    context
+                                        .read<BookingProvider>()
+                                        .fetchBookings();
                                   }
                                 } catch (e) {
                                   setModalState(() {
                                     isSubmitting = false;
                                   });
                                   if (context.mounted) {
-                                    AppFeedback.error(context, "Failed to submit review: $e");
+                                    AppFeedback.error(
+                                      context,
+                                      "Failed to submit review: $e",
+                                    );
                                   }
                                 }
                               },
                         child: isSubmitting
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text("Submit Review", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                "Submit Review",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                       ),
                     ),
                   ],
@@ -615,6 +792,258 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
           },
         );
       },
+    );
+  }
+
+  void _showRescheduleBottomSheet(BuildContext context, BookingModel booking) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
+    String selectedSlot = "11:00 AM";
+    bool isRescheduling = false;
+
+    final dates = List.generate(
+      7,
+      (idx) => DateTime.now().add(Duration(days: idx + 1)),
+    );
+    final timeSlots = [
+      "10:00 AM",
+      "11:00 AM",
+      "12:00 PM",
+      "01:00 PM",
+      "02:00 PM",
+      "03:00 PM",
+      "04:00 PM",
+      "05:00 PM",
+      "06:00 PM",
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? const Color(0xFF1E1C1B) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Reschedule Appointment",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "${booking.salonName} • ${booking.serviceName}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              const Text(
+                "Select New Date",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 70,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: dates.length,
+                  itemBuilder: (context, idx) {
+                    final d = dates[idx];
+                    final isSel =
+                        selectedDate.year == d.year &&
+                        selectedDate.month == d.month &&
+                        selectedDate.day == d.day;
+                    final weekdays = [
+                      "Mon",
+                      "Tue",
+                      "Wed",
+                      "Thu",
+                      "Fri",
+                      "Sat",
+                      "Sun",
+                    ];
+                    final weekday = weekdays[d.weekday - 1];
+
+                    return GestureDetector(
+                      onTap: () => setSheetState(() => selectedDate = d),
+                      child: Container(
+                        width: 56,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          color: isSel
+                              ? const Color(0xFFEC4899)
+                              : (isDark
+                                    ? const Color(0xFF161514)
+                                    : Colors.grey.shade100),
+                          borderRadius: BorderRadius.circular(14),
+                          border: isSel
+                              ? null
+                              : Border.all(color: Colors.grey.withAlpha(40)),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              weekday,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isSel ? Colors.white : Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              d.day.toString(),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isSel
+                                    ? Colors.white
+                                    : (isDark ? Colors.white : Colors.black87),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              const Text(
+                "Select New Time Slot",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: timeSlots.map((slot) {
+                  final isSel = selectedSlot == slot;
+                  return ChoiceChip(
+                    label: Text(slot),
+                    selected: isSel,
+                    onSelected: (val) {
+                      if (val) setSheetState(() => selectedSlot = slot);
+                    },
+                    selectedColor: const Color(0xFFEC4899),
+                    labelStyle: TextStyle(
+                      color: isSel
+                          ? Colors.white
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 24),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEC4899),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: isRescheduling
+                    ? null
+                    : () async {
+                        setSheetState(() => isRescheduling = true);
+                        try {
+                          final ok = await context
+                              .read<BookingProvider>()
+                              .rescheduleBooking(
+                                booking.id,
+                                selectedDate,
+                                selectedSlot,
+                              );
+                          if (ctx.mounted) {
+                            Navigator.pop(ctx);
+                          }
+                          if (context.mounted) {
+                            if (ok) {
+                              AppFeedback.success(
+                                context,
+                                "Appointment rescheduled to ${selectedDate.day}/${selectedDate.month}/${selectedDate.year} at $selectedSlot!",
+                              );
+                              context.read<BookingProvider>().fetchBookings();
+                            } else {
+                              AppFeedback.error(
+                                context,
+                                "Failed to reschedule booking.",
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (ctx.mounted) {
+                            Navigator.pop(ctx);
+                          }
+                          if (context.mounted) {
+                            AppFeedback.error(context, "Reschedule error: $e");
+                          }
+                        }
+                      },
+                child: isRescheduling
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        "Confirm Reschedule",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

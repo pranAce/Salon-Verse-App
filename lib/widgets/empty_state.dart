@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salonverse/theme/app_theme.dart';
 
-/// Reusable empty state widget with icon, title, subtitle, and optional action.
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -69,10 +68,13 @@ class EmptyState extends StatelessWidget {
                 onPressed: onAction,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.buttonRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.buttonRadius,
+                    ),
                   ),
                 ),
                 child: Text(

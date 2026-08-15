@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salonverse/theme/app_theme.dart';
 
-/// Reusable error state widget with retry functionality.
 class ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
@@ -33,11 +32,7 @@ class ErrorState extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: theme.colorScheme.error.withAlpha(isDark ? 20 : 12),
               ),
-              child: Icon(
-                icon,
-                size: 32,
-                color: theme.colorScheme.error,
-              ),
+              child: Icon(icon, size: 32, color: theme.colorScheme.error),
             ),
             const SizedBox(height: 20),
             Text(
@@ -63,10 +58,13 @@ class ErrorState extends StatelessWidget {
                 label: const Text('Try Again'),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.buttonRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.buttonRadius,
+                    ),
                   ),
                 ),
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salonverse/services/app_service.dart';
-import 'package:salonverse/services/api_result.dart';
+import 'package:salonverse/core/network/api_result.dart';
 import 'package:salonverse/widgets/app_button.dart';
 import 'package:salonverse/widgets/app_text_field.dart';
 import 'package:salonverse/widgets/feedback_helper.dart';
@@ -54,9 +54,7 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contact Support'),
-      ),
+      appBar: AppBar(title: const Text('Contact Support')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -67,8 +65,7 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 24),
-                  
-                  // Subject
+
                   AppTextField(
                     controller: _subjectController,
                     label: "Subject",
@@ -82,7 +79,6 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Message Description
                   AppTextField(
                     controller: _msgController,
                     label: "Describe your query or issue",
@@ -97,7 +93,6 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Submit Button
                   AppButton(
                     label: "Submit Ticket",
                     isLoading: _isLoading,

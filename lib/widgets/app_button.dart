@@ -26,7 +26,8 @@ class AppButton extends StatefulWidget {
   State<AppButton> createState() => _AppButtonState();
 }
 
-class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMixin {
+class _AppButtonState extends State<AppButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -40,7 +41,10 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       upperBound: 1.0,
     );
     _controller.value = 1.0;
-    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -116,7 +120,8 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
             backgroundColor: primaryColor,
-            foregroundColor: widget.foregroundColor ?? theme.colorScheme.onPrimary,
+            foregroundColor:
+                widget.foregroundColor ?? theme.colorScheme.onPrimary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
             ),
@@ -131,10 +136,7 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       onTapDown: isEnabled ? _handleTapDown : null,
       onTapUp: isEnabled ? _handleTapUp : null,
       onTapCancel: isEnabled ? _handleTapCancel : null,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: buttonChild,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: buttonChild),
     );
   }
 

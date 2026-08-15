@@ -21,7 +21,12 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     final salonProvider = context.read<SalonProvider>();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(24, 8, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        8,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +42,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           Text(
             'Filters',
             style: theme.textTheme.headlineMedium?.copyWith(
@@ -46,10 +51,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           ),
           const SizedBox(height: 24),
 
-          // 1. City Filter
           Text(
             'Location',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -68,7 +74,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 },
                 selectedColor: theme.colorScheme.primary,
                 labelStyle: TextStyle(
-                  color: isSel ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                  color: isSel
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               );
@@ -76,10 +84,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           ),
           const SizedBox(height: 24),
 
-          // 2. Price Range Filter
           Text(
             'Price Range (Rs.)',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           RangeSlider(
@@ -101,16 +110,23 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Rs. ${_priceRange.start.round()}', style: theme.textTheme.bodySmall),
-              Text('Rs. ${_priceRange.end.round()}', style: theme.textTheme.bodySmall),
+              Text(
+                'Rs. ${_priceRange.start.round()}',
+                style: theme.textTheme.bodySmall,
+              ),
+              Text(
+                'Rs. ${_priceRange.end.round()}',
+                style: theme.textTheme.bodySmall,
+              ),
             ],
           ),
           const SizedBox(height: 24),
 
-          // 3. Minimum Rating Filter
           Text(
             'Minimum Rating',
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -125,11 +141,18 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 },
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSel ? theme.colorScheme.primary : Colors.transparent,
+                    color: isSel
+                        ? theme.colorScheme.primary
+                        : Colors.transparent,
                     border: Border.all(
-                      color: isSel ? theme.colorScheme.primary : theme.colorScheme.outline,
+                      color: isSel
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline,
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -144,7 +167,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       Text(
                         '$rate+',
                         style: TextStyle(
-                          color: isSel ? Colors.white : theme.colorScheme.onSurface,
+                          color: isSel
+                              ? Colors.white
+                              : theme.colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -156,11 +181,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
           ),
           const SizedBox(height: 40),
 
-          // Apply Button
           AppButton(
             label: "Apply Filters",
             onPressed: () {
-              // Trigger reload in provider using local filter criteria simulation
               salonProvider.fetchSalons();
               Navigator.pop(context);
             },

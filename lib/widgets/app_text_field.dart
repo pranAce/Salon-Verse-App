@@ -58,7 +58,8 @@ class AppTextField extends StatelessWidget {
       maxLength: maxLength,
       maxLines: maxLines,
       textAlign: textAlign,
-      style: style ??
+      style:
+          style ??
           TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -68,7 +69,11 @@ class AppTextField extends StatelessWidget {
         labelText: label,
         counterText: maxLength != null ? "" : null,
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: 18, color: theme.colorScheme.primary.withAlpha(200))
+            ? Icon(
+                prefixIcon,
+                size: 18,
+                color: theme.colorScheme.primary.withAlpha(200),
+              )
             : null,
         suffixIcon: suffixIcon,
       ),

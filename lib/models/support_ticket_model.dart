@@ -1,5 +1,5 @@
 class TicketMessage {
-  final String sender; // 'user' or 'support'
+  final String sender;
   final String message;
   final String sentAt;
 
@@ -10,11 +10,7 @@ class TicketMessage {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'sender': sender,
-      'message': message,
-      'sentAt': sentAt,
-    };
+    return {'sender': sender, 'message': message, 'sentAt': sentAt};
   }
 
   factory TicketMessage.fromJson(Map<String, dynamic> json) {
@@ -31,8 +27,8 @@ class SupportTicketModel {
   final String userId;
   final String userName;
   final String subject;
-  final String message; // Initial message
-  final String status; // 'Open', 'Answered', 'Closed'
+  final String message;
+  final String status;
   final List<TicketMessage> messages;
   final String createdAt;
 

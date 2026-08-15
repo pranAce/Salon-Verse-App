@@ -1,13 +1,18 @@
 class ApiConfig {
-  /// Optional custom override URL for local testing (e.g. 'http://10.0.1.11:5000')
+  static const String prodUrl = 'https://api.salonverse.live';
+  static const String localUrl = 'http://localhost:3000';
+
   static String? customUrl;
 
-  /// Active base URL: Defaults to deployed production backend (https://api.salonverse.live)
   static String get baseUrl {
     if (customUrl != null && customUrl!.isNotEmpty) {
       return customUrl!;
     }
-    return 'https://api.salonverse.live';
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    if (envUrl.isNotEmpty) {
+      return envUrl;
+    }
+    return prodUrl;
   }
 
   static Map<String, String> headers([String? token]) {

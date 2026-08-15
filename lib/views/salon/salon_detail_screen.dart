@@ -42,23 +42,21 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
       try {
         _salon = salons.firstWhere((s) => s.id == widget.salonId);
       } catch (_) {
-        if (salons.isNotEmpty) {
-          _salon = salons.first;
-        } else {
-          _salon = null;
-          context.read<SalonProvider>().fetchSalons().then((_) {
-            if (mounted) {
-              final updatedSalons = context.read<SalonProvider>().salons;
-              setState(() {
-                try {
-                  _salon = updatedSalons.firstWhere((s) => s.id == widget.salonId);
-                } catch (_) {
-                  if (updatedSalons.isNotEmpty) _salon = updatedSalons.first;
-                }
-              });
-            }
-          });
-        }
+        _salon = null;
+        context.read<SalonProvider>().fetchSalons().then((_) {
+          if (mounted) {
+            final updatedSalons = context.read<SalonProvider>().salons;
+            setState(() {
+              try {
+                _salon = updatedSalons.firstWhere(
+                  (s) => s.id == widget.salonId,
+                );
+              } catch (_) {
+                _salon = null;
+              }
+            });
+          }
+        });
       }
     }
   }
@@ -78,20 +76,20 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     final user = context.watch<AuthProvider>().currentUser;
     final isFav = user?.favoriteSalons.contains(_salon!.id) ?? false;
 
-    // Estimate starting price from salon services
     final minPrice = _salon!.services.isNotEmpty
-        ? _salon!.services.map((s) => s.price).reduce((a, b) => a < b ? a : b).round()
+        ? _salon!.services
+              .map((s) => s.price)
+              .reduce((a, b) => a < b ? a : b)
+              .round()
         : 1200;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Scrollable Content
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Cover Image with overlay gradient
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -107,11 +105,14 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       errorWidget: (context, url, err) => Container(
                         height: 320,
                         color: Colors.grey,
-                        child: const Icon(Icons.storefront_rounded, size: 64, color: Colors.white12),
+                        child: const Icon(
+                          Icons.storefront_rounded,
+                          size: 64,
+                          color: Colors.white12,
+                        ),
                       ),
                     ),
-                    
-                    // Dark fade at the bottom of image
+
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
@@ -128,7 +129,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       ),
                     ),
 
-                    // Floating Logo Card overlaying the bottom-left of image
                     Positioned(
                       bottom: -28,
                       left: 24,
@@ -136,7 +136,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                         width: 88,
                         height: 88,
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
+                          color: isDark
+                              ? const Color(0xFF1E1C1B)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
@@ -146,13 +148,17 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             ),
                           ],
                           border: Border.all(
-                            color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
+                            color: theme.colorScheme.outline.withAlpha(
+                              isDark ? 30 : 60,
+                            ),
                             width: 1.5,
                           ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          _salon!.name.substring(0, 1).toUpperCase(),
+                          _salon!.name.isNotEmpty
+                              ? _salon!.name[0].toUpperCase()
+                              : 'S',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
@@ -163,10 +169,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 48),
 
-                // 2. Salon Title & Location Block
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -180,7 +185,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 26,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                           ),
@@ -220,7 +227,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             child: Text(
                               '${_salon!.address}, ${_salon!.city} • 0.8 km',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -233,46 +242,63 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
                 const SizedBox(height: 24),
 
-                // 3. Info Dashboard Row (Rating, Time, Call)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
                     children: [
-                      // Rating Card
                       Expanded(
                         child: _buildInfoCard(
                           context,
                           theme,
-                          Icon(Icons.star_rounded, color: Colors.pink.shade300, size: 20),
+                          Icon(
+                            Icons.star_rounded,
+                            color: Colors.pink.shade300,
+                            size: 20,
+                          ),
                           '${_salon!.rating}',
                           '${_salon!.reviewCount} reviews',
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Timing Card (Dynamic Opening Hours)
                       Expanded(
                         child: _buildInfoCard(
                           context,
                           theme,
-                          Icon(Icons.access_time_filled_rounded, color: Colors.pink.shade300, size: 20),
-                          _salon!.openingHours.isNotEmpty ? _salon!.openingHours.split('-')[0].trim() : '9:00 AM',
-                          _salon!.openingHours.isNotEmpty ? _salon!.openingHours : 'Open Today',
+                          Icon(
+                            Icons.access_time_filled_rounded,
+                            color: Colors.pink.shade300,
+                            size: 20,
+                          ),
+                          _salon!.openingHours.isNotEmpty
+                              ? _salon!.openingHours.split('-')[0].trim()
+                              : '9:00 AM',
+                          _salon!.openingHours.isNotEmpty
+                              ? _salon!.openingHours
+                              : 'Open Today',
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Call Card
                       Expanded(
                         child: InkWell(
                           onTap: () {
-                            AppFeedback.success(context, "Calling ${_salon!.name}...");
+                            AppFeedback.success(
+                              context,
+                              "Calling ${_salon!.name}...",
+                            );
                           },
                           borderRadius: BorderRadius.circular(20),
                           child: _buildInfoCard(
                             context,
                             theme,
-                            Icon(Icons.phone_in_talk_rounded, color: Colors.pink.shade300, size: 20),
+                            Icon(
+                              Icons.phone_in_talk_rounded,
+                              color: Colors.pink.shade300,
+                              size: 20,
+                            ),
                             'Call',
-                            _salon!.phoneNumber.isNotEmpty ? _salon!.phoneNumber : 'Call Salon',
+                            _salon!.phoneNumber.isNotEmpty
+                                ? _salon!.phoneNumber
+                                : 'Call Salon',
                           ),
                         ),
                       ),
@@ -282,7 +308,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
                 const SizedBox(height: 32),
 
-                // 4. About Details Block (Dynamic Description)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -302,7 +327,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                         maxLines: _isAboutExpanded ? 100 : 3,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                           height: 1.5,
                         ),
                       ),
@@ -328,7 +355,169 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
 
                 const SizedBox(height: 28),
 
-                // 5. Stylists Showcase Block (Dynamic Stylists List)
+                if (_salon!.services.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Available Services (${_salon!.services.length})",
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        ..._salon!.services.map((svc) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF1E1C1B)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withAlpha(
+                                  isDark ? 25 : 45,
+                                ),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(isDark ? 0 : 4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: const Color(
+                                    0xFFEC4899,
+                                  ).withAlpha(18),
+                                  child: const Icon(
+                                    Icons.spa_rounded,
+                                    color: Color(0xFFEC4899),
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        svc.name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF111827),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isDark
+                                                  ? Colors.white10
+                                                  : Colors.grey.shade100,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              svc.category.toUpperCase(),
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.bold,
+                                                color: isDark
+                                                    ? Colors.white70
+                                                    : Colors.grey.shade700,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            "${svc.durationMinutes} mins",
+                                            style: TextStyle(
+                                              fontSize: 11.5,
+                                              color: isDark
+                                                  ? Colors.white54
+                                                  : Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "Rs. ${svc.price.round()}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 14,
+                                        color: Color(0xFFEC4899),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    InkWell(
+                                      onTap: () {
+                                        context
+                                            .read<BookingProvider>()
+                                            .startBookingFlow(_salon!, svc);
+                                        context.push('/booking-flow');
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFEC4899),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Book",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 20),
+
                 if (_salon!.stylists.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -354,35 +543,51 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                                 margin: const EdgeInsets.only(right: 12),
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF1E1C1B) : Colors.grey.shade50,
+                                  color: isDark
+                                      ? const Color(0xFF1E1C1B)
+                                      : Colors.grey.shade50,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: theme.colorScheme.outline.withAlpha(isDark ? 20 : 40),
+                                    color: theme.colorScheme.outline.withAlpha(
+                                      isDark ? 20 : 40,
+                                    ),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     CircleAvatar(
                                       radius: 20,
-                                      backgroundImage: st.imageUrl.isNotEmpty ? NetworkImage(st.imageUrl) : null,
-                                      child: st.imageUrl.isEmpty ? const Icon(Icons.person, size: 20) : null,
+                                      backgroundImage: st.imageUrl.isNotEmpty
+                                          ? NetworkImage(st.imageUrl)
+                                          : null,
+                                      child: st.imageUrl.isEmpty
+                                          ? const Icon(Icons.person, size: 20)
+                                          : null,
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             st.name.split(' ')[0],
-                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
                                             st.specialty,
-                                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.grey,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -399,13 +604,11 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     ),
                   ),
 
-                // Add margin bottom for sticky footer
                 const SizedBox(height: 120),
               ],
             ),
           ),
 
-          // 5. Sticky Bottom Action Bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -416,7 +619,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 color: isDark ? const Color(0xFF161514) : Colors.white,
                 border: Border(
                   top: BorderSide(
-                    color: theme.colorScheme.outline.withAlpha(isDark ? 30 : 60),
+                    color: theme.colorScheme.outline.withAlpha(
+                      isDark ? 30 : 60,
+                    ),
                   ),
                 ),
                 boxShadow: [
@@ -436,7 +641,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       Text(
                         "Starting from",
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                          color: isDark
+                              ? AppColors.darkTextTertiary
+                              : AppColors.lightTextTertiary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -465,8 +672,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                           elevation: 0,
                         ),
                         onPressed: () {
-                          // Initialize booking with selected salon and open booking flow stepper
-                          context.read<BookingProvider>().startBookingFlowForSalon(_salon!);
+                          context
+                              .read<BookingProvider>()
+                              .startBookingFlowForSalon(_salon!);
                           context.push('/booking-flow');
                         },
                         child: const Row(
@@ -491,13 +699,16 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ),
 
-          // 6. Header Action Overlay (Circular buttons on top of image)
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 20,
             child: _buildCircularButton(
               context,
-              Icon(Icons.arrow_back_rounded, color: isDark ? Colors.white : AppColors.lightTextPrimary, size: 20),
+              Icon(
+                Icons.arrow_back_rounded,
+                color: isDark ? Colors.white : AppColors.lightTextPrimary,
+                size: 20,
+              ),
               () => Navigator.pop(context),
             ),
           ),
@@ -508,7 +719,11 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
               children: [
                 _buildCircularButton(
                   context,
-                  Icon(Icons.share_outlined, color: isDark ? Colors.white : AppColors.lightTextPrimary, size: 20),
+                  Icon(
+                    Icons.share_outlined,
+                    color: isDark ? Colors.white : AppColors.lightTextPrimary,
+                    size: 20,
+                  ),
                   () {
                     AppFeedback.success(context, "Link copied to clipboard!");
                   },
@@ -517,8 +732,12 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 _buildCircularButton(
                   context,
                   Icon(
-                    isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                    color: isFav ? Colors.red : (isDark ? Colors.white : AppColors.lightTextPrimary),
+                    isFav
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: isFav
+                        ? Colors.red
+                        : (isDark ? Colors.white : AppColors.lightTextPrimary),
                     size: 20,
                   ),
                   () {
@@ -533,7 +752,11 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     );
   }
 
-  Widget _buildCircularButton(BuildContext context, Widget child, VoidCallback onTap) {
+  Widget _buildCircularButton(
+    BuildContext context,
+    Widget child,
+    VoidCallback onTap,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
@@ -541,7 +764,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF221F1C).withAlpha(200) : Colors.white.withAlpha(220),
+          color: isDark
+              ? const Color(0xFF221F1C).withAlpha(200)
+              : Colors.white.withAlpha(220),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
@@ -582,7 +807,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             title,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -591,7 +818,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 10,
-              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+              color: isDark
+                  ? AppColors.darkTextTertiary
+                  : AppColors.lightTextTertiary,
             ),
           ),
         ],

@@ -7,7 +7,6 @@ import 'package:salonverse/widgets/app_button.dart';
 import 'package:salonverse/widgets/app_text_field.dart';
 import 'package:salonverse/widgets/feedback_helper.dart';
 
-/// Login mode determines which post-login destination the user is routed to.
 enum LoginMode { customer, salon }
 
 class LoginPage extends StatefulWidget {
@@ -41,13 +40,10 @@ class _LoginPageState extends State<LoginPage>
       parent: _animController,
       curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
     );
-    _headerSlide = Tween<Offset>(
-      begin: const Offset(0, -0.05),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOutCubic,
-    ));
+    _headerSlide =
+        Tween<Offset>(begin: const Offset(0, -0.05), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
     _animController.forward();
   }
 
@@ -76,7 +72,6 @@ class _LoginPageState extends State<LoginPage>
       final user = authProvider.currentUser;
 
       if (_isSalonMode) {
-        // Salon mode: verify user has salon role
         if (user != null && user.isSalonRole) {
           AppFeedback.success(context, 'Welcome back, ${user.name}!');
           context.go('/salon-workspace/dashboard');
@@ -88,7 +83,6 @@ class _LoginPageState extends State<LoginPage>
           await authProvider.logout();
         }
       } else {
-        // Customer mode: verify user does not have salon role
         if (user != null && user.isSalonRole) {
           AppFeedback.error(
             context,
@@ -152,10 +146,7 @@ class _LoginPageState extends State<LoginPage>
               SizedBox(width: 6),
               Text(
                 'Quick Login (Test Accounts)',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ],
           ),
@@ -165,30 +156,63 @@ class _LoginPageState extends State<LoginPage>
             runSpacing: 8,
             children: [
               ActionChip(
-                avatar: const Icon(Icons.person_rounded, size: 16, color: Color(0xFFEC4899)),
-                label: const Text('Test Customer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                backgroundColor: isDark ? const Color(0xFF2A2726) : Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                avatar: const Icon(
+                  Icons.person_rounded,
+                  size: 16,
+                  color: Color(0xFFEC4899),
+                ),
+                label: const Text(
+                  'Test Customer',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                backgroundColor: isDark
+                    ? const Color(0xFF2A2726)
+                    : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 onPressed: () => _handleQuickLogin(
                   email: 'user@salonverse.live',
                   password: '12345678',
                 ),
               ),
               ActionChip(
-                avatar: const Icon(Icons.storefront_rounded, size: 16, color: Color(0xFF3B82F6)),
-                label: const Text('Salon Admin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                backgroundColor: isDark ? const Color(0xFF2A2726) : Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                avatar: const Icon(
+                  Icons.storefront_rounded,
+                  size: 16,
+                  color: Color(0xFF3B82F6),
+                ),
+                label: const Text(
+                  'Salon Admin',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                backgroundColor: isDark
+                    ? const Color(0xFF2A2726)
+                    : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 onPressed: () => _handleQuickLogin(
                   email: 'salon_admin@salonverse.live',
                   password: '12345678',
                 ),
               ),
               ActionChip(
-                avatar: const Icon(Icons.content_cut_rounded, size: 16, color: Color(0xFF10B981)),
-                label: const Text('Salon Staff', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                backgroundColor: isDark ? const Color(0xFF2A2726) : Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                avatar: const Icon(
+                  Icons.content_cut_rounded,
+                  size: 16,
+                  color: Color(0xFF10B981),
+                ),
+                label: const Text(
+                  'Salon Staff',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                backgroundColor: isDark
+                    ? const Color(0xFF2A2726)
+                    : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 onPressed: () => _handleQuickLogin(
                   email: 'salon_staff@salonverse.live',
                   password: '12345678',
@@ -224,7 +248,6 @@ class _LoginPageState extends State<LoginPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Mode Indicator & Logo
                         Center(
                           child: Container(
                             width: 76,
@@ -233,7 +256,9 @@ class _LoginPageState extends State<LoginPage>
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: theme.colorScheme.primary.withAlpha(20),
+                                  color: theme.colorScheme.primary.withAlpha(
+                                    20,
+                                  ),
                                   blurRadius: 16,
                                 ),
                               ],
@@ -248,12 +273,10 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         const SizedBox(height: 28),
 
-                        // Headers
                         Center(
                           child: Text(
                             _isSalonMode ? 'Salon Login' : 'Welcome Back',
-                            style:
-                                theme.textTheme.headlineLarge?.copyWith(
+                            style: theme.textTheme.headlineLarge?.copyWith(
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -271,20 +294,21 @@ class _LoginPageState extends State<LoginPage>
                           ),
                         ),
 
-                        // Mode badge
                         if (_isSalonMode) ...[
                           const SizedBox(height: 20),
                           Center(
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary
-                                    .withAlpha(15),
+                                color: theme.colorScheme.primary.withAlpha(15),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: theme.colorScheme.primary
-                                      .withAlpha(40),
+                                  color: theme.colorScheme.primary.withAlpha(
+                                    40,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -312,7 +336,6 @@ class _LoginPageState extends State<LoginPage>
 
                         const SizedBox(height: 36),
 
-                        // Email
                         AppTextField(
                           controller: _emailController,
                           label: 'Email Address',
@@ -330,7 +353,6 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         const SizedBox(height: 16),
 
-                        // Password
                         AppTextField(
                           controller: _passwordController,
                           label: 'Password',
@@ -362,7 +384,6 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         const SizedBox(height: 12),
 
-                        // Forgot Password
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -371,7 +392,9 @@ class _LoginPageState extends State<LoginPage>
                             },
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                             ),
                             child: Text(
                               'Forgot Password?',
@@ -385,7 +408,6 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         const SizedBox(height: 24),
 
-                        // Login Button
                         AppButton(
                           label: _isSalonMode ? 'Sign In to Salon' : 'Login',
                           isLoading: authProvider.isLoading,
@@ -393,21 +415,17 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         const SizedBox(height: 20),
 
-                        // Quick Login (Test Accounts) Section
                         _buildQuickLoginCard(theme, isDark),
                         const SizedBox(height: 20),
 
-                        // Footer: Register or Switch mode
                         if (!_isSalonMode) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 "Don't have an account? ",
-                                style:
-                                    theme.textTheme.bodyMedium?.copyWith(
-                                  color:
-                                      theme.colorScheme.onSurfaceVariant,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               GestureDetector(
@@ -426,7 +444,6 @@ class _LoginPageState extends State<LoginPage>
 
                         const SizedBox(height: 16),
 
-                        // Switch login mode
                         Center(
                           child: TextButton.icon(
                             onPressed: () {
@@ -434,8 +451,10 @@ class _LoginPageState extends State<LoginPage>
                               if (_isSalonMode) {
                                 context.go('/auth/login');
                               } else {
-                                context.go('/auth/login',
-                                    extra: {'loginMode': 'salon'});
+                                context.go(
+                                  '/auth/login',
+                                  extra: {'loginMode': 'salon'},
+                                );
                               }
                             },
                             icon: Icon(
