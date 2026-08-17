@@ -124,6 +124,7 @@ class SalonModel {
   final String priceRange;
   final String description;
   final String phoneNumber;
+  final String subscription;
   final bool isFeatured;
   final bool homeServiceAvailable;
   final List<ServiceModel> services;
@@ -137,6 +138,7 @@ class SalonModel {
   int get reviewsCount => reviewCount;
   double get lat => latitude;
   double get lng => longitude;
+  bool get isPremium => subscription == 'premium' || isFeatured;
 
   SalonModel({
     required this.id,
@@ -153,6 +155,7 @@ class SalonModel {
     this.priceRange = 'Rs. 200 - 1500',
     this.description = '',
     this.phoneNumber = '',
+    this.subscription = 'basic',
     this.isFeatured = false,
     this.homeServiceAvailable = false,
     this.services = const [],
@@ -175,6 +178,7 @@ class SalonModel {
       'priceRange': priceRange,
       'description': description,
       'phoneNumber': phoneNumber,
+      'subscription': subscription,
       'isFeatured': isFeatured,
       'homeServiceAvailable': homeServiceAvailable,
       'services': services.map((e) => e.toJson()).toList(),
@@ -203,6 +207,10 @@ class SalonModel {
 
     final id = (json['id'] ?? json['_id'])?.toString() ?? '';
     final name = json['name'] ?? '';
+    final subStr = (json['subscription'] is Map)
+        ? (json['subscription']['plan'] ?? 'basic').toString()
+        : (json['subscription'] ?? 'basic').toString();
+    final bool feat = (json['isFeatured'] as bool? ?? false) || subStr == 'premium';
 
     final model = SalonModel(
       id: id,
@@ -221,7 +229,8 @@ class SalonModel {
       priceRange: json['priceRange'] ?? 'Rs. 200 - 1500',
       description: json['description'] ?? '',
       phoneNumber: (json['phoneNumber'] ?? json['phone'])?.toString() ?? '',
-      isFeatured: json['isFeatured'] as bool? ?? false,
+      subscription: subStr,
+      isFeatured: feat,
       homeServiceAvailable: json['homeServiceAvailable'] as bool? ?? false,
       services: (json['services'] as List? ?? [])
           .map((e) => ServiceModel.fromJson(Map<String, dynamic>.from(e)))
