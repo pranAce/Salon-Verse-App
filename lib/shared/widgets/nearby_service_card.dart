@@ -55,7 +55,10 @@ class NearbyServiceCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -73,8 +76,7 @@ class NearbyServiceCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          if (item.isCheapest) ...[
-                            const SizedBox(width: 6),
+                          if (item.isCheapest)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(
@@ -90,7 +92,6 @@ class NearbyServiceCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -132,6 +133,7 @@ class NearbyServiceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.schedule_rounded, size: 12, color: Colors.grey),
                         const SizedBox(width: 3),
@@ -157,28 +159,28 @@ class NearbyServiceCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: SizedBox(
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     child: item.salonLogo.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: item.salonLogo,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
-                              child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
+                              child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 18),
                             ),
                             errorWidget: (context, url, error) => Container(
                               color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
-                              child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
+                              child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 18),
                             ),
                           )
                         : Container(
                             color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
-                            child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
+                            child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 18),
                           ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,37 +191,39 @@ class NearbyServiceCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          fontSize: 14,
+                          fontSize: 13.5,
                           color: primaryTextColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 13),
                           const SizedBox(width: 2),
                           Text(
                             item.rating.toStringAsFixed(1),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontSize: 11.5,
                               color: primaryTextColor,
                             ),
                           ),
                           Text(
                             ' (${item.reviewCount})',
-                            style: const TextStyle(color: Colors.grey, fontSize: 11.5),
+                            style: const TextStyle(color: Colors.grey, fontSize: 11),
                           ),
                           if (item.distanceKm != null) ...[
-                            const SizedBox(width: 8),
-                            const Icon(Icons.location_on_outlined, color: Color(0xFFEC4899), size: 13),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${item.distanceKm} km away',
-                              style: const TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFFEC4899),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                '• ${item.distanceKm}km',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFEC4899),
+                                ),
                               ),
                             ),
                           ],
@@ -228,21 +232,23 @@ class NearbyServiceCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 6),
 
                 // Action Buttons: View & Book Now
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: primaryTextColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         side: BorderSide(
                           color: theme.colorScheme.outline.withAlpha(isDark ? 40 : 80),
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       onPressed: () {
@@ -252,19 +258,19 @@ class NearbyServiceCard extends StatelessWidget {
                           context.push('/salon/${item.salonId}', extra: {'salon': item.salon});
                         }
                       },
-                      child: const Text('View', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                      child: const Text('View', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEC4899),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       onPressed: () {
@@ -276,7 +282,7 @@ class NearbyServiceCard extends StatelessWidget {
                           context.push('/booking-flow');
                         }
                       },
-                      child: const Text('Book Now', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                      child: const Text('Book Now', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),

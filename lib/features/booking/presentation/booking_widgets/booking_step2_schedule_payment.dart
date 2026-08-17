@@ -9,6 +9,8 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
 import 'package:salonverse/core/widgets/feedback_helper.dart';
 
+import 'package:salonverse/features/booking/models/booking_slot_model.dart';
+
 class BookingStep2SchedulePayment extends StatefulWidget {
   final SalonModel salon;
   final ServiceModel? service;
@@ -36,38 +38,11 @@ class _BookingStep2SchedulePaymentState
     super.dispose();
   }
 
-  List<String> _getDynamicTimeSlots(
-    BookingProvider provider,
-    SalonModel salon,
-    ServiceModel? service,
-    DateTime? activeDate,
+  List<BookingSlotModel> _filterSlotsByPeriod(
+    List<BookingSlotModel> slots,
+    String period,
   ) {
-    if (provider.backendAvailableSlots.isNotEmpty ||
-        provider.backendBookedSlots.isNotEmpty) {
-      return <String>{
-        ...provider.backendAvailableSlots,
-        ...provider.backendBookedSlots,
-      }.toList();
-    }
-    return [];
-  }
-
-  List<String> _filterSlotsByPeriod(List<String> slots, String period) {
-    return slots.where((slot) {
-      final isPM = slot.contains("PM");
-      final isAM = slot.contains("AM");
-      final hourStr = slot.split(":")[0];
-      final hour = int.tryParse(hourStr) ?? 12;
-
-      if (period == "morning") {
-        return isAM;
-      } else if (period == "afternoon") {
-        return isPM && (hour == 12 || (hour >= 1 && hour < 5));
-      } else if (period == "evening") {
-        return isPM && (hour >= 5 && hour < 12);
-      }
-      return true;
-    }).toList();
+    return slots.where((slot) => slot.period.toLowerCase() == period.toLowerCase()).toList();
   }
 
   @override
@@ -80,31 +55,13 @@ class _BookingStep2SchedulePaymentState
     final activeTime = provider.selectedTime;
 
     final dates = List.generate(
-      10,
+      14,
       (idx) => DateTime.now().add(Duration(days: idx)),
     );
-    final dynamicTimeSlots = _getDynamicTimeSlots(
-      provider,
-      widget.salon,
-      widget.service,
-      activeDate,
-    );
 
-    final dateStr = activeDate != null
-        ? "${activeDate.year}-${activeDate.month.toString().padLeft(2, '0')}-${activeDate.day.toString().padLeft(2, '0')}"
-        : "";
-
-    final bookedTimeSlots = {
-      ...provider.backendBookedSlots,
-      ...provider.bookings
-          .where(
-            (b) =>
-                b.salonId == widget.salon.id &&
-                b.date == dateStr &&
-                b.status != 'cancelled',
-          )
-          .map((b) => b.timeSlot),
-    };
+    final availableSlots = provider.availableSlots;
+    final bookedSlots = provider.bookedSlots;
+    final allSlots = provider.availabilityResult?.allSlots ?? [...availableSlots, ...bookedSlots];
 
     final servicePrice = widget.service?.price ?? 500.0;
     final discount = provider.discountAmount;
@@ -391,7 +348,7 @@ class _BookingStep2SchedulePaymentState
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  "${dynamicTimeSlots.where((s) => !bookedTimeSlots.contains(s)).length} Available",
+                  "${availableSlots.length} Available",
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFFEC4899),
@@ -403,7 +360,23 @@ class _BookingStep2SchedulePaymentState
           ),
           const SizedBox(height: 16),
 
-          if (provider.isSalonClosed) ...[
+          if (provider.isLoadingSlots) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              child: const Column(
+                children: [
+                  CircularProgressIndicator(color: Color(0xFFEC4899)),
+                  SizedBox(height: 12),
+                  Text(
+                    "Checking real-time availability...",
+                    style: TextStyle(color: Colors.grey, fontSize: 12.5),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ] else if (provider.error != null) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -412,14 +385,14 @@ class _BookingStep2SchedulePaymentState
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.red.withAlpha(50)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.event_busy_rounded, color: Colors.red),
-                  SizedBox(width: 12),
+                  const Icon(Icons.error_outline_rounded, color: Colors.red),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      "Salon is closed on this date. Please select another date.",
-                      style: TextStyle(
+                      provider.error!,
+                      style: const TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -430,7 +403,35 @@ class _BookingStep2SchedulePaymentState
               ),
             ),
             const SizedBox(height: 16),
-          ] else if (dynamicTimeSlots.where((s) => !bookedTimeSlots.contains(s)).isEmpty) ...[
+          ] else if (provider.isSalonClosed) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.withAlpha(15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.red.withAlpha(50)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.event_busy_rounded, color: Colors.red),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      provider.closureReason ??
+                          "Salon is closed on this date. Please select another date.",
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ] else if (availableSlots.isEmpty) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -445,7 +446,7 @@ class _BookingStep2SchedulePaymentState
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      "No time slots available for this date (operating hours ended or all slots booked). Please select a future date above.",
+                      "No appointments available for this date (operating hours ended or all slots booked). Please select another date above.",
                       style: TextStyle(
                         color: Colors.amber,
                         fontWeight: FontWeight.bold,
@@ -459,172 +460,166 @@ class _BookingStep2SchedulePaymentState
             const SizedBox(height: 16),
           ],
 
-          ...[
-            {
-              'title': 'Morning (09:00 AM - 11:30 AM)',
-              'icon': Icons.wb_sunny_outlined,
-              'period': 'morning',
-              'color': Colors.amber.shade700,
-            },
-            {
-              'title': 'Afternoon (12:00 PM - 04:30 PM)',
-              'icon': Icons.wb_cloudy_outlined,
-              'period': 'afternoon',
-              'color': Colors.orange.shade700,
-            },
-            {
-              'title': 'Evening (05:00 PM - 08:00 PM)',
-              'icon': Icons.nightlight_round,
-              'period': 'evening',
-              'color': Colors.indigo.shade400,
-            },
-          ].map((cat) {
-            final categorySlots = _filterSlotsByPeriod(
-              dynamicTimeSlots,
-              cat['period'] as String,
-            );
-            if (categorySlots.isEmpty) return const SizedBox.shrink();
+          if (!provider.isLoadingSlots && !provider.isSalonClosed && provider.error == null && allSlots.isNotEmpty) ...[
+            ...[
+              {
+                'title': 'Morning Slots',
+                'icon': Icons.wb_sunny_outlined,
+                'period': 'morning',
+                'color': Colors.amber.shade700,
+              },
+              {
+                'title': 'Afternoon Slots',
+                'icon': Icons.wb_cloudy_outlined,
+                'period': 'afternoon',
+                'color': Colors.orange.shade700,
+              },
+              {
+                'title': 'Evening Slots',
+                'icon': Icons.nightlight_round,
+                'period': 'evening',
+                'color': Colors.indigo.shade400,
+              },
+            ].map((cat) {
+              final categorySlots = _filterSlotsByPeriod(
+                allSlots,
+                cat['period'] as String,
+              );
+              if (categorySlots.isEmpty) return const SizedBox.shrink();
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        cat['icon'] as IconData,
-                        size: 14,
-                        color: cat['color'] as Color,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        cat['title'] as String,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? Colors.grey.shade400
-                              : Colors.grey.shade700,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          cat['icon'] as IconData,
+                          size: 14,
+                          color: cat['color'] as Color,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 2.3,
-                        ),
-                    itemCount: categorySlots.length,
-                    itemBuilder: (context, idx) {
-                      final slot = categorySlots[idx];
-                      final isSel = activeTime == slot;
-                      final isBooked = bookedTimeSlots.contains(slot);
-
-                      return InkWell(
-                        onTap: isBooked
-                            ? null
-                            : () {
-                                provider.selectTime(slot);
-                              },
-                        borderRadius: BorderRadius.circular(14),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          decoration: BoxDecoration(
-                            color: isBooked
-                                ? (isDark
-                                      ? const Color(0xFF161514)
-                                      : Colors.grey.shade200)
-                                : isSel
-                                ? const Color(0xFFEC4899)
-                                : (isDark
-                                      ? const Color(0xFF1E1C1B)
-                                      : Colors.white),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isSel
-                                  ? const Color(0xFFEC4899)
-                                  : isBooked
-                                  ? Colors.transparent
-                                  : (isDark
-                                        ? Colors.white10
-                                        : Colors.grey.shade300),
-                              width: isSel ? 1.5 : 1,
-                            ),
-                            boxShadow: isSel
-                                ? [
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFFEC4899,
-                                      ).withAlpha(50),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ]
-                                : [],
+                        const SizedBox(width: 6),
+                        Text(
+                          cat['title'] as String,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700,
                           ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (isSel) ...[
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Colors.white,
-                                  size: 13,
-                                ),
-                                const SizedBox(width: 4),
-                              ],
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    slot,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 2.3,
+                          ),
+                      itemCount: categorySlots.length,
+                      itemBuilder: (context, idx) {
+                        final slotObj = categorySlots[idx];
+                        final slotStr = slotObj.timeSlot.isNotEmpty ? slotObj.timeSlot : slotObj.startTime;
+                        final isSel = activeTime == slotStr || activeTime == slotObj.startTime;
+                        final isAvailable = slotObj.available;
+
+                        return InkWell(
+                          onTap: !isAvailable
+                              ? null
+                              : () {
+                                  provider.selectTime(slotStr);
+                                },
+                          borderRadius: BorderRadius.circular(14),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            decoration: BoxDecoration(
+                              color: !isAvailable
+                                  ? (isDark
+                                        ? const Color(0xFF161514)
+                                        : Colors.grey.shade200)
+                                  : isSel
+                                  ? const Color(0xFFEC4899)
+                                  : (isDark
+                                        ? const Color(0xFF1E1C1B)
+                                        : Colors.white),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSel
+                                    ? const Color(0xFFEC4899)
+                                    : !isAvailable
+                                    ? Colors.transparent
+                                    : (isDark
+                                          ? Colors.white10
+                                          : Colors.grey.shade300),
+                                width: isSel ? 1.5 : 1,
+                              ),
+                              boxShadow: isSel
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFFEC4899,
+                                        ).withAlpha(50),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (isSel) ...[
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Colors.white,
+                                    size: 13,
+                                  ),
+                                  const SizedBox(width: 4),
+                                ],
+                                Flexible(
+                                  child: Text(
+                                    slotObj.startTime,
                                     style: TextStyle(
-                                      color: isBooked
-                                          ? Colors.grey.shade400
+                                      color: !isAvailable
+                                          ? (isDark
+                                                ? Colors.white24
+                                                : Colors.grey.shade400)
                                           : isSel
                                           ? Colors.white
                                           : (isDark
                                                 ? Colors.white
                                                 : Colors.black87),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      decoration: isBooked
+                                      fontSize: 11.5,
+                                      fontWeight: isSel || isAvailable
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      decoration: !isAvailable
                                           ? TextDecoration.lineThrough
-                                          : null,
+                                          : TextDecoration.none,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (isBooked) ...[
-                                    const SizedBox(height: 1),
-                                    const Text(
-                                      "BOOKED",
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 7.5,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          }),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
 
           const SizedBox(height: 14),
 

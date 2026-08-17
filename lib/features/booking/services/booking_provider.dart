@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:salonverse/features/booking/models/booking_model.dart';
+import 'package:salonverse/features/booking/models/booking_slot_model.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
 import 'package:salonverse/features/home/services/app_service.dart';
 import 'package:salonverse/features/notifications/services/socket_service.dart';
@@ -33,10 +34,6 @@ class BookingProvider extends ChangeNotifier {
   double? _homeLat;
   double? _homeLng;
 
-  List<String> _backendAvailableSlots = [];
-  List<String> _backendBookedSlots = [];
-  bool _isSalonClosed = false;
-
   SalonModel? get selectedSalon => _selectedSalon;
   ServiceModel? get selectedService => _selectedService;
   StylistModel? get selectedStylist => _selectedStylist;
@@ -49,9 +46,25 @@ class BookingProvider extends ChangeNotifier {
   double? get homeLat => _homeLat;
   double? get homeLng => _homeLng;
 
-  List<String> get backendAvailableSlots => _backendAvailableSlots;
-  List<String> get backendBookedSlots => _backendBookedSlots;
+  AvailabilityResultModel? _availabilityResult;
+  AvailabilityResultModel? get availabilityResult => _availabilityResult;
+
+  List<BookingSlotModel> _availableSlots = [];
+  List<BookingSlotModel> get availableSlots => _availableSlots;
+
+  List<BookingSlotModel> _bookedSlots = [];
+  List<BookingSlotModel> get bookedSlots => _bookedSlots;
+
+  bool _isSalonClosed = false;
+  String? _closureReason;
+
+  List<String> get backendAvailableSlots =>
+      _availableSlots.map((s) => s.timeSlot).toList();
+  List<String> get backendBookedSlots =>
+      _bookedSlots.map((s) => s.timeSlot).toList();
+
   bool get isSalonClosed => _isSalonClosed;
+  String? get closureReason => _closureReason;
 
   void selectService(ServiceModel service) {
     _selectedService = service;
@@ -101,6 +114,8 @@ class BookingProvider extends ChangeNotifier {
     _contactNumber = "";
     _appliedPromoCode = null;
     _discountAmount = 0.0;
+    _error = null;
+    SocketService.instance.joinSalon(salon.id);
     notifyListeners();
     fetchDynamicSlots();
   }
@@ -117,12 +132,15 @@ class BookingProvider extends ChangeNotifier {
     _contactNumber = "";
     _appliedPromoCode = null;
     _discountAmount = 0.0;
+    _error = null;
+    SocketService.instance.joinSalon(salon.id);
     notifyListeners();
     fetchDynamicSlots();
   }
 
   void selectStylist(StylistModel stylist) {
     _selectedStylist = stylist;
+    _selectedTime = null;
     notifyListeners();
     fetchDynamicSlots();
   }
@@ -152,9 +170,13 @@ class BookingProvider extends ChangeNotifier {
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 
     _isLoadingSlots = true;
+    _availableSlots = [];
+    _bookedSlots = [];
+    _availabilityResult = null;
+    _error = null;
     notifyListeners();
 
-    final result = await _service.getAvailability(
+    final result = await _service.booking.getAvailability(
       salonId: _selectedSalon!.id,
       date: dateStr,
       serviceId: _selectedService?.id,
@@ -164,17 +186,18 @@ class BookingProvider extends ChangeNotifier {
 
     _isLoadingSlots = false;
     if (result is Success<Map<String, dynamic>>) {
-      final data = result.data;
-      _isSalonClosed = data['isClosed'] == true;
-      final rawAvailable = data['availableSlots'] as List? ?? [];
-      final rawBooked = data['bookedSlots'] as List? ?? [];
-
-      _backendAvailableSlots = rawAvailable.map((e) => e.toString()).toList();
-      _backendBookedSlots = rawBooked.map((e) => e.toString()).toList();
+      final model = AvailabilityResultModel.fromJson(result.data);
+      _availabilityResult = model;
+      _isSalonClosed = model.isClosed;
+      _closureReason = model.closureReason;
+      _availableSlots = model.availableSlots;
+      _bookedSlots = model.bookedSlots;
+      _error = null;
     } else if (result is Failure<Map<String, dynamic>>) {
       _isSalonClosed = false;
-      _backendAvailableSlots = [];
-      _backendBookedSlots = [];
+      _closureReason = null;
+      _availableSlots = [];
+      _bookedSlots = [];
       _error = (result as Failure).message;
     }
     notifyListeners();

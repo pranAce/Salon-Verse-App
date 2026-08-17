@@ -482,51 +482,60 @@ class _OffersPageState extends State<OffersPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Tag Row
+                // Top Tag Row (Wrapped to avoid overflow)
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(20),
-                            blurRadius: 8,
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(20),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              offer.discountLabel,
+                              style: const TextStyle(
+                                color: Color(0xFFBE185D),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(25),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.white.withAlpha(40)),
+                            ),
+                            child: Text(
+                              offer.code,
+                              style: const TextStyle(
+                                fontFamily: 'monospace',
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: Text(
-                        offer.discountLabel,
-                        style: const TextStyle(
-                          color: Color(0xFFBE185D),
-                          fontWeight: FontWeight.w900,
-                          fontSize: 13,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
                     ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(25),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withAlpha(40)),
-                      ),
-                      child: Text(
-                        offer.code,
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -534,6 +543,7 @@ class _OffersPageState extends State<OffersPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.timer_outlined, color: Colors.white70, size: 12),
                           const SizedBox(width: 4),
@@ -566,24 +576,44 @@ class _OffersPageState extends State<OffersPage> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Row(
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              const Icon(Icons.storefront_rounded, size: 14, color: Colors.white70),
-                              const SizedBox(width: 4),
-                              Text(
-                                offer.primarySalonName,
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.storefront_rounded, size: 14, color: Colors.white70),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      offer.primarySalonName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
-                              const Icon(Icons.location_on_rounded, size: 14, color: Colors.white70),
-                              const SizedBox(width: 2),
-                              Text(
-                                offer.primaryLocation,
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.location_on_rounded, size: 14, color: Colors.white70),
+                                  const SizedBox(width: 2),
+                                  Flexible(
+                                    child: Text(
+                                      offer.primaryLocation,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

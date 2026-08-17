@@ -33,11 +33,16 @@ class ServiceModel {
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
     final id = (json['id'] ?? json['_id'])?.toString() ?? '';
     final name = json['name'] ?? '';
+    final rawDuration = json['durationMinutes'] ?? json['duration'];
+    final durMin = rawDuration is num
+        ? rawDuration.toInt()
+        : (rawDuration != null ? int.tryParse(rawDuration.toString()) : null);
+
     final model = ServiceModel(
       id: id,
       name: name,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      durationMinutes: json['durationMinutes'] as int? ?? 30,
+      durationMinutes: durMin ?? 30,
       category: json['category'] ?? 'Hair',
       description: json['description'] ?? '',
       assignedStaff: json['assignedStaff']?.toString(),
@@ -122,7 +127,6 @@ class SalonModel {
   final String phoneNumber;
   final bool isFeatured;
   final bool homeServiceAvailable;
-  final List<String> publishedTimeSlots;
   final List<ServiceModel> services;
   final List<StylistModel> stylists;
 
@@ -149,7 +153,6 @@ class SalonModel {
     this.phoneNumber = '',
     this.isFeatured = false,
     this.homeServiceAvailable = false,
-    this.publishedTimeSlots = const [],
     this.services = const [],
     this.stylists = const [],
   });
@@ -172,7 +175,6 @@ class SalonModel {
       'phoneNumber': phoneNumber,
       'isFeatured': isFeatured,
       'homeServiceAvailable': homeServiceAvailable,
-      'publishedTimeSlots': publishedTimeSlots,
       'services': services.map((e) => e.toJson()).toList(),
       'stylists': stylists.map((e) => e.toJson()).toList(),
     };
@@ -219,7 +221,6 @@ class SalonModel {
       phoneNumber: (json['phoneNumber'] ?? json['phone'])?.toString() ?? '',
       isFeatured: json['isFeatured'] as bool? ?? false,
       homeServiceAvailable: json['homeServiceAvailable'] as bool? ?? false,
-      publishedTimeSlots: List<String>.from(json['publishedTimeSlots'] ?? []),
       services: (json['services'] as List? ?? [])
           .map((e) => ServiceModel.fromJson(Map<String, dynamic>.from(e)))
           .toList(),

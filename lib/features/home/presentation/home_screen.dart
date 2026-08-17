@@ -297,67 +297,79 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Welcome back',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF8B8FA3),
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Text(
-                              userName,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                color: primaryTextColor,
-                              ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Welcome back',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF8B8FA3),
+                              fontWeight: FontWeight.w400,
                             ),
-                            const SizedBox(width: 6),
-                            const Text('✨', style: TextStyle(fontSize: 20)),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        GestureDetector(
-                          onTap: _fetchLiveGpsAndSalons,
-                          child: Row(
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
                             children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 15,
-                                color: Color(0xFFEC4899),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _liveGpsLocation,
-                                style: const TextStyle(
-                                  fontSize: 12.5,
-                                  color: Color(0xFF8B8FA3),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              if (_isFetchingGps) ...[
-                                const SizedBox(width: 6),
-                                const SizedBox(
-                                  width: 10,
-                                  height: 10,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 1.5,
-                                    color: Color(0xFFEC4899),
+                              Flexible(
+                                child: Text(
+                                  userName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    color: primaryTextColor,
                                   ),
                                 ),
-                              ],
+                              ),
+                              const SizedBox(width: 6),
+                              const Text('✨', style: TextStyle(fontSize: 20)),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: _fetchLiveGpsAndSalons,
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.location_on_outlined,
+                                  size: 15,
+                                  color: Color(0xFFEC4899),
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    _liveGpsLocation,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12.5,
+                                      color: Color(0xFF8B8FA3),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                if (_isFetchingGps) ...[
+                                  const SizedBox(width: 6),
+                                  const SizedBox(
+                                    width: 10,
+                                    height: 10,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                      color: Color(0xFFEC4899),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+
+                    const SizedBox(width: 12),
 
                     Stack(
                       children: [
@@ -617,29 +629,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isSearching
-                              ? 'Search Results (${salonProv.nearbyServices.length})'
-                              : 'Services Near You',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: primaryTextColor,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isSearching
+                                ? 'Search Results (${salonProv.nearbyServices.length})'
+                                : 'Services Near You',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: primaryTextColor,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Compare prices & book from nearby salons',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.white60 : Colors.grey.shade600,
+                          const SizedBox(height: 2),
+                          Text(
+                            'Compare prices & book from nearby salons',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.white60 : Colors.grey.shade600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
 
                     // Sort Selector
                     Container(

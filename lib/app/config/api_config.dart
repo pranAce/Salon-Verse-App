@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 
 class ApiConfig {
   static const String prodUrl = 'https://api.salonverse.live';
-  static const String localDesktopUrl = 'http://localhost:8080';
-  static const String localAndroidUrl = 'http://10.0.2.2:8080';
+  static const String localDesktopUrl = 'http://localhost:5000';
+  static const String localAndroidUrl = 'http://localhost:5000';
 
   static String? customUrl;
 
