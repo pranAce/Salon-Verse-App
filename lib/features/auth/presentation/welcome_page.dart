@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:salonverse/app/theme/app_theme.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -10,8 +13,7 @@ class WelcomePage extends StatefulWidget {
   State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage>
-    with TickerProviderStateMixin {
+class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _slideController;
   late final Animation<double> _fadeAnimation;
@@ -25,34 +27,27 @@ class _WelcomePageState extends State<WelcomePage>
 
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
     );
     _slideController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _logoScale = Tween<double>(begin: 0.7, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutBack),
     );
-    _logoScale = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
-      ),
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
     );
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-        );
     _buttonsFade = CurvedAnimation(
       parent: _slideController,
-      curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
     );
 
     _fadeController.forward();
-    Future.delayed(const Duration(milliseconds: 400), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _slideController.forward();
     });
   }
@@ -75,46 +70,18 @@ class _WelcomePageState extends State<WelcomePage>
       child: Scaffold(
         body: Stack(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [const Color(0xFF0F0E0D), const Color(0xFF1A1816)]
-                      : [const Color(0xFFFDFBF7), const Color(0xFFF3EDE4)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-
+            // Background Glow Circles
             Positioned(
-              top: -size.width * 0.3,
+              top: -size.width * 0.2,
               right: -size.width * 0.2,
               child: Container(
-                width: size.width * 0.7,
-                height: size.width * 0.7,
+                width: size.width * 0.8,
+                height: size.width * 0.8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      theme.colorScheme.primary.withAlpha(isDark ? 12 : 20),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -size.width * 0.25,
-              left: -size.width * 0.15,
-              child: Container(
-                width: size.width * 0.6,
-                height: size.width * 0.6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      theme.colorScheme.secondary.withAlpha(isDark ? 8 : 14),
+                      AppColors.primary.withAlpha(isDark ? 30 : 25),
                       Colors.transparent,
                     ],
                   ),
@@ -124,14 +91,12 @@ class _WelcomePageState extends State<WelcomePage>
 
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 24,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
                 child: Column(
                   children: [
                     const Spacer(flex: 2),
 
+                    // Logo & App Name
                     FadeTransition(
                       opacity: _fadeAnimation,
                       child: ScaleTransition(
@@ -140,44 +105,44 @@ class _WelcomePageState extends State<WelcomePage>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                              width: 88,
-                              height: 88,
+                              width: 96,
+                              height: 96,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: theme.colorScheme.primary.withAlpha(
-                                      isDark ? 30 : 50,
-                                    ),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
+                                boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.35),
                               ),
                               child: ClipOval(
                                 child: Image.asset(
                                   'assets/images/logo.png',
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    decoration: const BoxDecoration(
+                                      gradient: AppGradients.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.spa_rounded, color: Colors.white, size: 48),
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 24),
                             Text(
                               'SalonVerse',
-                              style: theme.textTheme.displayLarge?.copyWith(
+                              style: GoogleFonts.outfit(
                                 fontSize: 44,
-                                fontWeight: FontWeight.w800,
-                                color: theme.colorScheme.primary,
-                                letterSpacing: -1.5,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.primary,
+                                letterSpacing: -1.0,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Text(
-                              'DISCOVER  ·  BOOK  ·  GLOW',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                letterSpacing: 4,
-                                fontWeight: FontWeight.w500,
+                              'DISCOVER  •  BOOK  •  GLOW',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                letterSpacing: 3.5,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -187,6 +152,7 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const Spacer(flex: 2),
 
+                    // Hero Description
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
@@ -195,25 +161,23 @@ class _WelcomePageState extends State<WelcomePage>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Your premium beauty\nservices platform',
+                              'Your Next-Gen Beauty\n& Wellness Sanctuary',
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                height: 1.3,
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                height: 1.25,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                'Browse top salons, select services, and book your appointments seamlessly.',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  height: 1.6,
-                                ),
+                            Text(
+                              'Discover premier salons, choose elite stylists, track live queue tokens, and claim VIP rewards.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13.5,
+                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                height: 1.5,
                               ),
                             ),
                           ],
@@ -223,44 +187,16 @@ class _WelcomePageState extends State<WelcomePage>
 
                     const Spacer(flex: 1),
 
+                    // CTA Button
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
                         opacity: _buttonsFade,
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.buttonRadius,
-                                ),
-                              ),
-                              elevation: 4,
-                              shadowColor: theme.colorScheme.primary.withAlpha(
-                                80,
-                              ),
-                            ),
-                            onPressed: () => context.go('/onboarding'),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Get Started",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.2,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward_rounded, size: 20),
-                              ],
-                            ),
-                          ),
+                        child: SVButton(
+                          text: 'Get Started',
+                          isFullWidth: true,
+                          icon: Icons.arrow_forward_rounded,
+                          onPressed: () => context.go('/onboarding'),
                         ),
                       ),
                     ),

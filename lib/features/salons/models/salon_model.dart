@@ -1,4 +1,3 @@
-
 class ServiceModel {
   final String id;
   final String name;
@@ -135,6 +134,9 @@ class SalonModel {
   String get coverImage => imageUrl;
   String get logo => imageUrl;
   String get phone => phoneNumber;
+  int get reviewsCount => reviewCount;
+  double get lat => latitude;
+  double get lng => longitude;
 
   SalonModel({
     required this.id,

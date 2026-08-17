@@ -27,6 +27,7 @@ class SalonProvider extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  // Filter & Search State
   String _searchQuery = "";
   String get searchQuery => _searchQuery;
 
@@ -36,14 +37,93 @@ class SalonProvider extends ChangeNotifier {
   String _selectedSort = "recommended";
   String get selectedSort => _selectedSort;
 
+  String _selectedCity = "All Locations";
+  String get selectedCity => _selectedCity;
+
+  double _minPrice = 0.0;
+  double get minPrice => _minPrice;
+
+  double _maxPrice = 10000.0;
+  double get maxPrice => _maxPrice;
+
+  double _minRating = 0.0;
+  double get minRating => _minRating;
+
+  bool _homeServiceOnly = false;
+  bool get homeServiceOnly => _homeServiceOnly;
+
   double? _userLat;
   double? get userLat => _userLat;
   double? _userLng;
   double? get userLng => _userLng;
   double? _userRadius;
+  double? get userRadius => _userRadius;
 
   List<SalonModel> get featuredSalons =>
       _allSalons.where((salon) => salon.isFeatured).toList();
+
+  /// Returns the current active list of salons matching all criteria
+  List<SalonModel> get filteredSalons {
+    return _salons.where((s) {
+      // 1. Search Query
+      if (_searchQuery.trim().isNotEmpty) {
+        final q = _searchQuery.toLowerCase().trim();
+        final nameMatch = s.name.toLowerCase().contains(q);
+        final addressMatch = s.address.toLowerCase().contains(q);
+        final cityMatch = s.city.toLowerCase().contains(q);
+        final serviceMatch = s.services.any((srv) => srv.name.toLowerCase().contains(q));
+        final stylistMatch = s.stylists.any((st) => st.name.toLowerCase().contains(q));
+        if (!nameMatch && !addressMatch && !cityMatch && !serviceMatch && !stylistMatch) {
+          return false;
+        }
+      }
+
+      // 2. City Filter
+      if (_selectedCity != "All Locations" && _selectedCity.isNotEmpty) {
+        final c = _selectedCity.toLowerCase();
+        final salonCity = s.city.toLowerCase();
+        final salonAddr = s.address.toLowerCase();
+        if (!salonCity.contains(c) && !salonAddr.contains(c)) {
+          return false;
+        }
+      }
+
+      // 3. Minimum Rating Filter
+      if (_minRating > 0.0) {
+        if (s.rating < _minRating) return false;
+      }
+
+      // 4. Home Service Availability Filter
+      if (_homeServiceOnly) {
+        if (!s.homeServiceAvailable) return false;
+      }
+
+      // 5. Price Range Filter (if salon has services)
+      if (s.services.isNotEmpty && (_minPrice > 0 || _maxPrice < 10000)) {
+        final hasMatchingPrice = s.services.any((srv) =>
+            srv.price >= _minPrice && srv.price <= _maxPrice);
+        if (!hasMatchingPrice) return false;
+      }
+
+      return true;
+    }).toList()
+      ..sort((a, b) {
+        if (_selectedSort == "rating") {
+          return b.rating.compareTo(a.rating);
+        } else if (_selectedSort == "nearest") {
+          return (a.distanceKm ?? 999.0).compareTo(b.distanceKm ?? 999.0);
+        } else if (_selectedSort == "price_asc") {
+          final minA = a.services.isNotEmpty
+              ? a.services.map((s) => s.price).reduce((curr, next) => curr < next ? curr : next)
+              : 0.0;
+          final minB = b.services.isNotEmpty
+              ? b.services.map((s) => s.price).reduce((curr, next) => curr < next ? curr : next)
+              : 0.0;
+          return minA.compareTo(minB);
+        }
+        return 0;
+      });
+  }
 
   Future<void> fetchSalons({
     String? query,
@@ -87,6 +167,24 @@ class SalonProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<SalonModel?> fetchSalonDetails(String id) async {
+    final result = await _service.getSalonById(id);
+    if (result is Success<SalonModel>) {
+      // Update in cached lists
+      final idx = _salons.indexWhere((s) => s.id == id);
+      if (idx != -1) {
+        _salons[idx] = result.data;
+      }
+      final allIdx = _allSalons.indexWhere((s) => s.id == id);
+      if (allIdx != -1) {
+        _allSalons[allIdx] = result.data;
+      }
+      notifyListeners();
+      return result.data;
+    }
+    return null;
+  }
+
   Future<void> fetchNearbyServices({
     String? search,
     String? category,
@@ -126,6 +224,7 @@ class SalonProvider extends ChangeNotifier {
 
   void setSortOption(String sort) {
     _selectedSort = sort;
+    notifyListeners();
     fetchNearbyServices(sort: sort, silent: false);
   }
 
@@ -158,6 +257,41 @@ class SalonProvider extends ChangeNotifier {
     _selectedCategory = category;
     fetchSalons(category: category, silent: false);
     fetchNearbyServices(category: category, silent: false);
+  }
+
+  void applyFilters({
+    String? category,
+    String? sort,
+    String? city,
+    double? minPrice,
+    double? maxPrice,
+    double? minRating,
+    bool? homeServiceOnly,
+  }) {
+    if (category != null) _selectedCategory = category;
+    if (sort != null) _selectedSort = sort;
+    if (city != null) _selectedCity = city;
+    if (minPrice != null) _minPrice = minPrice;
+    if (maxPrice != null) _maxPrice = maxPrice;
+    if (minRating != null) _minRating = minRating;
+    if (homeServiceOnly != null) _homeServiceOnly = homeServiceOnly;
+
+    fetchSalons(category: _selectedCategory, silent: false, forceRefresh: true);
+    fetchNearbyServices(category: _selectedCategory, sort: _selectedSort, silent: false);
+  }
+
+  void clearAllFilters() {
+    _searchQuery = "";
+    _selectedCategory = "All";
+    _selectedSort = "recommended";
+    _selectedCity = "All Locations";
+    _minPrice = 0.0;
+    _maxPrice = 10000.0;
+    _minRating = 0.0;
+    _homeServiceOnly = false;
+
+    fetchSalons(query: "", category: "All", silent: false, forceRefresh: true);
+    fetchNearbyServices(search: "", category: "All", sort: "recommended", silent: false);
   }
 
   List<SalonModel> getFavoriteSalons(List<String> favoriteIds) {

@@ -15,7 +15,18 @@ class AppCurrencyFormatter {
               (Match m) => '${m[1]},',
             );
 
-    final currCode = currency.toUpperCase() == 'NPR' || currency.isEmpty ? 'NPR' : currency;
+    final currCode = currency.toUpperCase() == 'NPR' || currency.isEmpty ? 'Rs.' : currency;
     return '$currCode $formattedNum';
+  }
+}
+
+class CurrencyFormatter {
+  static String formatNPR(num? amount) {
+    if (amount == null) return 'Rs. 0';
+    return AppCurrencyFormatter.format(amount, currency: 'Rs.');
+  }
+
+  static String format(num? amount, {String currency = 'Rs.'}) {
+    return AppCurrencyFormatter.format(amount, currency: currency);
   }
 }

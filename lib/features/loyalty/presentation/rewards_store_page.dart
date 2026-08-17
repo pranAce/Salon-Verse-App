@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/features/loyalty/models/loyalty_model.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
 
 class RewardsStorePage extends StatefulWidget {
   const RewardsStorePage({super.key});
@@ -30,113 +34,105 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.sheetRadius)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Redeem Reward?',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 18),
               Text(
-                'You are about to redeem ${reward.title}.',
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                'Redeem Reward',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 4),
+              Text(
+                'Unlock "${reward.title}" with your points.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 18),
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141414) : Colors.grey.shade100,
+                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Points Required', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                        Text('${reward.creditsRequired} points', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      ],
-                    ),
+                    _buildRow('Points Required', '${reward.creditsRequired} pts', isDark),
                     const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Your Balance', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                        Text('$userCredits points', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      ],
-                    ),
-                    const Divider(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Balance After', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text(
-                          '${userCredits - reward.creditsRequired} points',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFFEC4899),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
+                    _buildRow('Your Balance', '$userCredits pts', isDark),
+                    const Divider(height: 20),
+                    _buildRow(
+                      'Remaining Balance',
+                      '${userCredits - reward.creditsRequired} pts',
+                      isDark,
+                      isBold: true,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
+
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
+                    child: SVButton(
+                      text: 'Cancel',
+                      variant: SVButtonVariant.outline,
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEC4899),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
+                    child: SVButton(
+                      text: 'Confirm Redeem',
                       onPressed: () async {
                         Navigator.pop(ctx);
                         final loyalty = context.read<LoyaltyProvider>();
                         final success = await loyalty.claimReward(reward.id);
                         if (context.mounted) {
                           if (success) {
-                            AppFeedback.success(
-                              context,
-                              'Reward claimed! Check My Vouchers.',
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Reward claimed! Voucher added to My Vouchers.'),
+                                backgroundColor: AppColors.primary,
+                              ),
                             );
                           } else {
-                            AppFeedback.error(
-                              context,
-                              loyalty.error ?? 'Redemption failed.',
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(loyalty.error ?? 'Redemption failed.'),
+                                backgroundColor: AppColors.error,
+                              ),
                             );
                           }
                         }
                       },
-                      child: const Text('Redeem', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -145,6 +141,27 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildRow(String label, String value, bool isDark, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+          ),
+        ),
+        Text(
+          value,
+          style: isBold
+              ? GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)
+              : GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+      ],
     );
   }
 
@@ -158,159 +175,133 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rewards', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: false,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => context.read<LoyaltyProvider>().loadLoyaltyData(),
-          ),
-        ],
+        title: Text(
+          'Rewards Store',
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
       ),
-      body: loyalty.isLoading && rewards.isEmpty && !loyalty.hasLoadedData
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () => context.read<LoyaltyProvider>().loadLoyaltyData(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Use your points to unlock rewards.',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Balance header card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: theme.colorScheme.outline.withAlpha(isDark ? 20 : 40)),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => context.read<LoyaltyProvider>().loadLoyaltyData(),
+          color: AppColors.primary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Balance Banner
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Your balance:',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                        ),
-                        Text(
-                          '$userCredits points',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFFEC4899),
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
+                    boxShadow: isDark ? null : AppSpacing.softShadow(context),
                   ),
-                  const SizedBox(height: 24),
-
-                  // Rewards List
-                  rewards.isEmpty
-                      ? Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(32),
-                          child: const Column(
-                            children: [
-                              Icon(Icons.card_giftcard_rounded, size: 40, color: Colors.grey),
-                              SizedBox(height: 12),
-                              Text(
-                                'No rewards available yet.',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Keep earning points and check back soon.',
-                                style: TextStyle(color: Colors.grey, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            for (final r in rewards) ...[
-                              Builder(
-                                builder: (context) {
-                                  final canAfford = userCredits >= r.creditsRequired;
-
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    padding: const EdgeInsets.all(18),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-                                      borderRadius: BorderRadius.circular(18),
-                                      border: Border.all(
-                                        color: theme.colorScheme.outline.withAlpha(isDark ? 20 : 40),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                r.title,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '${r.creditsRequired} points',
-                                                style: const TextStyle(
-                                                  color: Color(0xFFEC4899),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                              if (!canAfford) ...[
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  '${r.creditsRequired} required · $userCredits available',
-                                                  style: const TextStyle(color: Colors.grey, fontSize: 11),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: canAfford ? const Color(0xFFEC4899) : Colors.grey.shade400,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                          ),
-                                          onPressed: canAfford ? () => _showRedeemConfirmation(context, r, userCredits) : null,
-                                          child: Text(
-                                            canAfford ? 'Redeem' : 'Not enough points',
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Your Current Balance',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                         ),
-                ],
-              ),
+                      ),
+                      Text(
+                        '$userCredits pts',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                if (rewards.isEmpty)
+                  const SVEmptyState(
+                    icon: Icons.card_giftcard_rounded,
+                    title: 'No Rewards Available',
+                    description: 'Rewards are currently being refreshed. Check back soon!',
+                  )
+                else
+                  ...rewards.map((r) {
+                    final canAfford = userCredits >= r.creditsRequired;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkSurface : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                        ),
+                        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryTint,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.card_giftcard_rounded, color: AppColors.primary, size: 22),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  r.title,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${r.creditsRequired} points needed',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: canAfford
+                                        ? AppColors.primary
+                                        : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SVButton(
+                            text: canAfford ? 'Redeem' : 'Need Pts',
+                            size: SVButtonSize.sm,
+                            variant: canAfford ? SVButtonVariant.primary : SVButtonVariant.outline,
+                            onPressed: canAfford
+                                ? () => _showRedeemConfirmation(context, r, userCredits)
+                                : null,
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+              ],
             ),
           ),
+        ),
+      ),
     );
   }
 }

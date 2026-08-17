@@ -24,6 +24,9 @@ class BookingModel {
   final String homeAddress;
   final String contactNumber;
 
+  double get finalAmount => servicePrice;
+  String get salonImage => salonImageUrl;
+
   BookingModel({
     required this.id,
     required this.userId,

@@ -74,6 +74,13 @@ class OfferModel {
     return "All Partner Salons";
   }
 
+  String? get primarySalonId {
+    if (applicableSalons.isNotEmpty && applicableSalons.first.id.isNotEmpty) {
+      return applicableSalons.first.id;
+    }
+    return null;
+  }
+
   String get primaryLocation {
     if (applicableSalons.isNotEmpty) {
       final s = applicableSalons.first;

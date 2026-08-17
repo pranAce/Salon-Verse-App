@@ -68,12 +68,6 @@ class BookingProvider extends ChangeNotifier {
 
   void selectService(ServiceModel service) {
     _selectedService = service;
-    if (_selectedSalon != null && _selectedSalon!.stylists.isNotEmpty) {
-      if (_selectedStylist == null ||
-          !_selectedSalon!.stylists.any((s) => s.id == _selectedStylist!.id)) {
-        _selectedStylist = _selectedSalon!.stylists.first;
-      }
-    }
     notifyListeners();
     fetchDynamicSlots();
   }
@@ -105,7 +99,7 @@ class BookingProvider extends ChangeNotifier {
   void startBookingFlow(SalonModel salon, ServiceModel service) {
     _selectedSalon = salon;
     _selectedService = service;
-    _selectedStylist = salon.stylists.isNotEmpty ? salon.stylists.first : null;
+    _selectedStylist = null; // Default: Any Specialist
     _selectedDate ??= DateTime.now();
     _selectedTime = null;
     _paymentMethod = "Cash";
@@ -123,7 +117,7 @@ class BookingProvider extends ChangeNotifier {
   void startBookingFlowForSalon(SalonModel salon) {
     _selectedSalon = salon;
     _selectedService = salon.services.isNotEmpty ? salon.services.first : null;
-    _selectedStylist = salon.stylists.isNotEmpty ? salon.stylists.first : null;
+    _selectedStylist = null; // Default: Any Specialist
     _selectedDate ??= DateTime.now();
     _selectedTime = null;
     _paymentMethod = "Cash";
@@ -138,7 +132,7 @@ class BookingProvider extends ChangeNotifier {
     fetchDynamicSlots();
   }
 
-  void selectStylist(StylistModel stylist) {
+  void selectStylist(StylistModel? stylist) {
     _selectedStylist = stylist;
     _selectedTime = null;
     notifyListeners();

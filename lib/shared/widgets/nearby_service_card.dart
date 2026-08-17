@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:salonverse/features/salons/models/nearby_service_model.dart';
-import 'package:salonverse/core/utils/currency_formatter.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
+import 'package:salonverse/core/utils/currency_formatter.dart';
+import 'package:salonverse/shared/design_system/sv_cards.dart';
 
 class NearbyServiceCard extends StatelessWidget {
   final NearbyServiceModel item;
@@ -167,16 +168,15 @@ class NearbyServiceCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
-                              child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 18),
                             ),
-                            errorWidget: (context, url, error) => Container(
-                              color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
-                              child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 18),
+                            errorWidget: (context, url, error) => const SVFallbackLogo(
+                              logoSize: 20,
+                              padding: 6,
                             ),
                           )
-                        : Container(
-                            color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
-                            child: const Icon(Icons.storefront_rounded, color: Colors.grey, size: 18),
+                        : const SVFallbackLogo(
+                            logoSize: 20,
+                            padding: 6,
                           ),
                   ),
                 ),
@@ -277,8 +277,8 @@ class NearbyServiceCard extends StatelessWidget {
                         if (onBookNow != null) {
                           onBookNow!();
                         } else {
-                          final bookingProvider = context.read<BookingProvider>();
-                          bookingProvider.startBookingFlow(item.salon, item.service);
+                          final bk = context.read<BookingProvider>();
+                          bk.startBookingFlow(item.salon, item.service);
                           context.push('/booking-flow');
                         }
                       },

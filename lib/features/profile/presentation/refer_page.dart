@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:salonverse/app/theme/app_theme.dart';
+import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/core/widgets/feedback_helper.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
 
 class ReferPage extends StatefulWidget {
   const ReferPage({super.key});
@@ -28,157 +32,125 @@ class _ReferPageState extends State<ReferPage> {
     final loyalty = context.watch<LoyaltyProvider>();
     final referralCode = loyalty.referralCode.isNotEmpty
         ? loyalty.referralCode
-        : (loyalty.profile?.referralCode ?? 'SALONVERSE');
+        : (loyalty.profile?.referralCode ?? '');
+
+    final referralRule = loyalty.rules.where((r) => r.ruleKey == 'REFERRAL_QUALIFIED').firstOrNull;
+    final bonusCredits = (loyalty.currentTierDetails != null && loyalty.currentTierDetails!.referralBonusCredits > 0)
+        ? loyalty.currentTierDetails!.referralBonusCredits
+        : (referralRule?.creditsToAward ?? 0);
 
     const Color emeraldColor = Color(0xFF10B981);
 
+    // Sum referral points earned from authoritative ledger
+    final totalReferralCreditsEarned = loyalty.activity
+        .where((t) => t.type.contains('REFERRAL') || t.source.contains('referral'))
+        .fold<int>(0, (sum, t) => sum + (t.amount > 0 ? t.amount : 0));
+
+    final displayEarned = totalReferralCreditsEarned > 0
+        ? totalReferralCreditsEarned
+        : (loyalty.completedReferrals * (bonusCredits > 0 ? bonusCredits : 1));
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Refer & Earn'), elevation: 0),
+      appBar: AppBar(
+        title: Text(
+          'Refer & Earn',
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // 1. Hero Gift Icon
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: AppGradients.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.35),
+                ),
+                child: const Center(
+                  child: Icon(Icons.card_giftcard_rounded, size: 40, color: Colors.white),
+                ),
+              ),
               const SizedBox(height: 16),
 
-              Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        const Color(0xFFC39B4B),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withAlpha(40),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.card_giftcard_rounded,
-                    size: 52,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 28),
-
               Text(
-                'Refer a Friend & Earn Loyalty Credits!',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 22,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Share your unique referral code with friends. When they complete their first qualifying booking, you earn +2 Loyalty Credits!',
+                bonusCredits > 0
+                    ? 'Earn $bonusCredits Points Per Referral!'
+                    : 'Earn Points With Every Referral!',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
-                  height: 1.5,
+                style: GoogleFonts.outfit(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                 ),
               ),
+              const SizedBox(height: 6),
+              Text(
+                'Share your code with friends. When they register using your code and complete their first salon appointment, you earn authoritative loyalty points!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 22),
 
-              const SizedBox(height: 28),
-
-              // Real Referral Code Container
+              // 2. Share Your Code Box
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                   border: Border.all(
-                    color: theme.colorScheme.primary.withAlpha(60),
-                    width: 1.5,
+                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                   ),
+                  boxShadow: isDark ? null : AppSpacing.softShadow(context),
                 ),
                 child: Column(
                   children: [
                     Text(
-                      "YOUR UNIQUE REFERRAL CODE",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                        letterSpacing: 1.0,
+                      'YOUR EXCLUSIVE REFERRAL CODE',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                        letterSpacing: 0.8,
                       ),
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF161514)
-                            : Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
+                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.primary.withAlpha(50)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             referralCode,
-                            style: const TextStyle(
-                              fontSize: 20,
+                            style: GoogleFonts.outfit(
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 2.0,
+                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Clipboard.setData(
-                                ClipboardData(text: referralCode),
-                              );
-                              AppFeedback.success(
-                                context,
-                                "Referral code copied successfully!",
-                              );
+                          SVButton(
+                            text: 'Copy',
+                            size: SVButtonSize.sm,
+                            icon: Icons.copy_rounded,
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: referralCode));
+                              AppFeedback.success(context, 'Referral code "$referralCode" copied to clipboard!');
                             },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Row(
-                                children: [
-                                  Icon(
-                                    Icons.copy_rounded,
-                                    color: Colors.white,
-                                    size: 12,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    "Copy",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -186,50 +158,58 @@ class _ReferPageState extends State<ReferPage> {
                   ],
                 ),
               ),
+              const SizedBox(height: 18),
 
-              const SizedBox(height: 24),
-
-              // Live Referral Tracker Stats
+              // 3. Referral Stats Tracker
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF161514) : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                  border: Border.all(
+                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Column(
                       children: [
-                        const Text(
-                          "Successful Referrals",
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        Text(
+                          'Successful Referrals',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${loyalty.completedReferrals}',
-                          style: const TextStyle(
+                          style: GoogleFonts.outfit(
                             fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             color: emeraldColor,
                           ),
                         ),
                       ],
                     ),
-                    Container(height: 30, width: 1, color: Colors.grey.shade400),
+                    Container(height: 28, width: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
                     Column(
                       children: [
-                        const Text(
-                          "Earned Credits",
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        Text(
+                          'Points Earned',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.5,
+                            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${loyalty.completedReferrals * 2}',
-                          style: const TextStyle(
+                          '$displayEarned',
+                          style: GoogleFonts.outfit(
                             fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.pink,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
                           ),
                         ),
                       ],
@@ -237,75 +217,17 @@ class _ReferPageState extends State<ReferPage> {
                   ],
                 ),
               ),
+              const SizedBox(height: 24),
 
-              const SizedBox(height: 36),
-
+              // 4. How It Works
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  "How it works",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: SVSectionHeader(title: 'How It Works'),
               ),
-              const SizedBox(height: 16),
-              _buildStepItem(
-                context,
-                theme,
-                "1",
-                "Share your unique code",
-                "Send code $referralCode to your friends via WhatsApp or Social Media.",
-              ),
-              _buildStepItem(
-                context,
-                theme,
-                "2",
-                "Friend completes booking",
-                "Your friend registers & completes a qualifying salon service.",
-              ),
-              _buildStepItem(
-                context,
-                theme,
-                "3",
-                "Earn Loyalty Credits",
-                "Once booking is completed, +2 Loyalty Credits are credited to your account!",
-              ),
-
-              const SizedBox(height: 32),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: referralCode));
-                    AppFeedback.success(context, "Referral code copied to share!");
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.share_rounded, size: 16),
-                      SizedBox(width: 8),
-                      Text(
-                        "Share Code with Friends",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              _buildStepItem('1', 'Share code', 'Share your referral code with friends & family.', isDark),
+              _buildStepItem('2', 'Friend registers with code', 'New friends enter your referral code when creating their account.', isDark),
+              _buildStepItem('3', 'Earn loyalty points', 'You receive authoritative loyalty points when they complete their first booking!', isDark),
             ],
           ),
         ),
@@ -313,51 +235,43 @@ class _ReferPageState extends State<ReferPage> {
     );
   }
 
-  Widget _buildStepItem(
-    BuildContext context,
-    ThemeData theme,
-    String num,
-    String title,
-    String desc,
-  ) {
-    final isDark = theme.brightness == Brightness.dark;
+  Widget _buildStepItem(String num, String title, String desc, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 14,
-            backgroundColor: theme.colorScheme.primary.withAlpha(15),
+            radius: 13,
+            backgroundColor: AppColors.primaryTint,
             child: Text(
               num,
-              style: TextStyle(
-                color: theme.colorScheme.primary,
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w700,
                     fontSize: 14,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 1),
                 Text(
                   desc,
-                  style: TextStyle(
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                   ),
                 ),
               ],

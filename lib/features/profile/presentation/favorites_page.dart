@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/features/auth/services/auth_provider.dart';
 import 'package:salonverse/features/salons/services/salon_provider.dart';
-import 'package:salonverse/features/salons/models/salon_model.dart';
-import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/core/widgets/empty_state.dart';
+import 'package:salonverse/shared/design_system/sv_cards.dart';
+import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
 
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().currentUser;
+    final auth = context.watch<AuthProvider>();
+    final user = auth.currentUser;
     final salonProvider = context.watch<SalonProvider>();
 
     final favsList = salonProvider.getFavoriteSalons(
@@ -22,149 +22,34 @@ class FavoritesPage extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Saved Salons')),
+      appBar: AppBar(
+        title: Text(
+          'Saved Salons',
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+      ),
       body: SafeArea(
         child: favsList.isEmpty
-            ? EmptyState(
+            ? SVEmptyState(
                 icon: Icons.favorite_border_rounded,
-                title: 'No saved salons',
-                subtitle:
-                    'Bookmark your favorite beauty spots to access them quickly.',
+                title: 'No Saved Salons',
+                description: 'Bookmark your favorite beauty spots to quickly access and book them anytime.',
                 actionLabel: 'Explore Salons',
-                onAction: () => context.go('/home'),
+                onAction: () => context.go('/salon-tab'),
               )
             : ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 itemCount: favsList.length,
                 itemBuilder: (context, index) {
                   final salon = favsList[index];
-                  return _buildTile(context, salon);
+                  return SVSalonCard(
+                    salon: salon,
+                    isFavorite: true,
+                    onTap: () => context.push('/salon/${salon.id}', extra: {'salon': salon}),
+                    onFavoriteToggle: () => auth.toggleFavorite(salon.id),
+                  );
                 },
               ),
-      ),
-    );
-  }
-
-  Widget _buildTile(BuildContext context, SalonModel salon) {
-    final theme = Theme.of(context);
-
-    return GestureDetector(
-      onTap: () {
-        context.push('/salon/${salon.id}', extra: {'salon': salon});
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color,
-          border: theme.cardTheme.shape is RoundedRectangleBorder
-              ? Border.fromBorderSide(
-                  (theme.cardTheme.shape as RoundedRectangleBorder).side,
-                )
-              : null,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: AppSpacing.cardShadow(context),
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: salon.imageUrl,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  width: 80,
-                  height: 80,
-                  color: theme.colorScheme.surfaceContainer,
-                ),
-                errorWidget: (context, url, err) => Container(
-                  width: 80,
-                  height: 80,
-                  color: theme.colorScheme.surfaceContainer,
-                  child: const Icon(
-                    Icons.storefront_rounded,
-                    size: 24,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          salon.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          context.read<AuthProvider>().toggleFavorite(salon.id);
-                        },
-                        child: const Icon(
-                          Icons.favorite_rounded,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    salon.address,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            color: Colors.amber,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            salon.rating.toString(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        salon.priceRange,
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

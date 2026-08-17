@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
+import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
+import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
 import 'package:salonverse/features/booking/presentation/booking_widgets/booking_step1_services.dart';
 import 'package:salonverse/features/booking/presentation/booking_widgets/booking_step2_schedule_payment.dart';
 import 'package:salonverse/features/booking/presentation/booking_widgets/booking_bottom_bar.dart';
@@ -25,7 +28,7 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
       _currentStep = 1;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      provider.fetchBookings();
+      provider.fetchDynamicSlots();
     });
   }
 
@@ -37,8 +40,12 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
 
     if (bookingProvider.selectedSalon == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Book Appointment'), elevation: 0),
-        body: const Center(child: Text('No active booking details found.')),
+        appBar: AppBar(title: const Text('Book Appointment')),
+        body: const SVEmptyState(
+          icon: Icons.calendar_today_rounded,
+          title: 'No Active Booking',
+          description: 'Please select a salon and service first.',
+        ),
       );
     }
 
@@ -47,20 +54,15 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
     final selectedStylist = bookingProvider.selectedStylist;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF090808) : Colors.white,
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF090808) : Colors.white,
-        elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,
-            color: isDark ? Colors.white : Colors.black,
+            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
           ),
           onPressed: () {
             if (_currentStep == 1) {
-              setState(() {
-                _currentStep = 0;
-              });
+              setState(() => _currentStep = 0);
             } else {
               Navigator.pop(context);
             }
@@ -71,24 +73,18 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
           children: [
             Text(
               salon.name,
-              style: TextStyle(
+              style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
               ),
             ),
             Text(
-              _currentStep == 0
-                  ? "Select Service & Stylist"
-                  : "Select Schedule & Payment",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
+              _currentStep == 0 ? 'Select Service & Stylist' : 'Schedule & Payment',
+              style: GoogleFonts.outfit(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
               ),
             ),
           ],
@@ -97,7 +93,22 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildStepperProgress(isDark),
+            SVStepIndicator(
+              currentStep: _currentStep,
+              steps: const ['Service & Specialist', 'Schedule & Pay'],
+              onStepTapped: (index) {
+                if (index == 1 && selectedService == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select a service first.'),
+                      backgroundColor: AppColors.primary,
+                    ),
+                  );
+                  return;
+                }
+                setState(() => _currentStep = index);
+              },
+            ),
 
             Expanded(
               child: _currentStep == 0
@@ -119,86 +130,12 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
               selectedStylist: selectedStylist,
               provider: bookingProvider,
               onContinueToStep2: () {
-                setState(() {
-                  _currentStep = 1;
-                });
+                setState(() => _currentStep = 1);
               },
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStepperProgress(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF090808) : Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: isDark ? const Color(0xFF1E1C1B) : Colors.grey.shade100,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          _stepNode(0, "Services", _currentStep >= 0, isDark),
-          Expanded(
-            child: Container(
-              height: 2,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              color: _currentStep >= 1
-                  ? const Color(0xFFEC4899)
-                  : (isDark ? const Color(0xFF2C2A29) : Colors.grey.shade200),
-            ),
-          ),
-          _stepNode(1, "Schedule", _currentStep >= 1, isDark),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepNode(int index, String label, bool isActive, bool isDark) {
-    const activeColor = Color(0xFFEC4899);
-    final inactiveColor = isDark
-        ? const Color(0xFF2C2A29)
-        : Colors.grey.shade200;
-
-    return Row(
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: isActive ? activeColor : inactiveColor,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            "${index + 1}",
-            style: TextStyle(
-              color: isActive
-                  ? Colors.white
-                  : (isDark ? Colors.white38 : Colors.grey),
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive
-                ? (isDark ? Colors.white : Colors.black)
-                : (isDark ? Colors.white38 : Colors.grey),
-            fontSize: 13,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }

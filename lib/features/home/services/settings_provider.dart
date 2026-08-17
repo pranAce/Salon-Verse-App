@@ -29,6 +29,8 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleTheme(bool value) => setDarkMode(value);
+
   void setAccentColor(String color) {
     _accentColor = color;
     AppServices.prefs.setString(KConstants.accentColorKey, color);

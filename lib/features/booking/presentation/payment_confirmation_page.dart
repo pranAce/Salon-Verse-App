@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import 'package:salonverse/features/booking/services/booking_provider.dart';
-import 'package:salonverse/features/home/services/settings_provider.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
+import 'package:salonverse/features/booking/models/booking_model.dart';
+import 'package:salonverse/core/utils/currency_formatter.dart';
+import 'package:salonverse/core/utils/receipt_pdf_helper.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
 
 class PaymentConfirmationPage extends StatelessWidget {
   const PaymentConfirmationPage({super.key});
@@ -17,313 +16,169 @@ class PaymentConfirmationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bookingProvider = context.watch<BookingProvider>();
 
-    final bookings = bookingProvider.bookings;
-    final lastBooking = bookings.isNotEmpty ? bookings.first : null;
+    final extra = GoRouterState.of(context).extra as Map<String, dynamic>?;
+    final booking = extra?['booking'] as BookingModel?;
 
-    final String salonName = lastBooking?.salonName ?? "Glow Beauty Lounge";
-    final String salonAddress =
-        lastBooking?.salonAddress ?? "Thamel, Kathmandu";
-    final String salonImageUrl =
-        lastBooking?.salonImageUrl ??
-        "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80";
-    final String dateStr = lastBooking?.date ?? "Fri, Nov 14";
-    final String timeStr = lastBooking?.timeSlot ?? "02:30 PM";
-    final String serviceName = lastBooking?.serviceName ?? "Signature Haircut";
-    final String stylistName = lastBooking?.stylistName ?? "Priya S.";
-    final String bookingId = lastBooking != null
-        ? (lastBooking.id.length >= 6
-              ? "SV-${lastBooking.id.substring(0, 6).toUpperCase()}"
-              : "SV-${lastBooking.id.toUpperCase()}")
-        : "SV-284071";
+    if (booking == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Confirmation')),
+        body: SVEmptyState(
+          icon: Icons.check_circle_outline_rounded,
+          title: 'Booking Confirmed',
+          description: 'Your appointment has been scheduled successfully.',
+          actionLabel: 'Go to Bookings',
+          onAction: () => context.go('/bookings'),
+        ),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             children: [
-              const SizedBox(height: 28),
+              const SizedBox(height: 10),
 
-              Center(
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        theme.colorScheme.secondary,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withAlpha(50),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    size: 52,
-                    color: Colors.white,
-                  ),
+              // Success Icon
+              Container(
+                width: 64,
+                height: 64,
+                decoration: const BoxDecoration(
+                  color: AppColors.success,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(Icons.check_rounded, color: Colors.white, size: 36),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
 
               Text(
                 'Booking Confirmed!',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 24,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                style: GoogleFonts.outfit(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  letterSpacing: -0.3,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                'Your appointment is secured.\nA confirmation has been sent to your phone.',
+                'Your appointment is scheduled with the salon.',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
-                  height: 1.4,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                 ),
               ),
+              const SizedBox(height: 20),
 
-              const SizedBox(height: 32),
-
+              // Digital Ticket Container
               Container(
-                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                   border: Border.all(
-                    color: theme.colorScheme.outline.withAlpha(
-                      isDark ? 30 : 60,
-                    ),
+                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                   ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(isDark ? 0 : 5),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  boxShadow: isDark ? null : AppSpacing.softShadow(context),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: CachedNetworkImage(
-                            imageUrl: salonImageUrl,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorWidget: (c, u, e) => Container(
-                              color: Colors.grey,
-                              width: 60,
-                              height: 60,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary.withAlpha(
-                                    15,
-                                  ),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: theme.colorScheme.primary.withAlpha(
-                                      30,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  "VERIFIED SALON",
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    color: theme.colorScheme.primary,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                salonName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                salonAddress,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const Divider(height: 32),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildReceiptBlock(
-                            context,
-                            theme,
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              color: theme.colorScheme.primary,
-                              size: 16,
-                            ),
-                            "DATE",
-                            dateStr,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildReceiptBlock(
-                            context,
-                            theme,
-                            Icon(
-                              Icons.access_time_rounded,
-                              color: theme.colorScheme.primary,
-                              size: 16,
-                            ),
-                            "TIME",
-                            timeStr,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _buildReceiptBlock(
-                      context,
-                      theme,
-                      Icon(
-                        Icons.content_cut_rounded,
-                        color: theme.colorScheme.primary,
-                        size: 16,
-                      ),
-                      "SERVICE",
-                      serviceName,
-                      subtitle: "with $stylistName",
-                    ),
-
-                    const SizedBox(height: 20),
-
+                    // Ticket Header
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF161514)
-                            : Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(16),
+                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.cardRadius)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          Text(
+                            'APPOINTMENT TICKET',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                          Text(
+                            'ID: #${booking.id.length > 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            booking.salonName,
+                            style: GoogleFonts.outfit(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            booking.serviceName,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          const Divider(),
+                          const SizedBox(height: 14),
+
+                          // Details grid
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
-                                Icons.tag_rounded,
-                                color: theme.colorScheme.primary,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "BOOKING ID",
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    bookingId,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              _buildMetaColumn('DATE', booking.date, isDark),
+                              _buildMetaColumn('TIME', booking.timeSlot, isDark),
+                              _buildMetaColumn('STATUS', booking.status.toUpperCase(), isDark, isHighlight: true),
                             ],
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Clipboard.setData(ClipboardData(text: bookingId));
-                              AppFeedback.success(
-                                context,
-                                "Booking ID copied!",
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          const SizedBox(height: 14),
+
+                          // Price Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Total Paid / Due',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade200),
+                              Text(
+                                CurrencyFormatter.formatNPR(booking.servicePrice),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                ),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.copy_rounded,
-                                    color: theme.colorScheme.primary,
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    "Copy",
-                                    style: TextStyle(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
@@ -331,155 +186,39 @@ class PaymentConfirmationPage extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 24),
 
-              const SizedBox(height: 36),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  onPressed: () {
-                    context.read<SettingsProvider>().setPage(1);
-                    context.go('/bookings');
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.calendar_month_rounded, size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        "View Booking",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
+              // Action Buttons
+              SVButton(
+                text: 'Download Invoice / Receipt',
+                variant: SVButtonVariant.secondary,
+                isFullWidth: true,
+                icon: Icons.receipt_long_rounded,
+                onPressed: () async {
+                  await ReceiptPdfHelper.generateAndDownloadReceipt(
+                    context: context,
+                    booking: booking,
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              SVButton(
+                text: 'View My Appointments',
+                isFullWidth: true,
+                onPressed: () => context.go('/bookings'),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => context.go('/home'),
+                child: Text(
+                  'Back to Discovery',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.primary,
-                        side: BorderSide(
-                          color: theme.colorScheme.primary.withAlpha(80),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () async {
-                        try {
-                          final title = Uri.encodeComponent(
-                            "Salon Appointment: $serviceName at $salonName",
-                          );
-                          final details = Uri.encodeComponent(
-                            "SalonVerse Booking $bookingId with stylist $stylistName. Address: $salonAddress",
-                          );
-                          final location = Uri.encodeComponent(salonAddress);
-                          final now = DateTime.now();
-                          final startFormatted =
-                              "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}T100000Z";
-                          final endFormatted =
-                              "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}T110000Z";
-
-                          final googleCalendarUrl = Uri.parse(
-                            "https://calendar.google.com/calendar/render?action=TEMPLATE&text=$title&details=$details&location=$location&dates=$startFormatted/$endFormatted",
-                          );
-
-                          if (await canLaunchUrl(googleCalendarUrl)) {
-                            await launchUrl(
-                              googleCalendarUrl,
-                              mode: LaunchMode.externalApplication,
-                            );
-                            if (context.mounted) {
-                              AppFeedback.success(
-                                context,
-                                "Opening device calendar...",
-                              );
-                            }
-                          } else {
-                            Clipboard.setData(
-                              ClipboardData(
-                                text:
-                                    "$serviceName at $salonName on $dateStr at $timeStr. Location: $salonAddress",
-                              ),
-                            );
-                            if (context.mounted) {
-                              AppFeedback.success(
-                                context,
-                                "Appointment details copied to clipboard!",
-                              );
-                            }
-                          }
-                        } catch (_) {}
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today_rounded, size: 15),
-                          SizedBox(width: 6),
-                          Text(
-                            "Add to Calendar",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: isDark ? Colors.white70 : Colors.black87,
-                        side: BorderSide(
-                          color: isDark ? Colors.white24 : Colors.grey.shade300,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () {
-                        context.read<SettingsProvider>().setPage(0);
-                        context.go('/home');
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.home_outlined, size: 15),
-                          SizedBox(width: 6),
-                          Text(
-                            "Back Home",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -487,56 +226,28 @@ class PaymentConfirmationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReceiptBlock(
-    BuildContext context,
-    ThemeData theme,
-    Widget icon,
-    String label,
-    String value, {
-    String? subtitle,
-  }) {
-    return Row(
+  Widget _buildMetaColumn(String label, String value, bool isDark, {bool isHighlight = false}) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: theme.colorScheme.primary.withAlpha(12),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+            letterSpacing: 0.5,
           ),
-          alignment: Alignment.center,
-          child: icon,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ],
-            ],
+        const SizedBox(height: 3),
+        Text(
+          value,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: isHighlight
+                ? AppColors.primary
+                : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
           ),
         ),
       ],

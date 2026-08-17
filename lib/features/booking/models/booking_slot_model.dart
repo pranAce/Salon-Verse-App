@@ -4,9 +4,11 @@ class BookingSlotModel {
   final String timeSlot;
   final int startMinutes;
   final int endMinutes;
-  final String period; // 'morning', 'afternoon', 'evening'
+  final String period;
   final bool available;
   final String? assignedStylistId;
+
+  bool get isAvailable => available;
 
   BookingSlotModel({
     required this.startTime,

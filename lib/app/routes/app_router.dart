@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:salonverse/features/home/services/app_service.dart';
 import 'package:salonverse/core/storage/app_storage.dart';
 import 'package:salonverse/core/constants/app_constants.dart';
-import 'package:salonverse/app/theme/app_theme.dart';
 
 import 'package:salonverse/features/auth/presentation/welcome_page.dart';
 import 'package:salonverse/features/auth/presentation/onboarding_page.dart';
@@ -37,47 +36,8 @@ import 'package:salonverse/features/support/presentation/support_page.dart';
 import 'package:salonverse/features/support/presentation/contact_support_page.dart';
 import 'package:salonverse/features/support/presentation/contact_detail_page.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _customerShellKey = GlobalKey<NavigatorState>();
-
-CustomTransitionPage<void> _fadeTransitionPage({
-  required Widget child,
-  required GoRouterState state,
-}) {
-  return CustomTransitionPage(
-    key: state.pageKey,
-    child: child,
-    transitionDuration: AppPageTransitions.normal,
-    reverseTransitionDuration: AppPageTransitions.fast,
-    transitionsBuilder: AppPageTransitions.fadeThrough,
-  );
-}
-
-CustomTransitionPage<void> _slideRightPage({
-  required Widget child,
-  required GoRouterState state,
-}) {
-  return CustomTransitionPage(
-    key: state.pageKey,
-    child: child,
-    transitionDuration: AppPageTransitions.normal,
-    reverseTransitionDuration: AppPageTransitions.fast,
-    transitionsBuilder: AppPageTransitions.slideFromRight,
-  );
-}
-
-CustomTransitionPage<void> _slideBottomPage({
-  required Widget child,
-  required GoRouterState state,
-}) {
-  return CustomTransitionPage(
-    key: state.pageKey,
-    child: child,
-    transitionDuration: AppPageTransitions.normal,
-    reverseTransitionDuration: AppPageTransitions.fast,
-    transitionsBuilder: AppPageTransitions.slideFromBottom,
-  );
-}
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNav');
+final GlobalKey<NavigatorState> _customerShellKey = GlobalKey<NavigatorState>(debugLabel: 'shellNav');
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
@@ -113,30 +73,30 @@ final GoRouter appRouter = GoRouter(
   },
   routes: [
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/welcome',
-      pageBuilder: (context, state) =>
-          _fadeTransitionPage(child: const WelcomePage(), state: state),
+      builder: (context, state) => const WelcomePage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/onboarding',
-      pageBuilder: (context, state) =>
-          _fadeTransitionPage(child: const OnboardingPage(), state: state),
+      builder: (context, state) => const OnboardingPage(),
     ),
 
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/auth/login',
-      pageBuilder: (context, state) =>
-          _fadeTransitionPage(child: const LoginPage(), state: state),
+      builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/auth/register',
-      pageBuilder: (context, state) =>
-          _fadeTransitionPage(child: const RegisterPage(), state: state),
+      builder: (context, state) => const RegisterPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/auth/forgot-password',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const ForgotPasswordPage(), state: state),
+      builder: (context, state) => const ForgotPasswordPage(),
     ),
 
     ShellRoute(
@@ -145,140 +105,126 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/home',
-          pageBuilder: (context, state) =>
-              _fadeTransitionPage(child: const HomeScreen(), state: state),
+          builder: (context, state) => const HomeScreen(),
         ),
         GoRoute(
           path: '/bookings',
-          pageBuilder: (context, state) => _fadeTransitionPage(
-            child: const BookingHistoryPage(),
-            state: state,
-          ),
+          builder: (context, state) => const BookingHistoryPage(),
         ),
         GoRoute(
           path: '/salon-tab',
-          pageBuilder: (context, state) =>
-              _fadeTransitionPage(child: const SalonsDirectoryPage(), state: state),
+          builder: (context, state) => const SalonsDirectoryPage(),
         ),
         GoRoute(
           path: '/profile',
-          pageBuilder: (context, state) =>
-              _fadeTransitionPage(child: const ProfilePage(), state: state),
+          builder: (context, state) => const ProfilePage(),
         ),
       ],
     ),
 
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/salon/:id',
-      pageBuilder: (context, state) {
+      builder: (context, state) {
         final salonId = state.pathParameters['id']!;
         final extra = state.extra as Map<String, dynamic>?;
         final salon = extra?['salon'];
-        return _slideRightPage(
-          child: SalonDetailScreen(salonId: salonId, preloadedSalon: salon),
-          state: state,
-        );
+        return SalonDetailScreen(salonId: salonId, preloadedSalon: salon);
       },
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/booking-flow',
-      pageBuilder: (context, state) =>
-          _slideBottomPage(child: const BookingFlowPage(), state: state),
+      builder: (context, state) => const BookingFlowPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/payment-confirmation',
-      pageBuilder: (context, state) => _slideBottomPage(
-        child: const PaymentConfirmationPage(),
-        state: state,
-      ),
+      builder: (context, state) => const PaymentConfirmationPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/loyalty',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const LoyaltyHomePage(), state: state),
+      builder: (context, state) => const LoyaltyHomePage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/loyalty/earn',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const HowToEarnPage(), state: state),
+      builder: (context, state) => const HowToEarnPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/loyalty/rewards',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const RewardsStorePage(), state: state),
+      builder: (context, state) => const RewardsStorePage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/loyalty/vouchers',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const MyVouchersPage(), state: state),
+      builder: (context, state) => const MyVouchersPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/loyalty/history',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const PointsHistoryPage(), state: state),
+      builder: (context, state) => const PointsHistoryPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/profile/account',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const AccountPage(), state: state),
+      builder: (context, state) => const AccountPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/profile/refer',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const ReferPage(), state: state),
+      builder: (context, state) => const ReferPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/profile/favorites',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const FavoritesPage(), state: state),
+      builder: (context, state) => const FavoritesPage(),
     ),
-
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/profile/addresses',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const AddressesPage(), state: state),
+      builder: (context, state) => const AddressesPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/profile/payments',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const PaymentsPage(), state: state),
+      builder: (context, state) => const PaymentsPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/profile/offers',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const OffersPage(), state: state),
+      builder: (context, state) => const OffersPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/offers',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const OffersPage(), state: state),
+      builder: (context, state) => const OffersPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/notifications',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const NotificationsPage(), state: state),
+      builder: (context, state) => const NotificationsPage(),
     ),
-
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/support',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const SupportPage(), state: state),
+      builder: (context, state) => const SupportPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/support/contact',
-      pageBuilder: (context, state) =>
-          _slideRightPage(child: const ContactSupportPage(), state: state),
+      builder: (context, state) => const ContactSupportPage(),
     ),
     GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
       path: '/support/detail/:id',
-      pageBuilder: (context, state) {
+      builder: (context, state) {
         final ticketId = state.pathParameters['id']!;
         final extra = state.extra as Map<String, dynamic>?;
         final subject = extra?['subject'] as String? ?? 'Support Ticket';
-        return _slideRightPage(
-          child: ContactDetailPage(ticketId: ticketId, subject: subject),
-          state: state,
-        );
+        return ContactDetailPage(ticketId: ticketId, subject: subject);
       },
     ),
   ],

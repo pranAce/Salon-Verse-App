@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/auth/services/auth_provider.dart';
-import 'package:salonverse/core/widgets/app_button.dart';
-import 'package:salonverse/core/widgets/app_text_field.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -54,18 +54,15 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _fetchGpsLocation() async {
-    setState(() {
-      _isFetchingGps = true;
-    });
+    setState(() => _isFetchingGps = true);
 
     try {
-      final pos = await Geolocator.getCurrentPosition();
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
       _lat = pos.latitude;
       _lng = pos.longitude;
-      final placemarks = await placemarkFromCoordinates(
-        pos.latitude,
-        pos.longitude,
-      );
+      final placemarks = await placemarkFromCoordinates(pos.latitude, pos.longitude);
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
         final city = p.locality ?? 'Kathmandu';
@@ -77,19 +74,17 @@ class _AccountPageState extends State<AccountPage> {
         });
 
         if (mounted) {
-          AppFeedback.success(context, "Detected GPS: $street, $city");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Detected GPS: $street, $city'),
+              backgroundColor: AppColors.primary,
+            ),
+          );
         }
       }
     } catch (_) {
-      if (mounted) {
-        AppFeedback.info(context, "Set to default Kathmandu location.");
-      }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isFetchingGps = false;
-        });
-      }
+      if (mounted) setState(() => _isFetchingGps = false);
     }
   }
 
@@ -99,12 +94,8 @@ class _AccountPageState extends State<AccountPage> {
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.updateProfile(
       name: _nameController.text.trim(),
-      phone: _phoneController.text.trim().isEmpty
-          ? null
-          : _phoneController.text.trim(),
-      dateOfBirth: _dobController.text.trim().isEmpty
-          ? null
-          : _dobController.text.trim(),
+      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      dateOfBirth: _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
       homeLocation: {
         'address': _locationAddressController.text.trim(),
         'city': _locationCityController.text.trim(),
@@ -115,15 +106,19 @@ class _AccountPageState extends State<AccountPage> {
 
     if (mounted) {
       if (success) {
-        AppFeedback.success(
-          context,
-          "Account & Home Location saved to server!",
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account & Location saved successfully!'),
+            backgroundColor: AppColors.primary,
+          ),
         );
         Navigator.pop(context);
       } else {
-        AppFeedback.error(
-          context,
-          authProvider.error ?? "Failed to save profile changes.",
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.error ?? 'Failed to save profile.'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -131,59 +126,76 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Account & Home Location')),
+      appBar: AppBar(
+        title: Text(
+          'Edit Profile',
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: "Full Name",
-                  prefixIcon: Icons.person_outline_rounded,
-                  textCapitalization: TextCapitalization.words,
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return "Please enter your name.";
-                    }
-                    return null;
-                  },
+                Text(
+                  'Personal Information',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
-                AppTextField(
-                  controller: _phoneController,
-                  label: "Phone Number",
-                  prefixIcon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name',
+                    prefixIcon: Icon(Icons.person_outline_rounded),
+                  ),
+                  validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
+
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                ),
+                const SizedBox(height: 14),
 
                 GestureDetector(
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+                      initialDate: DateTime(2000),
                       firstDate: DateTime(1940),
                       lastDate: DateTime.now(),
                     );
                     if (picked != null) {
-                      final month = picked.month.toString().padLeft(2, '0');
-                      final day = picked.day.toString().padLeft(2, '0');
-                      _dobController.text = "${picked.year}-$month-$day";
+                      final m = picked.month.toString().padLeft(2, '0');
+                      final d = picked.day.toString().padLeft(2, '0');
+                      _dobController.text = "${picked.year}-$m-$d";
                     }
                   },
                   child: AbsorbPointer(
-                    child: AppTextField(
+                    child: TextFormField(
                       controller: _dobController,
-                      label: "Date of Birth (For Birthday Perks)",
-                      prefixIcon: Icons.cake_outlined,
+                      decoration: const InputDecoration(
+                        labelText: 'Date of Birth (Birthday Perks)',
+                        prefixIcon: Icon(Icons.cake_outlined),
+                      ),
                     ),
                   ),
                 ),
@@ -192,30 +204,23 @@ class _AccountPageState extends State<AccountPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Home Location",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                    Text(
+                      'Home Service Address',
+                      style: GoogleFonts.outfit(
                         fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                       ),
                     ),
                     TextButton.icon(
                       onPressed: _isFetchingGps ? null : _fetchGpsLocation,
                       icon: _isFetchingGps
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(
-                              Icons.my_location_rounded,
-                              size: 16,
-                              color: Color(0xFFE91E63),
-                            ),
-                      label: const Text(
-                        "Fetch Live GPS",
-                        style: TextStyle(
-                          color: Color(0xFFE91E63),
+                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.my_location_rounded, size: 16, color: AppColors.primary),
+                      label: Text(
+                        'Fetch GPS',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -223,26 +228,29 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
 
-                AppTextField(
+                TextFormField(
                   controller: _locationAddressController,
-                  label: "Street Address Location",
-                  prefixIcon: Icons.home_work_outlined,
-                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: 'Street Address',
+                    prefixIcon: Icon(Icons.home_work_outlined),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                AppTextField(
+                TextFormField(
                   controller: _locationCityController,
-                  label: "City / District",
-                  prefixIcon: Icons.location_city_outlined,
-                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: 'City / District',
+                    prefixIcon: Icon(Icons.location_city_outlined),
+                  ),
                 ),
                 const SizedBox(height: 32),
 
-                AppButton(
-                  label: "Save Home Location",
+                SVButton(
+                  text: 'Save Changes',
+                  isFullWidth: true,
                   isLoading: authProvider.isLoading,
                   onPressed: _handleSave,
                 ),

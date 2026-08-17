@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
-import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
-import 'package:salonverse/features/booking/presentation/booking_widgets/booking_payment_modals.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
 
 class BookingBottomBar extends StatelessWidget {
   final int currentStep;
@@ -24,200 +24,103 @@ class BookingBottomBar extends StatelessWidget {
     required this.onContinueToStep2,
   });
 
+  Future<void> _handleConfirmBooking(BuildContext context) async {
+    if (provider.selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an available time slot.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final booking = await provider.confirmBooking();
+    if (context.mounted) {
+      if (booking != null) {
+        context.pushReplacement('/payment-confirmation', extra: {'booking': booking});
+      } else if (provider.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(provider.error!),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    if (selectedService == null) {
-      return const SizedBox.shrink();
-    }
-
-    final isStep1 = currentStep == 0;
-    final stylistName = selectedStylist?.name.split(' ')[0] ?? 'Assigned Staff';
-    final double finalPrice = (selectedService!.price - provider.discountAmount)
-        .clamp(0.0, double.infinity);
+    final servicePrice = selectedService?.price ?? 0.0;
+    final discount = provider.discountAmount;
+    final finalPrice = servicePrice - discount > 0 ? servicePrice - discount : 0.0;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161514) : Colors.white,
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+          ),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 0 : 8),
+            color: Colors.black.withAlpha(isDark ? 50 : 15),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
         ],
-        border: Border(
-          top: BorderSide(
-            color: isDark ? const Color(0xFF1E1C1B) : Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        child: Row(
+          children: [
+            Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isStep1 ? selectedService!.name : "Total Amount",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: isStep1 ? FontWeight.bold : FontWeight.w600,
-                    fontSize: isStep1 ? 14 : 12,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                  'TOTAL AMOUNT',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 6,
-                  children: [
-                    if (provider.discountAmount > 0) ...[
-                      Text(
-                        AppCurrencyFormatter.format(selectedService!.price),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ],
-                    Text(
-                      AppCurrencyFormatter.format(finalPrice),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFFEC4899),
-                      ),
-                    ),
-                    if (isStep1) ...[
-                      Text(
-                        "• $stylistName",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  CurrencyFormatter.formatNPR(finalPrice),
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 16),
-
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(140, 48),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              backgroundColor: const Color(0xFFEC4899),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            const Spacer(),
+            if (currentStep == 0)
+              SVButton(
+                text: 'Continue',
+                onPressed: selectedService != null ? onContinueToStep2 : null,
+                icon: Icons.arrow_forward_rounded,
+                size: SVButtonSize.md,
+              )
+            else
+              SVButton(
+                text: 'Confirm Booking',
+                isLoading: provider.isLoading,
+                onPressed: () => _handleConfirmBooking(context),
+                icon: Icons.check_circle_rounded,
+                size: SVButtonSize.md,
               ),
-              elevation: 0,
-            ),
-            onPressed: provider.isLoading
-                ? null
-                : () async {
-                    if (isStep1) {
-                      onContinueToStep2();
-                    } else {
-                      if (provider.selectedTime == null) {
-                        AppFeedback.warning(
-                          context,
-                          "Please pick an appointment time slot.",
-                        );
-                        return;
-                      }
-
-                      final router = GoRouter.of(context);
-
-                      Future<void> executeBooking(String txnId) async {
-                        final successBooking = await provider.confirmBooking();
-                        if (!context.mounted) return;
-                        if (successBooking != null) {
-                          if (txnId.isNotEmpty) {
-                            await provider.recordPayment(
-                              successBooking.id,
-                              provider.paymentMethod,
-                              finalPrice,
-                              txnId,
-                            );
-                          }
-                          router.replace('/payment-confirmation');
-                        } else {
-                          AppFeedback.error(
-                            context,
-                            provider.error ?? "Failed to book slot.",
-                          );
-                        }
-                      }
-
-                      if (provider.paymentMethod == 'eSewa') {
-                        final txnId =
-                            "ESEWA-TXN-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}";
-                        BookingPaymentModals.showEsewaPaymentModal(
-                          context,
-                          provider,
-                          finalPrice,
-                          () {
-                            executeBooking(txnId);
-                          },
-                        );
-                      } else if (provider.paymentMethod == 'Khalti') {
-                        final txnId =
-                            "KHALTI-TXN-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}";
-                        BookingPaymentModals.showKhaltiPaymentModal(
-                          context,
-                          provider,
-                          finalPrice,
-                          () {
-                            executeBooking(txnId);
-                          },
-                        );
-                      } else {
-                        executeBooking('');
-                      }
-                    }
-                  },
-            child: provider.isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        isStep1 ? "Continue" : "Confirm & Pay",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(Icons.arrow_forward_rounded, size: 16),
-                    ],
-                  ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

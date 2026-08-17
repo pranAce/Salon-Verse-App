@@ -32,6 +32,9 @@ class LoyaltyProvider extends ChangeNotifier {
   double _progressRatio = 0.0;
   double get progressRatio => _progressRatio;
 
+  List<LoyaltyTierModel> _allTiers = [];
+  List<LoyaltyTierModel> get allTiers => _allTiers;
+
   List<LoyaltyRuleModel> _rules = [];
   List<LoyaltyRuleModel> get rules => _rules;
 
@@ -52,6 +55,11 @@ class LoyaltyProvider extends ChangeNotifier {
 
   SmartRebookModel? _smartRebook;
   SmartRebookModel? get smartRebook => _smartRebook;
+
+  bool _justLeveledUp = false;
+  bool get justLeveledUp => _justLeveledUp;
+  String? _newlyAchievedTier;
+  String? get newlyAchievedTier => _newlyAchievedTier;
 
   StreamSubscription? _balanceSub;
   StreamSubscription? _tierSub;
@@ -76,12 +84,20 @@ class LoyaltyProvider extends ChangeNotifier {
     super.dispose();
   }
 
+  void clearLevelUpFlag() {
+    _justLeveledUp = false;
+    _newlyAchievedTier = null;
+    notifyListeners();
+  }
+
   Future<void> loadLoyaltyData() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      final previousTier = _profile?.currentTier;
+
       final results = await Future.wait([
         _service.getProfile(),
         _service.getRewards(),
@@ -90,6 +106,7 @@ class LoyaltyProvider extends ChangeNotifier {
         _service.getReferralStatus(),
         _service.getSmartRebook(),
         _service.getRules(),
+        _service.getTiers(),
       ]);
 
       final profResult = results[0] as ApiResult<Map<String, dynamic>>;
@@ -99,6 +116,7 @@ class LoyaltyProvider extends ChangeNotifier {
       final refResult = results[4] as ApiResult<Map<String, dynamic>>;
       final rebResult = results[5] as ApiResult<SmartRebookModel>;
       final rulesResult = results[6] as ApiResult<List<LoyaltyRuleModel>>;
+      final tiersResult = results[7] as ApiResult<List<LoyaltyTierModel>>;
 
       if (profResult is Success<Map<String, dynamic>>) {
         final data = profResult.data;
@@ -110,6 +128,8 @@ class LoyaltyProvider extends ChangeNotifier {
         }
         if (data['nextTierDetails'] != null) {
           _nextTierDetails = LoyaltyTierModel.fromJson(Map<String, dynamic>.from(data['nextTierDetails']));
+        } else {
+          _nextTierDetails = null;
         }
         _creditsNeededForNext = (data['creditsNeededForNext'] as num?)?.toInt() ?? 0;
         _progressRatio = (data['progressRatio'] as num?)?.toDouble() ?? 0.0;
@@ -117,6 +137,13 @@ class LoyaltyProvider extends ChangeNotifier {
           _rules = (data['rules'] as List)
               .map((r) => LoyaltyRuleModel.fromJson(Map<String, dynamic>.from(r)))
               .toList();
+        }
+
+        // Check for level-up milestone
+        final newTier = _profile?.currentTier;
+        if (_hasLoadedData && previousTier != null && newTier != null && previousTier != newTier) {
+          _justLeveledUp = true;
+          _newlyAchievedTier = _currentTierDetails?.name ?? newTier.toUpperCase();
         }
       } else if (profResult is Failure<Map<String, dynamic>>) {
         _error = profResult.message;
@@ -147,6 +174,10 @@ class LoyaltyProvider extends ChangeNotifier {
         _rules = rulesResult.data;
       }
 
+      if (tiersResult is Success<List<LoyaltyTierModel>>) {
+        _allTiers = tiersResult.data;
+      }
+
       _hasLoadedData = true;
     } catch (e) {
       _error = e.toString();
@@ -175,7 +206,13 @@ class LoyaltyProvider extends ChangeNotifier {
   }
 
   Future<bool> applyReferralCode(String code) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
     final result = await _service.applyReferralCode(code);
+    _isLoading = false;
+
     if (result is Success<void>) {
       await loadLoyaltyData();
       return true;

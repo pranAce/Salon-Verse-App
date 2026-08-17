@@ -22,6 +22,8 @@ class LoyaltyProfileModel {
     required this.isSuspended,
   });
 
+  String get tier => currentTier;
+
   factory LoyaltyProfileModel.fromJson(Map<String, dynamic> json) {
     final idStr = (json['_id'] ?? json['id'] ?? '').toString();
     final model = LoyaltyProfileModel(
@@ -45,6 +47,8 @@ class LoyaltyRuleModel {
   final String name;
   final String description;
   final int creditsToAward;
+  final int? periodDays;
+  final int? requiredCount;
   final bool isActive;
 
   LoyaltyRuleModel({
@@ -53,6 +57,8 @@ class LoyaltyRuleModel {
     required this.name,
     required this.description,
     required this.creditsToAward,
+    this.periodDays,
+    this.requiredCount,
     required this.isActive,
   });
 
@@ -63,6 +69,8 @@ class LoyaltyRuleModel {
       name: (json['name'] ?? '').toString(),
       description: (json['description'] ?? '').toString(),
       creditsToAward: (json['creditsToAward'] as num?)?.toInt() ?? 1,
+      periodDays: (json['periodDays'] as num?)?.toInt(),
+      requiredCount: (json['requiredCount'] as num?)?.toInt(),
       isActive: json['isActive'] == true,
     );
   }
@@ -78,7 +86,9 @@ class LoyaltyTierModel {
   final int? maxCredits;
   final double earningMultiplier;
   final List<String> benefits;
+  final String birthdayRewardType;
   final int birthdayRewardValue;
+  final int referralBonusCredits;
 
   LoyaltyTierModel({
     required this.id,
@@ -90,7 +100,9 @@ class LoyaltyTierModel {
     this.maxCredits,
     required this.earningMultiplier,
     required this.benefits,
+    required this.birthdayRewardType,
     required this.birthdayRewardValue,
+    required this.referralBonusCredits,
   });
 
   factory LoyaltyTierModel.fromJson(Map<String, dynamic> json) {
@@ -104,7 +116,9 @@ class LoyaltyTierModel {
       maxCredits: (json['maxCredits'] as num?)?.toInt(),
       earningMultiplier: (json['earningMultiplier'] as num?)?.toDouble() ?? 1.0,
       benefits: (json['benefits'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      birthdayRewardValue: (json['birthdayRewardValue'] as num?)?.toInt() ?? 200,
+      birthdayRewardType: (json['birthdayRewardType'] ?? 'discount_fixed').toString(),
+      birthdayRewardValue: (json['birthdayRewardValue'] as num?)?.toInt() ?? 0,
+      referralBonusCredits: (json['referralBonusCredits'] as num?)?.toInt() ?? 0,
     );
   }
 }

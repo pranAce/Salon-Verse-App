@@ -74,6 +74,22 @@ class SalonService {
     return result;
   }
 
+  Future<ApiResult<SalonModel>> getSalonById(String id) async {
+    return _client.request<SalonModel>(
+      "GET",
+      "/api/v1/salons/$id",
+      auth: false,
+      onSuccess: (data) {
+        final map = data is Map<String, dynamic>
+            ? data
+            : (data is Map && data['data'] is Map
+                ? Map<String, dynamic>.from(data['data'] as Map)
+                : Map<String, dynamic>.from(data as Map));
+        return SalonModel.fromJson(map);
+      },
+    );
+  }
+
   Future<ApiResult<List<NearbyServiceModel>>> getNearbyServices({
     String? search,
     String? category,

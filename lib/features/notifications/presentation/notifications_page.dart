@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/notifications/models/notification_model.dart';
 import 'package:salonverse/features/home/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
-import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/core/widgets/empty_state.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
+import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -20,7 +21,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    _fetchNotifications();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchNotifications();
+    });
   }
 
   Future<void> _fetchNotifications() async {
@@ -58,11 +61,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
     if (mounted) {
       setState(() {
-        _notifications = _notifications
-            .map((n) => n.copyWith(isRead: true))
-            .toList();
+        _notifications = _notifications.map((n) => n.copyWith(isRead: true)).toList();
       });
-      AppFeedback.success(context, "All notifications marked as read.");
     }
   }
 
@@ -70,169 +70,163 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
     final unreadCount = _notifications.where((n) => !n.isRead).length;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text(
-          "Notifications",
-          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+        title: Text(
+          'Notifications',
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800),
         ),
         actions: [
           if (unreadCount > 0)
-            TextButton.icon(
+            TextButton(
               onPressed: _markAllAsRead,
-              icon: const Icon(Icons.done_all_rounded, size: 16),
-              label: const Text(
-                "Read All",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              child: Text(
+                'Read All',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
         ],
       ),
       body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: _fetchNotifications,
-                child: _notifications.isEmpty
-                    ? EmptyState(
-                        icon: Icons.notifications_none_rounded,
-                        title: "No notifications",
-                        subtitle:
-                            "You're all caught up! Important booking updates will appear here.",
-                        actionLabel: "Refresh",
-                        onAction: _fetchNotifications,
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
-                        ),
-                        itemCount: _notifications.length,
-                        itemBuilder: (context, index) {
-                          final item = _notifications[index];
-                          return _buildNotificationCard(theme, isDark, item);
-                        },
-                      ),
-              ),
+        child: RefreshIndicator(
+          onRefresh: _fetchNotifications,
+          color: AppColors.primary,
+          child: _isLoading
+              ? ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  itemCount: 4,
+                  itemBuilder: (context, index) => const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: SVSkeleton(width: double.infinity, height: 76, borderRadius: 16),
+                  ),
+                )
+              : _notifications.isEmpty
+                  ? const SVEmptyState(
+                      icon: Icons.notifications_none_rounded,
+                      title: 'No Notifications',
+                      description: 'You are all caught up! Booking updates and alerts will appear here.',
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                      itemCount: _notifications.length,
+                      itemBuilder: (context, index) {
+                        final item = _notifications[index];
+                        return _buildNotificationCard(isDark, item);
+                      },
+                    ),
+        ),
       ),
     );
   }
 
-  Widget _buildNotificationCard(
-    ThemeData theme,
-    bool isDark,
-    NotificationModel item,
-  ) {
+  Widget _buildNotificationCard(bool isDark, NotificationModel item) {
     final IconData iconData;
     final Color iconColor;
 
     switch (item.type.toLowerCase()) {
       case 'booking':
         iconData = Icons.calendar_today_rounded;
-        iconColor = const Color(0xFFEC4899);
+        iconColor = AppColors.primary;
         break;
       case 'payment':
-        iconData = Icons.payment_rounded;
-        iconColor = Colors.green;
+        iconData = Icons.receipt_rounded;
+        iconColor = const Color(0xFF10B981);
         break;
       case 'promo':
       case 'offer':
         iconData = Icons.local_offer_outlined;
-        iconColor = Colors.orange;
+        iconColor = const Color(0xFFF59E0B);
         break;
       default:
         iconData = Icons.notifications_outlined;
-        iconColor = theme.colorScheme.primary;
+        iconColor = AppColors.primary;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: item.isRead
-            ? (isDark ? const Color(0xFF161514) : Colors.white)
-            : (isDark ? const Color(0xFF241C1E) : const Color(0xFFFFF1F4)),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
+    return GestureDetector(
+      onTap: () {
+        if (!item.isRead) _markAsRead(item.id);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
           color: item.isRead
-              ? (isDark ? const Color(0xFF2C2A29) : Colors.grey.shade200)
-              : const Color(0xFFEC4899).withAlpha(80),
-          width: item.isRead ? 1 : 1.5,
+              ? (isDark ? AppColors.darkSurface : Colors.white)
+              : (isDark ? const Color(0xFF28141D) : AppColors.primaryTint),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: item.isRead
+                ? (isDark ? AppColors.darkBorder : AppColors.lightBorder)
+                : AppColors.primary.withAlpha(80),
+          ),
+          boxShadow: isDark ? null : AppSpacing.softShadow(context),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 0 : 4),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        clipBehavior: Clip.antiAlias,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          onTap: () {
-            if (!item.isRead) {
-              _markAsRead(item.id);
-            }
-          },
-          leading: CircleAvatar(
-            radius: 22,
-            backgroundColor: iconColor.withAlpha(20),
-            child: Icon(iconData, color: iconColor, size: 20),
-          ),
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  item.title,
-                  style: TextStyle(
-                    fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w900,
-                    fontSize: 14,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withAlpha(20),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(iconData, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: GoogleFonts.outfit(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          ),
+                        ),
+                      ),
+                      if (!item.isRead)
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-              ),
-              if (!item.isRead)
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEC4899),
-                    shape: BoxShape.circle,
+                  const SizedBox(height: 4),
+                  Text(
+                    item.message,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      height: 1.35,
+                    ),
                   ),
-                ),
-            ],
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                item.message,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
-                  height: 1.3,
-                ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _formatTimeAgo(item.createdAt),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
-              Text(
-                _formatTimeAgo(item.createdAt),
-                style: TextStyle(
-                  fontSize: 10.5,
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

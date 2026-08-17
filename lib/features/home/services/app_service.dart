@@ -103,6 +103,10 @@ class AppService {
     );
   }
 
+  Future<ApiResult<SalonModel>> getSalonById(String id) {
+    return salon.getSalonById(id);
+  }
+
   Future<ApiResult<List<NearbyServiceModel>>> getNearbyServices({
     String? search,
     String? category,

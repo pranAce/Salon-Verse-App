@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/auth/services/auth_provider.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
+import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/features/home/services/settings_provider.dart';
-import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -17,39 +18,36 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   void _showLogoutDialog(BuildContext context) {
-    final theme = Theme.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text(
-          'Are you sure you want to log out from SalonVerse?',
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'Log Out?',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to log out of your SalonVerse account?',
+          style: GoogleFonts.plusJakartaSans(fontSize: 13.5),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
-              Navigator.pop(context);
-              final authProvider = context.read<AuthProvider>();
-              await authProvider.logout();
+              Navigator.pop(ctx);
+              final auth = context.read<AuthProvider>();
+              await auth.logout();
               if (context.mounted) {
-                AppFeedback.success(context, "Logged out successfully.");
                 context.go('/auth/login');
               }
             },
-            child: Text(
-              'Logout',
-              style: TextStyle(
-                color: theme.colorScheme.error,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: const Text('Log Out'),
           ),
         ],
       ),
@@ -61,6 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BookingProvider>().fetchBookings();
+      context.read<LoyaltyProvider>().loadLoyaltyData();
     });
   }
 
@@ -70,502 +69,313 @@ class _ProfilePageState extends State<ProfilePage> {
     final isDark = theme.brightness == Brightness.dark;
     final user = context.watch<AuthProvider>().currentUser;
     final settings = context.watch<SettingsProvider>();
-    final bookingProvider = context.watch<BookingProvider>();
+    final bookingProv = context.watch<BookingProvider>();
+    final loyalty = context.watch<LoyaltyProvider>();
 
-    final upcomingCount = bookingProvider.bookings
-        .where(
-          (b) =>
-              b.status != 'completed' &&
-              b.status != 'cancelled' &&
-              b.status != 'no_show',
-        )
-        .length;
-    final completedCount = bookingProvider.bookings
-        .where((b) => b.status.toLowerCase() == 'completed')
-        .length;
+    final bookingsCount = bookingProv.bookings.length;
     final favoritesCount = user?.favoriteSalons.length ?? 0;
+    final loyaltyPoints = loyalty.profile?.loyaltyCredits ?? 0;
+    final tier = loyalty.profile?.tier.toUpperCase() ?? 'MEMBER';
+
+    final userName = user?.name ?? 'SalonVerse User';
+    final userEmail = user?.email ?? 'user@salonverse.com';
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              isDark
-                  ? const Color(0xFF4C0E1E)
-                  : const Color(
-                      0xFFFFBCC3,
-                    ),
-              isDark ? const Color(0xFF090808) : Colors.white,
-            ],
-            begin: Alignment.topCenter,
-            end: const Alignment(0, 0.1),
+      appBar: AppBar(
+        title: Text(
+          'Account & Profile',
+          style: GoogleFonts.outfit(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
           ),
         ),
+      ),
+      body: SafeArea(
         child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: MediaQuery.of(context).padding.top + 16,
-            bottom: 20,
-          ),
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 46,
-                        backgroundColor: Colors.white,
-                        child: CircleAvatar(
-                          radius: 44,
-                          backgroundColor: theme.colorScheme.primary.withAlpha(
-                            20,
-                          ),
-                          backgroundImage: const NetworkImage(
-                            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-                          ),
+              // 1. User Identity Header (No bulky card, clean editorial profile)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundColor: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                        style: GoogleFonts.outfit(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
                         ),
                       ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark
-                                  ? const Color(0xFF090808)
-                                  : Colors.white,
-                              width: 2,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.edit_rounded,
-                            color: Colors.white,
-                            size: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Hi, ${user?.name ?? "User"}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
-                            color: isDark
-                                ? AppColors.darkTextPrimary
-                                : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Glow looks good on you ✨',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () => context.push('/notifications'),
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E1C1B)
-                                : Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(isDark ? 0 : 5),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Icon(
-                                Icons.notifications_none_rounded,
-                                color: isDark ? Colors.white : Colors.black87,
-                                size: 20,
+                              Flexible(
+                                child: Text(
+                                  userName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                ),
                               ),
-                              Positioned(
-                                top: 11,
-                                right: 11,
-                                child: Container(
-                                  width: 7,
-                                  height: 7,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFEC4899),
-                                    shape: BoxShape.circle,
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withAlpha(20),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  tier,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () => context.push('/profile/account'),
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E1C1B)
-                                : Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(isDark ? 0 : 5),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.settings_outlined,
-                            color: isDark ? Colors.white : Colors.black87,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 28),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildStatItem(
-                    theme,
-                    Icons.calendar_today_rounded,
-                    const Color(0xFFEC4899),
-                    upcomingCount.toString(),
-                    "Upcoming\nBookings",
-                  ),
-                  _buildDivider(theme),
-                  _buildStatItem(
-                    theme,
-                    Icons.check_circle_rounded,
-                    Colors.green.shade600,
-                    completedCount.toString(),
-                    "Completed\nBookings",
-                  ),
-                  _buildDivider(theme),
-                  GestureDetector(
-                    onTap: () => context.push('/profile/favorites'),
-                    child: _buildStatItem(
-                      theme,
-                      Icons.favorite_rounded,
-                      const Color(0xFFEC4899),
-                      favoritesCount.toString(),
-                      "Saved\nSalons",
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF1E70),
-                      Color(0xFFFF7643),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF1E70).withAlpha(45),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Colors.white24,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.workspace_premium_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          const SizedBox(height: 2),
                           Text(
-                            "salonVerse Premium",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 14,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            "You're enjoying exclusive benefits",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 10.5,
+                            userEmail,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12.5,
+                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => context.push('/loyalty'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: const Row(
-                          children: [
-                            Text(
-                              "Loyalty Hub",
-                              style: TextStyle(
-                                color: Color(0xFFEC4899),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
-                            SizedBox(width: 4),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              color: Color(0xFFEC4899),
-                              size: 10,
-                            ),
-                          ],
-                        ),
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      onPressed: () => context.push('/profile/account'),
                     ),
                   ],
                 ),
               ),
 
+              const SizedBox(height: 12),
 
-              const SizedBox(height: 28),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "My Tools",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+              // 2. Quick Metrics Row
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                  border: Border.all(
+                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatItem('Appointments', '$bookingsCount', () => context.go('/bookings'), isDark),
+                    Container(height: 28, width: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    _buildStatItem('Favorites', '$favoritesCount', () => context.push('/profile/favorites'), isDark),
+                    Container(height: 28, width: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    _buildStatItem('Points', '$loyaltyPoints', () => context.push('/loyalty'), isDark),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // 3. Grouped Settings Sections
+              _buildSectionTitle('ACCOUNT', isDark),
+              _buildSettingsGroup([
+                _buildTile(
+                  icon: Icons.person_outline_rounded,
+                  title: 'Personal Information',
+                  subtitle: 'Name, phone, email & gender',
+                  onTap: () => context.push('/profile/account'),
+                  isDark: isDark,
+                ),
+                _buildTile(
+                  icon: Icons.location_on_outlined,
+                  title: 'Saved Addresses',
+                  subtitle: 'Manage home & workplace delivery points',
+                  onTap: () => context.push('/profile/addresses'),
+                  isDark: isDark,
+                ),
+                _buildTile(
+                  icon: Icons.credit_card_outlined,
+                  title: 'Payment Methods',
+                  subtitle: 'Saved cards & digital wallets',
+                  onTap: () => context.push('/profile/payments'),
+                  isDark: isDark,
+                ),
+                _buildTile(
+                  icon: Icons.favorite_border_rounded,
+                  title: 'Saved Salons & Favorites',
+                  subtitle: 'Your preferred beauty venues',
+                  onTap: () => context.push('/profile/favorites'),
+                  isDark: isDark,
+                  isLast: true,
+                ),
+              ], isDark),
+
+              const SizedBox(height: 20),
+
+              _buildSectionTitle('BENEFITS & OFFERS', isDark),
+              _buildSettingsGroup([
+                _buildTile(
+                  icon: Icons.workspace_premium_outlined,
+                  title: 'Loyalty & VIP Pass',
+                  subtitle: 'Tier progress, rewards catalog & points',
+                  onTap: () => context.push('/loyalty'),
+                  isDark: isDark,
+                ),
+                _buildTile(
+                  icon: Icons.local_offer_outlined,
+                  title: 'Exclusive Deals & Coupons',
+                  subtitle: 'Special salon discounts & promos',
+                  onTap: () => context.push('/offers'),
+                  isDark: isDark,
+                ),
+                _buildTile(
+                  icon: Icons.card_giftcard_rounded,
+                  title: 'Refer a Friend & Earn',
+                  subtitle: 'Share code for bonus credits',
+                  onTap: () => context.push('/profile/refer'),
+                  isDark: isDark,
+                  isLast: true,
+                ),
+              ], isDark),
+
+              const SizedBox(height: 20),
+
+              _buildSectionTitle('PREFERENCES & SUPPORT', isDark),
+              _buildSettingsGroup([
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  child: Row(
                     children: [
-                      _buildToolItem(
-                        theme,
-                        isDark,
-                        Icons.credit_card_rounded,
-                        const Color(0xFFFF1E70),
-                        "My Payments",
-                        () => context.push('/profile/payments'),
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                          size: 18,
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                        ),
                       ),
-                      _buildToolItem(
-                        theme,
-                        isDark,
-                        Icons.local_offer_outlined,
-                        Colors.orange,
-                        "Offers",
-                        () => context.push('/profile/offers'),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Dark Theme',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                            Text(
+                              isDark ? 'Obsidian mode active' : 'Studio light mode active',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      _buildToolItem(
-                        theme,
-                        isDark,
-                        Icons.location_on_outlined,
-                        const Color(0xFFEC4899),
-                        "My Addresses",
-                        () => context.push('/profile/addresses'),
-                      ),
-                      _buildToolItem(
-                        theme,
-                        isDark,
-                        Icons.chat_bubble_outline_rounded,
-                        Colors.blue,
-                        "Help & Support",
-                        () => context.push('/support'),
-                      ),
-                      _buildToolItem(
-                        theme,
-                        isDark,
-                        Icons.card_giftcard_rounded,
-                        Colors.green,
-                        "Refer & Earn",
-                        () => context.push('/profile/refer'),
+                      Switch.adaptive(
+                        value: isDark,
+                        activeTrackColor: AppColors.primary,
+                        onChanged: (val) {
+                          settings.toggleTheme(val);
+                        },
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                const Divider(),
+                _buildTile(
+                  icon: Icons.notifications_none_rounded,
+                  title: 'Notifications',
+                  subtitle: 'Appointment alerts & promos',
+                  onTap: () => context.push('/notifications'),
+                  isDark: isDark,
+                ),
+                _buildTile(
+                  icon: Icons.help_outline_rounded,
+                  title: 'Help & Customer Support',
+                  subtitle: 'FAQs, ticket inquiries & contact',
+                  onTap: () => context.push('/support'),
+                  isDark: isDark,
+                  isLast: true,
+                ),
+              ], isDark),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  Material(
-                    color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        _buildGroupedMenuTile(
-                          theme,
-                          Icons.person_outline_rounded,
-                          const Color(0xFFEC4899),
-                          "Personal Information",
-                          () => context.push('/profile/account'),
-                          showDivider: true,
-                        ),
-                        _buildGroupedMenuTile(
-                          theme,
-                          Icons.notifications_none_rounded,
-                          const Color(0xFFEC4899),
-                          "Notifications",
-                          () => context.push('/notifications'),
-                          showDivider: true,
-                        ),
-                        _buildGroupedMenuTile(
-                          theme,
-                          Icons.shield_outlined,
-                          const Color(0xFFEC4899),
-                          "Privacy & Security",
-                          () {},
-                          showDivider: true,
-                        ),
-
-                        _buildGroupedMenuTile(
-                          theme,
-                          Icons.language_rounded,
-                          const Color(0xFFEC4899),
-                          "Language",
-                          () {},
-                          showDivider: true,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "English",
-                                style: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        SwitchListTile(
-                          value: settings.isDarkMode,
-                          activeThumbColor: theme.colorScheme.primary,
-                          title: const Text(
-                            "Dark Mode",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                          secondary: const Icon(
-                            Icons.dark_mode_outlined,
-                            color: Color(0xFFE91E63),
-                          ),
-                          onChanged: (val) => settings.setDarkMode(val),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Divider(
-                            height: 1,
-                            color: theme.colorScheme.outline.withAlpha(
-                              isDark ? 15 : 30,
-                            ),
-                          ),
-                        ),
-
-                        _buildGroupedMenuTile(
-                          theme,
-                          Icons.logout_rounded,
-                          const Color(0xFFE91E63),
-                          "Log Out",
-                          () => _showLogoutDialog(context),
-                          showDivider: false,
-                        ),
-                      ],
+              // 4. Log Out
+              GestureDetector(
+                onTap: () => _showLogoutDialog(context),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                    border: Border.all(
+                      color: AppColors.error.withAlpha(50),
                     ),
                   ),
-                ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Log Out of SalonVerse',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 36),
+
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  'SalonVerse v2.0.0 • Production Build',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: isDark ? AppColors.darkTextMuted : AppColors.lightTextTertiary,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -573,95 +383,26 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildDivider(ThemeData theme) {
-    return Container(
-      width: 1,
-      height: 32,
-      color: theme.colorScheme.outline.withAlpha(40),
-    );
-  }
-
-  Widget _buildStatItem(
-    ThemeData theme,
-    IconData icon,
-    Color iconColor,
-    String count,
-    String label,
-  ) {
-    final isDark = theme.brightness == Brightness.dark;
-    return Row(
-      children: [
-        Icon(icon, color: iconColor, size: 22),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              count,
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
-                fontWeight: FontWeight.bold,
-                height: 1.1,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildToolItem(
-    ThemeData theme,
-    bool isDark,
-    IconData icon,
-    Color iconColor,
-    String label,
-    VoidCallback onTap,
-  ) {
+  Widget _buildStatItem(String label, String value, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Column(
         children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E1C1B) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(isDark ? 0 : 4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+          Text(
+            value,
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
             ),
-            child: Icon(icon, color: iconColor, size: 22),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 1),
           Text(
             label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.lightTextPrimary,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11.5,
+              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
             ),
           ),
         ],
@@ -669,50 +410,97 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildGroupedMenuTile(
-    ThemeData theme,
-    IconData icon,
-    Color iconColor,
-    String label,
-    VoidCallback onTap, {
-    required bool showDivider,
-    Widget? trailing,
+  Widget _buildSectionTitle(String title, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsGroup(List<Widget> children, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isDark,
+    bool isLast = false,
   }) {
-    final isDark = theme.brightness == Brightness.dark;
     return Column(
       children: [
-        Material(
-          color: Colors.transparent,
-          child: ListTile(
-            onTap: onTap,
-            leading: Icon(icon, color: iconColor, size: 22),
-            title: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
-              ),
-            ),
-            trailing:
-                trailing ??
+        GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: theme.colorScheme.onSurfaceVariant.withAlpha(120),
-                  size: 20,
+                  size: 18,
+                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
                 ),
-          ),
-        ),
-        if (showDivider)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Divider(
-              height: 1,
-              color: theme.colorScheme.outline.withAlpha(isDark ? 15 : 30),
+              ],
             ),
           ),
+        ),
+        if (!isLast) const Divider(),
       ],
     );
   }

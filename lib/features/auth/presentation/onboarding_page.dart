@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:salonverse/core/storage/app_storage.dart';
 import 'package:salonverse/core/constants/app_constants.dart';
-import 'package:salonverse/core/widgets/app_button.dart';
+import 'package:salonverse/app/theme/app_theme.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
+
+class OnboardingSlide {
+  final IconData icon;
+  final String title;
+  final String description;
+
+  OnboardingSlide({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+}
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -19,21 +34,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<OnboardingSlide> _slides = [
     OnboardingSlide(
       icon: Icons.search_rounded,
-      title: "Centralized Discovery",
+      title: 'Curated Beauty Discovery',
       description:
-          "Find verified beauty salons across Nepal. Filter by location, specific service categories, and ratings to compare premium options.",
+          'Explore top-rated verified salons and beauty artists across Nepal with authentic reviews and clear portfolio previews.',
     ),
     OnboardingSlide(
       icon: Icons.calendar_month_rounded,
-      title: "Real-Time Booking",
+      title: 'Real-Time Schedule & Queue',
       description:
-          "Check live availability calendars for each salon and stylist. Book instantly and track your virtual queue position in real-time.",
+          'Check dynamic stylist calendars, reserve slots instantly, and track your live queue token directly on your phone.',
     ),
     OnboardingSlide(
-      icon: Icons.payments_outlined,
-      title: "Transparent Pricing",
+      icon: Icons.workspace_premium_rounded,
+      title: 'Transparent Pay & VIP Perks',
       description:
-          "Browse clear menu prices upfront with zero hidden costs. Complete payments seamlessly using eSewa, Khalti, or cash at the counter.",
+          'No surprise charges. Pay seamlessly with eSewa, Khalti, or counter cash while accumulating VIP loyalty credits.',
     ),
   ];
 
@@ -52,283 +67,162 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final size = MediaQuery.sizeOf(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [const Color(0xFF0F0E0D), const Color(0xFF1A1816)]
-                      : [const Color(0xFFFDFBF7), const Color(0xFFF3EDE4)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-
-            Positioned(
-              top: -size.width * 0.2,
-              left: -size.width * 0.1,
-              child: Container(
-                width: size.width * 0.6,
-                height: size.width * 0.6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      theme.colorScheme.primary.withAlpha(isDark ? 8 : 14),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 16,
-                ),
-                child: Column(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Column(
+              children: [
+                // Top Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            gradient: AppGradients.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.spa_rounded, color: Colors.white, size: 18),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'SalonVerse',
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_currentIndex < _slides.length - 1)
+                      TextButton(
+                        onPressed: _finishOnboarding,
+                        child: Text(
+                          'Skip',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13.5,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                // Carousel Slides
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _slides.length,
+                    onPageChanged: (index) => setState(() => _currentIndex = index),
+                    itemBuilder: (context, index) {
+                      final slide = _slides[index];
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ClipOval(
-                              child: Image.asset(
-                                'assets/images/logo.png',
-                                width: 28,
-                                height: 28,
-                                fit: BoxFit.cover,
+                            Container(
+                              width: 140,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.primaryTint,
+                                boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.2),
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 96,
+                                  height: 96,
+                                  decoration: const BoxDecoration(
+                                    gradient: AppGradients.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(slide.icon, size: 44, color: Colors.white),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(height: 40),
                             Text(
-                              'SalonVerse',
-                              style: theme.textTheme.titleMedium?.copyWith(
+                              slide.title,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(
+                                fontSize: 26,
                                 fontWeight: FontWeight.w800,
-                                color: theme.colorScheme.primary,
-                                letterSpacing: -0.5,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              slide.description,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13.5,
+                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                height: 1.5,
                               ),
                             ),
                           ],
                         ),
-                        if (_currentIndex < 2)
-                          TextButton(
-                            onPressed: () {
-                              _pageController.animateToPage(
-                                _slides.length - 1,
-                                duration: const Duration(milliseconds: 600),
-                                curve: Curves.easeInOutCubic,
-                              );
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.primary,
-                            ),
-                            child: Text(
-                              'Skip',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Dots & CTA
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_slides.length, (index) {
+                        final isActive = index == _currentIndex;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: isActive ? 24 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: isActive ? AppColors.primary : AppColors.primary.withAlpha(50),
                           ),
-                      ],
+                        );
+                      }),
                     ),
+                    const SizedBox(height: 32),
 
-                    Expanded(
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: _slides.length,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _currentIndex = index;
-                          });
-                        },
-                        itemBuilder: (context, index) {
-                          final slide = _slides[index];
-                          return AnimatedBuilder(
-                            animation: _pageController,
-                            builder: (context, child) {
-                              double value = 1.0;
-                              if (_pageController.position.haveDimensions) {
-                                value = _pageController.page! - index;
-                                value = (1 - (value.abs() * 0.15)).clamp(
-                                  0.0,
-                                  1.0,
-                                );
-                              }
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.scale(
-                                  scale: value,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 148,
-                                  height: 148,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        theme.colorScheme.primary.withAlpha(20),
-                                        theme.colorScheme.secondary.withAlpha(
-                                          12,
-                                        ),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    border: Border.all(
-                                      color: theme.colorScheme.primary
-                                          .withAlpha(30),
-                                      width: 2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: theme.colorScheme.primary
-                                            .withAlpha(isDark ? 5 : 10),
-                                        blurRadius: 24,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Container(
-                                      width: 108,
-                                      height: 108,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            theme.colorScheme.primary,
-                                            theme.colorScheme.secondary,
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        slide.icon,
-                                        size: 48,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 48),
-
-                                Text(
-                                  slide.title,
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.headlineLarge
-                                      ?.copyWith(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.5,
-                                      ),
-                                ),
-                                const SizedBox(height: 16),
-
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: Text(
-                                    slide.description,
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                      fontSize: 15,
-                                      height: 1.6,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                    SVButton(
+                      text: _currentIndex < _slides.length - 1 ? 'Next' : 'Get Started',
+                      isFullWidth: true,
+                      onPressed: () {
+                        if (_currentIndex < _slides.length - 1) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeOutCubic,
                           );
-                        },
-                      ),
+                        } else {
+                          _finishOnboarding();
+                        }
+                      },
                     ),
-
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(_slides.length, (index) {
-                            final isActive = index == _currentIndex;
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              width: isActive ? 24 : 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: isActive
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.primary.withAlpha(60),
-                              ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 36),
-
-                        if (_currentIndex < 2) ...[
-                          AppButton(
-                            label: "Next",
-                            onPressed: () {
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeOutCubic,
-                              );
-                            },
-                          ),
-                        ] else ...[
-                          AppButton(
-                            label: "Get Started",
-                            onPressed: () => _finishOnboarding(),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-
-class OnboardingSlide {
-  final IconData icon;
-  final String title;
-  final String description;
-
-  OnboardingSlide({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-}
-
-

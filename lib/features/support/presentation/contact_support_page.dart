@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/home/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
-import 'package:salonverse/core/widgets/app_button.dart';
-import 'package:salonverse/core/widgets/app_text_field.dart';
-import 'package:salonverse/core/widgets/feedback_helper.dart';
+import 'package:salonverse/shared/design_system/sv_button.dart';
 
 class ContactSupportPage extends StatefulWidget {
   const ContactSupportPage({super.key});
@@ -28,25 +29,31 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     final res = await AppService.instance.createSupportTicket(
       _subjectController.text.trim(),
       _msgController.text.trim(),
     );
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
 
     if (mounted) {
       if (res is Success) {
-        AppFeedback.success(context, "Support ticket created successfully!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Support ticket submitted! We will respond promptly.'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
         Navigator.pop(context);
       } else {
-        AppFeedback.error(context, (res as Failure).message);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text((res as Failure).message),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     }
   }
@@ -54,52 +61,54 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Contact Support')),
+      appBar: AppBar(
+        title: Text(
+          'Submit Support Ticket',
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Form(
             key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 24),
-
-                  AppTextField(
-                    controller: _subjectController,
-                    label: "Subject",
-                    prefixIcon: Icons.topic_outlined,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return "Please enter a subject.";
-                      }
-                      return null;
-                    },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _subjectController,
+                  decoration: const InputDecoration(
+                    labelText: 'Subject',
+                    hintText: 'e.g. Booking reschedule issue',
+                    prefixIcon: Icon(Icons.topic_outlined),
                   ),
-                  const SizedBox(height: 16),
+                  validator: (val) => val == null || val.isEmpty ? 'Please enter a subject' : null,
+                ),
+                const SizedBox(height: 16),
 
-                  AppTextField(
-                    controller: _msgController,
-                    label: "Describe your query or issue",
-                    prefixIcon: Icons.message_outlined,
-                    maxLines: 6,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return "Please describe your query.";
-                      }
-                      return null;
-                    },
+                TextFormField(
+                  controller: _msgController,
+                  maxLines: 6,
+                  decoration: const InputDecoration(
+                    labelText: 'Message / Description',
+                    hintText: 'Provide details about your question or issue...',
+                    alignLabelWithHint: true,
+                    prefixIcon: Padding(
+                      padding: EdgeInsets.only(bottom: 90),
+                      child: Icon(Icons.chat_outlined),
+                    ),
                   ),
-                  const SizedBox(height: 32),
+                  validator: (val) => val == null || val.isEmpty ? 'Please describe your query' : null,
+                ),
+                const SizedBox(height: 32),
 
-                  AppButton(
-                    label: "Submit Ticket",
-                    isLoading: _isLoading,
-                    onPressed: _handleSubmit,
-                  ),
-                ],
-              ),
+                SVButton(
+                  text: 'Submit Support Ticket',
+                  isFullWidth: true,
+                  isLoading: _isLoading,
+                  onPressed: _handleSubmit,
+                ),
+              ],
             ),
           ),
         ),

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -8,16 +9,51 @@ import 'package:open_filex/open_filex.dart';
 import 'package:salonverse/core/widgets/feedback_helper.dart';
 
 class ReceiptPdfHelper {
+  static Future<void> generateAndOpenReceipt(dynamic booking, [BuildContext? context]) async {
+    if (context != null) {
+      await generateAndDownloadReceipt(context: context, booking: booking);
+    }
+  }
+
   static Future<void> generateAndDownloadReceipt({
     required BuildContext context,
     required dynamic booking,
   }) async {
     try {
-      final pdf = pw.Document();
-
       final String bookingId = booking.id is String
           ? booking.id
           : "BK-${DateTime.now().millisecondsSinceEpoch}";
+      final sanitizedId = bookingId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+      final outputDir = await getApplicationDocumentsDirectory();
+      final file = File("${outputDir.path}/SalonVerse_Receipt_$sanitizedId.pdf");
+
+      // 1. If already generated and saved once, open immediately
+      if (await file.exists()) {
+        if (context.mounted) {
+          AppFeedback.success(context, "Opening saved receipt...");
+        }
+        try {
+          await OpenFilex.open(file.path);
+          return;
+        } catch (_) {
+          final bytes = await file.readAsBytes();
+          await Printing.sharePdf(
+            bytes: bytes,
+            filename: "SalonVerse_Receipt_$sanitizedId.pdf",
+          );
+          return;
+        }
+      }
+
+      // 2. Otherwise, generate for the first time
+      pw.MemoryImage? logoImage;
+      try {
+        final logoByteData = await rootBundle.load('assets/images/logo.png');
+        logoImage = pw.MemoryImage(logoByteData.buffer.asUint8List());
+      } catch (_) {}
+
+      final pdf = pw.Document();
+
       final String salonName = booking.salonName ?? "SalonVerse Partner Salon";
       final String serviceName = booking.serviceName ?? "Salon Service";
       final String stylistName = booking.stylistName ?? "Assigned Stylist";
@@ -43,25 +79,44 @@ class ReceiptPdfHelper {
               children: [
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
                       children: [
-                        pw.Text(
-                          "SALONVERSE",
-                          style: pw.TextStyle(
-                            fontSize: 24,
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColor.fromHex("#EC4899"),
+                        if (logoImage != null) ...[
+                          pw.Container(
+                            width: 36,
+                            height: 36,
+                            padding: const pw.EdgeInsets.all(5),
+                            decoration: pw.BoxDecoration(
+                              color: PdfColor.fromHex("#EC4899"),
+                              borderRadius: pw.BorderRadius.circular(8),
+                            ),
+                            child: pw.Image(logoImage, fit: pw.BoxFit.contain),
                           ),
-                        ),
-                        pw.SizedBox(height: 2),
-                        pw.Text(
-                          "Official Appointment Receipt & Invoice",
-                          style: pw.TextStyle(
-                            fontSize: 11,
-                            color: PdfColors.grey700,
-                          ),
+                          pw.SizedBox(width: 10),
+                        ],
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              "SALONVERSE",
+                              style: pw.TextStyle(
+                                fontSize: 20,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColor.fromHex("#EC4899"),
+                              ),
+                            ),
+                            pw.SizedBox(height: 2),
+                            pw.Text(
+                              "Official Appointment Receipt & Invoice",
+                              style: const pw.TextStyle(
+                                fontSize: 10,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -400,12 +455,6 @@ class ReceiptPdfHelper {
       );
 
       final bytes = await pdf.save();
-
-      final outputDir = await getApplicationDocumentsDirectory();
-      final sanitizedId = bookingId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
-      final file = File(
-        "${outputDir.path}/SalonVerse_Receipt_$sanitizedId.pdf",
-      );
       await file.writeAsBytes(bytes);
 
       if (context.mounted) {
