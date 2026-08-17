@@ -1,3 +1,5 @@
+import 'package:salonverse/core/utils/app_logger.dart';
+
 class ServiceModel {
   final String id;
   final String name;
@@ -30,15 +32,19 @@ class ServiceModel {
   }
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
-    return ServiceModel(
-      id: (json['id'] ?? json['_id'])?.toString() ?? '',
-      name: json['name'] ?? '',
+    final id = (json['id'] ?? json['_id'])?.toString() ?? '';
+    final name = json['name'] ?? '';
+    final model = ServiceModel(
+      id: id,
+      name: name,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       durationMinutes: json['durationMinutes'] as int? ?? 30,
       category: json['category'] ?? 'Hair',
       description: json['description'] ?? '',
       assignedStaff: json['assignedStaff']?.toString(),
     );
+    AppLogger.logModelParse('ServiceModel', true, 'id: $id, name: $name');
+    return model;
   }
 }
 
@@ -84,9 +90,11 @@ class StylistModel {
       specs = [json['specialty'].toString()];
     }
 
-    return StylistModel(
-      id: (json['id'] ?? json['_id'])?.toString() ?? '',
-      name: json['name'] ?? '',
+    final id = (json['id'] ?? json['_id'])?.toString() ?? '';
+    final name = json['name'] ?? '';
+    final model = StylistModel(
+      id: id,
+      name: name,
       imageUrl: json['imageUrl'] ?? json['avatar'] ?? '',
       specialty: specs.isNotEmpty ? specs.join(", ") : '',
       specialties: specs,
@@ -96,6 +104,8 @@ class StylistModel {
         json['portfolioImages'] ?? json['portfolio'] ?? [],
       ),
     );
+    AppLogger.logModelParse('StylistModel', true, 'id: $id, name: $name');
+    return model;
   }
 }
 
@@ -190,9 +200,12 @@ class SalonModel {
       }
     }
 
-    return SalonModel(
-      id: (json['id'] ?? json['_id'])?.toString() ?? '',
-      name: json['name'] ?? '',
+    final id = (json['id'] ?? json['_id'])?.toString() ?? '';
+    final name = json['name'] ?? '';
+
+    final model = SalonModel(
+      id: id,
+      name: name,
       imageUrl: json['imageUrl'] ?? json['coverImage'] ?? '',
       address: json['address'] ?? '',
       city: json['city'] ?? 'Kathmandu',
@@ -217,5 +230,7 @@ class SalonModel {
           .map((e) => StylistModel.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
     );
+    AppLogger.logModelParse('SalonModel', true, 'id: $id, name: $name');
+    return model;
   }
 }

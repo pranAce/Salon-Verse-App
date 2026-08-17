@@ -19,6 +19,7 @@ class _AccountPageState extends State<AccountPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
+  late TextEditingController _dobController;
   late TextEditingController _locationAddressController;
   late TextEditingController _locationCityController;
   double _lat = 27.7172;
@@ -31,6 +32,7 @@ class _AccountPageState extends State<AccountPage> {
     final user = context.read<AuthProvider>().currentUser;
     _nameController = TextEditingController(text: user?.name);
     _phoneController = TextEditingController(text: user?.number);
+    _dobController = TextEditingController(text: user?.dateOfBirth);
     _locationAddressController = TextEditingController(
       text: user?.homeLocationAddress ?? 'Thamel, Kathmandu',
     );
@@ -45,6 +47,7 @@ class _AccountPageState extends State<AccountPage> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _dobController.dispose();
     _locationAddressController.dispose();
     _locationCityController.dispose();
     super.dispose();
@@ -99,6 +102,9 @@ class _AccountPageState extends State<AccountPage> {
       phone: _phoneController.text.trim().isEmpty
           ? null
           : _phoneController.text.trim(),
+      dateOfBirth: _dobController.text.trim().isEmpty
+          ? null
+          : _dobController.text.trim(),
       homeLocation: {
         'address': _locationAddressController.text.trim(),
         'city': _locationCityController.text.trim(),
@@ -156,6 +162,30 @@ class _AccountPageState extends State<AccountPage> {
                   label: "Phone Number",
                   prefixIcon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+
+                GestureDetector(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+                      firstDate: DateTime(1940),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      final month = picked.month.toString().padLeft(2, '0');
+                      final day = picked.day.toString().padLeft(2, '0');
+                      _dobController.text = "${picked.year}-$month-$day";
+                    }
+                  },
+                  child: AbsorbPointer(
+                    child: AppTextField(
+                      controller: _dobController,
+                      label: "Date of Birth (For Birthday Perks)",
+                      prefixIcon: Icons.cake_outlined,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
 

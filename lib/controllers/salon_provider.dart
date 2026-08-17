@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:salonverse/models/salon_model.dart';
 import 'package:salonverse/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 
 class SalonProvider extends ChangeNotifier {
   final _service = AppService.instance;
@@ -51,6 +52,7 @@ class SalonProvider extends ChangeNotifier {
     if (!silent) {
       _isLoading = true;
       _error = null;
+      AppLogger.logState('SalonDiscovery', 'StateChanged -> LOADING');
       notifyListeners();
     }
 
@@ -69,8 +71,10 @@ class SalonProvider extends ChangeNotifier {
       if (_selectedCategory == "All" && _searchQuery.isEmpty) {
         _allSalons = List<SalonModel>.from(result.data);
       }
+      AppLogger.logState('SalonDiscovery', 'StateChanged -> SUCCESS (${_salons.length} items)');
     } else {
       _error = (result as Failure).message;
+      AppLogger.logState('SalonDiscovery', 'StateChanged -> ERROR ($_error)');
     }
     notifyListeners();
   }

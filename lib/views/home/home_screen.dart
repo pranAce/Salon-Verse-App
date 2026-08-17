@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import '../../services/api_config.dart';
 import '../../controllers/auth_provider.dart';
 import '../../controllers/salon_provider.dart';
 import '../../models/salon_model.dart';
@@ -877,6 +878,49 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
                       ),
                     )
+                  else if (salonProv.error != null && salonProv.salons.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withAlpha(15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.red.withAlpha(40)),
+                      ),
+                      child: Column(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.red,
+                            size: 36,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Failed to load salons: ${salonProv.error}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEC4899),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: _fetchLiveGpsAndSalons,
+                            icon: const Icon(Icons.refresh_rounded, size: 16),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    )
                   else if (salonProv.salons.isEmpty)
                     Container(
                       width: double.infinity,
@@ -958,7 +1002,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.network(
-                        salon.imageUrl,
+                        ApiConfig.resolveImageUrl(salon.imageUrl),
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             const Icon(

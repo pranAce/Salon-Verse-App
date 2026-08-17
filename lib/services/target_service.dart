@@ -14,6 +14,8 @@ class TargetService {
         dynamic targetsList = data;
         if (data is Map && data.containsKey('targets')) {
           targetsList = data['targets'];
+        } else if (data is Map && data.containsKey('items')) {
+          targetsList = data['items'];
         }
         final List list = targetsList is List ? targetsList : [];
         return list

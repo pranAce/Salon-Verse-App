@@ -9,7 +9,10 @@ import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/controllers/salon_provider.dart';
 import 'package:salonverse/controllers/booking_provider.dart';
 import 'package:salonverse/controllers/salon_workspace_provider.dart';
+import 'package:salonverse/controllers/subscription_provider.dart';
+import 'package:salonverse/controllers/loyalty_provider.dart';
 import 'package:salonverse/widgets/offline_banner.dart';
+
 
 import 'package:flutter/foundation.dart';
 
@@ -48,6 +51,7 @@ Future<void> main() async {
   }
 
   runApp(
+
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
@@ -55,10 +59,13 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => SalonProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => SalonWorkspaceProvider()),
+        ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
+        ChangeNotifierProvider(create: (_) => LoyaltyProvider()),
       ],
       child: const SalonVerseApp(),
     ),
   );
+
 }
 
 class SalonVerseApp extends StatelessWidget {

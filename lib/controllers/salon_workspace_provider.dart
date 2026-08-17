@@ -4,6 +4,7 @@ import 'package:salonverse/models/target_model.dart';
 import 'package:salonverse/services/admin_api_service.dart';
 import 'package:salonverse/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 
 class SalonWorkspaceProvider extends ChangeNotifier {
   final _apiService = AdminApiService.instance;
@@ -32,6 +33,7 @@ class SalonWorkspaceProvider extends ChangeNotifier {
   Future<bool> fetchDashboardMetrics() async {
     _isLoading = true;
     _error = null;
+    AppLogger.logState('SalonAdminDashboard', 'StateChanged -> LOADING');
     notifyListeners();
 
     final result = await _apiService.getDashboardMetrics();
@@ -39,10 +41,12 @@ class SalonWorkspaceProvider extends ChangeNotifier {
 
     if (result is Success<Map<String, dynamic>>) {
       _dashboardMetrics = result.data;
+      AppLogger.logState('SalonAdminDashboard', 'StateChanged -> SUCCESS');
       notifyListeners();
       return true;
     } else {
       _error = (result as Failure).message;
+      AppLogger.logState('SalonAdminDashboard', 'StateChanged -> ERROR ($_error)');
       notifyListeners();
       return false;
     }
@@ -51,6 +55,7 @@ class SalonWorkspaceProvider extends ChangeNotifier {
   Future<bool> fetchStaff(String salonId) async {
     _isLoading = true;
     _error = null;
+    AppLogger.logState('SalonAdminStaff', 'StateChanged -> LOADING (Salon: $salonId)');
     notifyListeners();
 
     final result = await _apiService.getStaffList(salonId: salonId);
@@ -60,10 +65,12 @@ class SalonWorkspaceProvider extends ChangeNotifier {
       _staffList = result.data
           .map((json) => StaffModel.fromJson(Map<String, dynamic>.from(json)))
           .toList();
+      AppLogger.logState('SalonAdminStaff', 'StateChanged -> SUCCESS (${_staffList.length} staff)');
       notifyListeners();
       return true;
     } else {
       _error = (result as Failure).message;
+      AppLogger.logState('SalonAdminStaff', 'StateChanged -> ERROR ($_error)');
       notifyListeners();
       return false;
     }

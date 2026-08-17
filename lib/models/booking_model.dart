@@ -1,3 +1,5 @@
+import 'package:salonverse/core/utils/app_logger.dart';
+
 class BookingModel {
   final String id;
   final String userId;
@@ -154,8 +156,9 @@ class BookingModel {
     final srv = json['service'];
     final sty = json['stylist'];
 
-    return BookingModel(
-      id: (json['id'] ?? json['_id'])?.toString() ?? '',
+    final bookingId = (json['id'] ?? json['_id'])?.toString() ?? '';
+    final model = BookingModel(
+      id: bookingId,
       userId: extractId(cust, 'userId'),
       userName: extractName(cust, 'userName'),
       salonId: extractId(sal, 'salonId'),
@@ -183,7 +186,7 @@ class BookingModel {
       paymentMethod: json['paymentMethod'] ?? 'Cash',
       paymentStatus: json['paymentStatus'] ?? 'Pending',
       status: json['status'] ?? 'in_queue',
-      queuePosition: json['queuePosition'] as int? ?? 0,
+      queuePosition: (json['queuePosition'] as num?)?.toInt() ?? 0,
       createdAt: json['createdAt']?.toString() ?? '',
       reviewed: json['reviewed'] as bool? ?? false,
       isHomeService:
@@ -192,5 +195,7 @@ class BookingModel {
       contactNumber:
           (json['contactNumber'] ?? json['contactPhone'])?.toString() ?? '',
     );
+    AppLogger.logModelParse('BookingModel', true, 'id: $bookingId, status: ${model.status}');
+    return model;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 
 class OfferModel {
   final String id;
@@ -76,9 +77,12 @@ class OfferModel {
       }
     }
 
-    return OfferModel(
-      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      code: json['code']?.toString().toUpperCase() ?? '',
+    final offerId = json['_id']?.toString() ?? json['id']?.toString() ?? '';
+    final codeStr = json['code']?.toString().toUpperCase() ?? '';
+
+    final model = OfferModel(
+      id: offerId,
+      code: codeStr,
       title: json['title']?.toString() ?? 'Special Offer',
       description: json['description']?.toString() ?? '',
       discountType: json['discountType']?.toString() ?? 'fixed',
@@ -96,6 +100,8 @@ class OfferModel {
       category: json['category']?.toString() ?? 'Discounts',
       icon: parseIcon(json['iconName']?.toString()),
     );
+    AppLogger.logModelParse('OfferModel', true, 'id: $offerId, code: $codeStr');
+    return model;
   }
 
   Map<String, dynamic> toJson() {

@@ -41,49 +41,52 @@ class _BookingStep2SchedulePaymentState
     ServiceModel? service,
     DateTime? activeDate,
   ) {
+    List<String> rawSlots;
     if (provider.backendAvailableSlots.isNotEmpty ||
         provider.backendBookedSlots.isNotEmpty) {
-      final combined = <String>{
+      rawSlots = <String>{
         ...provider.backendAvailableSlots,
         ...provider.backendBookedSlots,
       }.toList();
-      return combined;
+    } else if (salon.publishedTimeSlots.isNotEmpty) {
+      rawSlots = List<String>.from(salon.publishedTimeSlots);
+    } else {
+      rawSlots = [
+        "09:00 AM",
+        "09:30 AM",
+        "10:00 AM",
+        "10:30 AM",
+        "11:00 AM",
+        "11:30 AM",
+        "12:00 PM",
+        "12:30 PM",
+        "01:00 PM",
+        "01:30 PM",
+        "02:00 PM",
+        "02:30 PM",
+        "03:00 PM",
+        "03:30 PM",
+        "04:00 PM",
+        "04:30 PM",
+        "05:00 PM",
+        "05:30 PM",
+        "06:00 PM",
+        "06:30 PM",
+        "07:00 PM",
+        "07:30 PM",
+        "08:00 PM",
+      ];
     }
-    if (salon.publishedTimeSlots.isNotEmpty) {
-      return salon.publishedTimeSlots;
-    }
-    return [
-      "09:00 AM",
-      "09:30 AM",
-      "10:00 AM",
-      "10:30 AM",
-      "11:00 AM",
-      "11:30 AM",
-      "12:00 PM",
-      "12:30 PM",
-      "01:00 PM",
-      "01:30 PM",
-      "02:00 PM",
-      "02:30 PM",
-      "03:00 PM",
-      "03:30 PM",
-      "04:00 PM",
-      "04:30 PM",
-      "05:00 PM",
-      "05:30 PM",
-      "06:00 PM",
-      "06:30 PM",
-      "07:00 PM",
-      "07:30 PM",
-      "08:00 PM",
-    ];
+
+    return rawSlots;
   }
 
   List<String> _filterSlotsByPeriod(List<String> slots, String period) {
     return slots.where((slot) {
       final isPM = slot.contains("PM");
       final isAM = slot.contains("AM");
-      final hour = int.tryParse(slot.split(":")[0]) ?? 12;
+      final hourStr = slot.split(":")[0];
+      final hour = int.tryParse(hourStr) ?? 12;
 
       if (period == "morning") {
         return isAM;
@@ -254,24 +257,31 @@ class _BookingStep2SchedulePaymentState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_month_rounded,
-                    color: Color(0xFFEC4899),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Select Date",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_month_rounded,
+                      color: Color(0xFFEC4899),
+                      size: 18,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        "Select Date",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              if (activeDate != null)
+              if (activeDate != null) ...[
+                const SizedBox(width: 8),
                 Text(
                   "${activeDate.day}/${activeDate.month}/${activeDate.year}",
                   style: const TextStyle(
@@ -280,6 +290,7 @@ class _BookingStep2SchedulePaymentState
                     color: Color(0xFFEC4899),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -375,23 +386,30 @@ class _BookingStep2SchedulePaymentState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.access_time_filled_rounded,
-                    color: Color(0xFFEC4899),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Select Time Slot",
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time_filled_rounded,
+                      color: Color(0xFFEC4899),
+                      size: 18,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        "Select Time Slot",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -413,6 +431,62 @@ class _BookingStep2SchedulePaymentState
             ],
           ),
           const SizedBox(height: 16),
+
+          if (provider.isSalonClosed) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.withAlpha(15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.red.withAlpha(50)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.event_busy_rounded, color: Colors.red),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "Salon is closed on this date. Please select another date.",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ] else if (dynamicTimeSlots.where((s) => !bookedTimeSlots.contains(s)).isEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF261D10) : const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.amber.withAlpha(80)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.schedule_rounded, color: Colors.amber, size: 22),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "No time slots available for this date (operating hours ended or all slots booked). Please select a future date above.",
+                      style: TextStyle(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           ...[
             {
@@ -607,27 +681,34 @@ class _BookingStep2SchedulePaymentState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.local_offer_rounded,
-                          color: provider.appliedPromoCode != null
-                              ? Colors.green
-                              : const Color(0xFFEC4899),
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Promo Code & Coupons",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: isDark ? Colors.white : Colors.black87,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.local_offer_rounded,
+                            color: provider.appliedPromoCode != null
+                                ? Colors.green
+                                : const Color(0xFFEC4899),
+                            size: 18,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              "Promo Code & Coupons",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (provider.appliedPromoCode == null)
+                    if (provider.appliedPromoCode == null) ...[
+                      const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () => context.push('/profile/offers'),
                         child: const Text(
@@ -639,6 +720,7 @@ class _BookingStep2SchedulePaymentState
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -726,6 +808,8 @@ class _BookingStep2SchedulePaymentState
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEC4899),
                           foregroundColor: Colors.white,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size.zero,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 18,
                             vertical: 12,

@@ -755,7 +755,10 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Row(
+                              Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 6,
+                                runSpacing: 4,
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -779,9 +782,8 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
                                   Text(
-                                    "•  ${svc.durationMinutes} min session",
+                                    "• ${svc.durationMinutes} min session",
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: isDark
@@ -883,7 +885,7 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
               }
 
               return SizedBox(
-                height: 148,
+                height: 158,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: list.length,
@@ -958,26 +960,29 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.star_rounded,
-                                      color: Colors.amber,
-                                      size: 14,
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      '${stylist.rating}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11,
-                                        color: isDark
-                                            ? Colors.white70
-                                            : Colors.black87,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.star_rounded,
+                                        color: Colors.amber,
+                                        size: 13,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        '${stylist.rating}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 11,
+                                          color: isDark
+                                              ? Colors.white70
+                                              : Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

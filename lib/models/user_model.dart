@@ -1,3 +1,5 @@
+import 'package:salonverse/core/utils/app_logger.dart';
+
 class UserModel {
   final String id;
   final String name;
@@ -14,6 +16,8 @@ class UserModel {
   final double? homeLocationLat;
   final double? homeLocationLng;
 
+  final String? dateOfBirth;
+
   UserModel({
     required this.id,
     required this.name,
@@ -25,6 +29,7 @@ class UserModel {
     this.permissions = const [],
     this.status = 'active',
     this.createdAt,
+    this.dateOfBirth,
     this.homeLocationAddress,
     this.homeLocationCity,
     this.homeLocationLat,
@@ -55,6 +60,7 @@ class UserModel {
     List<String>? permissions,
     String? status,
     String? createdAt,
+    String? dateOfBirth,
     String? homeLocationAddress,
     String? homeLocationCity,
     double? homeLocationLat,
@@ -71,6 +77,7 @@ class UserModel {
       permissions: permissions ?? this.permissions,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       homeLocationAddress: homeLocationAddress ?? this.homeLocationAddress,
       homeLocationCity: homeLocationCity ?? this.homeLocationCity,
       homeLocationLat: homeLocationLat ?? this.homeLocationLat,
@@ -90,6 +97,7 @@ class UserModel {
       'permissions': permissions,
       'status': status,
       'createdAt': createdAt,
+      'dateOfBirth': dateOfBirth,
       'homeLocationAddress': homeLocationAddress,
       'homeLocationCity': homeLocationCity,
       'homeLocationLat': homeLocationLat,
@@ -113,8 +121,16 @@ class UserModel {
           .toList();
     }
 
-    return UserModel(
-      id: (json['id'] ?? json['_id'] ?? json['uid'])?.toString() ?? '',
+    String? parseDob(dynamic val) {
+      if (val == null) return null;
+      final str = val.toString();
+      if (str.contains('T')) return str.split('T')[0];
+      return str;
+    }
+
+    final userId = (json['id'] ?? json['_id'] ?? json['uid'])?.toString() ?? '';
+    final model = UserModel(
+      id: userId,
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       number: (json['phone'] ?? json['number'])?.toString(),
@@ -124,6 +140,7 @@ class UserModel {
       permissions: parseList(json['permissions']),
       status: json['status'] ?? 'active',
       createdAt: json['createdAt']?.toString(),
+      dateOfBirth: parseDob(json['dateOfBirth'] ?? json['dob']),
       homeLocationAddress: hl is Map
           ? hl['address']?.toString()
           : json['homeLocationAddress']?.toString(),
@@ -137,5 +154,8 @@ class UserModel {
           ? (hl['longitude'] as num?)?.toDouble()
           : (json['homeLocationLng'] as num?)?.toDouble(),
     );
+    AppLogger.logModelParse('UserModel', true, 'id: $userId, role: ${model.role}');
+    return model;
   }
 }
+

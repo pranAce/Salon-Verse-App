@@ -170,64 +170,68 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        onTap: () {
-          if (!item.isRead) {
-            _markAsRead(item.id);
-          }
-        },
-        leading: CircleAvatar(
-          radius: 22,
-          backgroundColor: iconColor.withAlpha(20),
-          child: Icon(iconData, color: iconColor, size: 20),
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                item.title,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          onTap: () {
+            if (!item.isRead) {
+              _markAsRead(item.id);
+            }
+          },
+          leading: CircleAvatar(
+            radius: 22,
+            backgroundColor: iconColor.withAlpha(20),
+            child: Icon(iconData, color: iconColor, size: 20),
+          ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: TextStyle(
+                    fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w900,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              if (!item.isRead)
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEC4899),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Text(
+                item.message,
                 style: TextStyle(
-                  fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w900,
-                  fontSize: 14,
+                  fontSize: 12.5,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
+                  height: 1.3,
                 ),
               ),
-            ),
-            if (!item.isRead)
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEC4899),
-                  shape: BoxShape.circle,
+              const SizedBox(height: 6),
+              Text(
+                _formatTimeAgo(item.createdAt),
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: Colors.grey.shade500,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              item.message,
-              style: TextStyle(
-                fontSize: 12.5,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _formatTimeAgo(item.createdAt),
-              style: TextStyle(
-                fontSize: 10.5,
-                color: Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

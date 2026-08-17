@@ -33,6 +33,8 @@ class AuthService {
     required String email,
     required String password,
     String? phone,
+    String? referralCode,
+    String? dateOfBirth,
   }) async {
     final result = await _client.request(
       "POST",
@@ -42,6 +44,10 @@ class AuthService {
         "email": email,
         "password": password,
         "phone": phone,
+        if (referralCode != null && referralCode.isNotEmpty)
+          "referralCode": referralCode.trim().toUpperCase(),
+        if (dateOfBirth != null && dateOfBirth.isNotEmpty)
+          "dateOfBirth": dateOfBirth,
       },
       onSuccess: (data) => data as Map<String, dynamic>,
     );
@@ -134,6 +140,7 @@ class AuthService {
   Future<ApiResult<UserModel>> updateProfile({
     String? name,
     String? phone,
+    String? dateOfBirth,
     Map<String, dynamic>? homeLocation,
   }) async {
     if (_token == null) return const Failure("Not logged in");
@@ -141,6 +148,7 @@ class AuthService {
     final body = <String, dynamic>{};
     if (name != null && name.isNotEmpty) body['name'] = name;
     if (phone != null && phone.isNotEmpty) body['phone'] = phone;
+    if (dateOfBirth != null && dateOfBirth.isNotEmpty) body['dateOfBirth'] = dateOfBirth;
     if (homeLocation != null) body['homeLocation'] = homeLocation;
 
     final result = await _client.request(

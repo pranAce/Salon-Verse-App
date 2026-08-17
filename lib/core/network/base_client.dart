@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 import 'package:salonverse/services/api_config.dart';
 
 class BaseClient {
@@ -44,9 +44,7 @@ class BaseClient {
     final url = Uri.parse("$baseUrl$fullPath");
 
     try {
-      if (kDebugMode) {
-        debugPrint('[BaseClient] $method $url');
-      }
+      AppLogger.logApiRequest(method, url.toString(), headers: headers, body: body);
 
       http.Response response;
       final encodedBody = body != null ? jsonEncode(body) : null;
@@ -68,8 +66,11 @@ class BaseClient {
       } else if (method == "DELETE") {
         response = await http.delete(url, headers: headers).timeout(_timeout);
       } else {
+        AppLogger.logApiError(url.toString(), 400, "UNSUPPORTED_METHOD", "Unsupported HTTP method: $method");
         return const Failure("Unsupported HTTP method");
       }
+
+      AppLogger.logApiResponse(response.statusCode, url.toString(), response.body);
 
       final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
@@ -82,11 +83,13 @@ class BaseClient {
         final message = json is Map<String, dynamic>
             ? (json['message'] ?? 'Request failed (${response.statusCode})')
             : 'Request failed (${response.statusCode})';
+        AppLogger.logApiError(url.toString(), response.statusCode, "HTTP_ERROR", message);
         return Failure(message, statusCode: response.statusCode);
       }
     } catch (e) {
-      if (kDebugMode) debugPrint('[BaseClient Error] $e');
+      AppLogger.logApiError(url.toString(), 0, "EXCEPTION", e.toString());
       return Failure(e.toString());
     }
   }
 }
+

@@ -5,6 +5,7 @@ import 'package:salonverse/models/offer_model.dart';
 import 'package:salonverse/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
 import 'package:salonverse/widgets/feedback_helper.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 
 class OffersPage extends StatefulWidget {
   const OffersPage({super.key});
@@ -20,6 +21,13 @@ class _OffersPageState extends State<OffersPage> {
   List<OfferModel> _offers = [];
   bool _isLoading = true;
   String? _errorMessage;
+
+  final List<String> _categories = [
+    "All Offers",
+    "Discounts",
+    "Spa Packages",
+    "Cashback",
+  ];
 
   @override
   void initState() {
@@ -46,129 +54,64 @@ class _OffersPageState extends State<OffersPage> {
         _isLoading = false;
         if (result is Success<List<OfferModel>>) {
           _offers = result.data;
+          AppLogger.logState('OffersPage', 'Loaded ${_offers.length} offers into UI state');
         } else {
           _errorMessage = (result as Failure).message;
+          AppLogger.logApiError('OffersPage', 0, 'FETCH_FAILED', _errorMessage!);
         }
       });
     }
   }
-
-  static const List<OfferModel> fallbackOffers = [
-    OfferModel(
-      id: "offer_salon500",
-      code: "SALON500",
-      title: "Flat Rs. 500 Welcome Discount",
-      description:
-          "Get Rs. 500 off on your salon bookings above Rs. 1000. Valid across all verified salons in Nepal.",
-      discountType: "fixed",
-      discountValue: 500.0,
-      minOrderAmount: 1000.0,
-      isActive: true,
-      badgeColor: Color(0xFFEC4899),
-      category: "Discounts",
-      icon: Icons.card_giftcard_rounded,
-    ),
-    OfferModel(
-      id: "offer_glow20",
-      code: "GLOW20",
-      title: "20% Off Skincare & Spa Sessions",
-      description:
-          "Enjoy 20% off on all facial, spa, massage, and bridal packages across partner salons.",
-      discountType: "percentage",
-      discountValue: 20.0,
-      minOrderAmount: 500.0,
-      maxDiscount: 500.0,
-      isActive: true,
-      badgeColor: Color(0xFF8B5CF6),
-      category: "Spa Packages",
-      icon: Icons.spa_rounded,
-    ),
-    OfferModel(
-      id: "offer_beauty50",
-      code: "BEAUTY50",
-      title: "First Booking 50% Special",
-      description:
-          "First time trying SalonVerse? Claim 50% discount up to Rs. 500 on haircuts and styling.",
-      discountType: "percentage",
-      discountValue: 50.0,
-      minOrderAmount: 300.0,
-      maxDiscount: 500.0,
-      isActive: true,
-      badgeColor: Color(0xFF10B981),
-      category: "Discounts",
-      icon: Icons.content_cut_rounded,
-    ),
-    OfferModel(
-      id: "offer_weekend15",
-      code: "WEEKEND15",
-      title: "Weekend Styling Bonanza",
-      description:
-          "Book any weekend appointment (Friday - Sunday) and get an instant 15% discount automatically.",
-      discountType: "percentage",
-      discountValue: 15.0,
-      minOrderAmount: 400.0,
-      isActive: true,
-      badgeColor: Color(0xFFF59E0B),
-      category: "Cashback",
-      icon: Icons.celebration_rounded,
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final primaryTextColor = isDark ? Colors.white : const Color(0xFF111827);
-    final secondaryTextColor = isDark
-        ? Colors.white70
-        : const Color(0xFF4B5563);
-    final cardBgColor = isDark ? const Color(0xFF1E1C1B) : Colors.white;
+    final cardBgColor = isDark ? const Color(0xFF181716) : Colors.white;
 
-    final displayOffers = _offers.isNotEmpty ? _offers : fallbackOffers;
-
-    final filteredOffers = displayOffers.where((offer) {
-      if (!offer.isActive) return false;
+    final filteredOffers = _offers.where((offer) {
       if (_selectedCategory == "All Offers") return true;
+      final catLower = offer.category.toLowerCase();
       if (_selectedCategory == "Discounts") {
-        return offer.category == "Discounts" ||
-            offer.discountType == 'percentage';
+        return catLower.contains("discount") ||
+            offer.discountType.toLowerCase() == 'percentage';
       }
       if (_selectedCategory == "Spa Packages") {
-        return offer.category == "Spa Packages";
+        return catLower.contains("spa") || catLower.contains("package");
       }
       if (_selectedCategory == "Cashback") {
-        return offer.category == "Cashback" || offer.discountType == 'fixed';
+        return catLower.contains("cashback") ||
+            offer.discountType.toLowerCase() == 'fixed';
       }
       return true;
     }).toList();
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF090808)
-          : const Color(0xFFF9FAFB),
+      backgroundColor: isDark ? const Color(0xFF0D0C0C) : const Color(0xFFF9FAFB),
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF090808) : Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0D0C0C) : Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,
-            color: isDark ? Colors.white : Colors.black87,
+            color: primaryTextColor,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Exclusive Offers & Deals",
+          "Offers & Promo Vouchers",
           style: TextStyle(
             fontWeight: FontWeight.w900,
             fontSize: 18,
-            color: isDark ? Colors.white : Colors.black87,
+            color: primaryTextColor,
           ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.refresh_rounded,
-              color: isDark ? Colors.white70 : Colors.black87,
+              color: primaryTextColor,
             ),
             onPressed: _loadOffers,
           ),
@@ -180,10 +123,11 @@ class _OffersPageState extends State<OffersPage> {
           color: const Color(0xFFEC4899),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top Hero Banner
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(22),
@@ -210,22 +154,23 @@ class _OffersPageState extends State<OffersPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
-                              vertical: 5,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white24,
-                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white.withAlpha(50),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Row(
                               children: [
                                 Icon(
-                                  Icons.local_fire_department_rounded,
+                                  Icons.local_offer_rounded,
                                   color: Colors.white,
-                                  size: 16,
+                                  size: 14,
                                 ),
                                 SizedBox(width: 4),
                                 Text(
@@ -233,58 +178,53 @@ class _OffersPageState extends State<OffersPage> {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 11,
-                                    letterSpacing: 0.5,
+                                    fontSize: 10,
+                                    letterSpacing: 1.0,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          const Icon(
+                            Icons.auto_awesome_rounded,
+                            color: Colors.amberAccent,
+                            size: 24,
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       const Text(
-                        "Save Up to 50% On\nYour Favorite Salons",
+                        "Save Up to 50% on Beauty & Hair Treatments",
                         style: TextStyle(
                           color: Colors.white,
+                          fontSize: 20,
                           fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                          height: 1.2,
+                          height: 1.25,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "Copy codes below and apply them during booking checkout for instant savings.",
+                      const SizedBox(height: 6),
+                      Text(
+                        "Claim exclusive partner salon vouchers & apply promo codes at checkout.",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          height: 1.3,
+                          color: Colors.white.withAlpha(220),
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
+                // Redeem Custom Voucher Code Card
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     color: cardBgColor,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF2C2A29)
-                          : Colors.grey.shade200,
-                      width: 1.2,
+                      color: theme.colorScheme.outline.withAlpha(isDark ? 25 : 55),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(isDark ? 0 : 5),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,16 +242,16 @@ class _OffersPageState extends State<OffersPage> {
                         children: [
                           Expanded(
                             child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? const Color(0xFF141312)
+                                    ? const Color(0xFF242220)
                                     : const Color(0xFFF3F4F6),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: TextField(
                                 controller: _customCodeController,
-                                textCapitalization:
-                                    TextCapitalization.characters,
+                                textCapitalization: TextCapitalization.characters,
                                 style: TextStyle(
                                   color: primaryTextColor,
                                   fontWeight: FontWeight.bold,
@@ -321,20 +261,17 @@ class _OffersPageState extends State<OffersPage> {
                                 decoration: InputDecoration(
                                   hintText: "Enter voucher code...",
                                   hintStyle: TextStyle(
-                                    color: isDark
-                                        ? Colors.white38
-                                        : Colors.grey.shade400,
+                                    color: isDark ? Colors.white38 : Colors.grey.shade400,
                                     fontSize: 13,
                                   ),
                                   border: InputBorder.none,
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
                                     vertical: 12,
                                   ),
                                   prefixIcon: const Icon(
                                     Icons.confirmation_num_outlined,
-                                    size: 20,
+                                    size: 18,
                                     color: Color(0xFFEC4899),
                                   ),
                                 ),
@@ -342,35 +279,35 @@ class _OffersPageState extends State<OffersPage> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFEC4899),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                          SizedBox(
+                            height: 44,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFEC4899),
+                                foregroundColor: Colors.white,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                minimumSize: Size.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                elevation: 0,
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 14,
-                              ),
-                              elevation: 0,
-                            ),
-                            onPressed: () {
-                              final code = _customCodeController.text
-                                  .trim()
-                                  .toUpperCase();
-                              if (code.isEmpty) return;
-                              Clipboard.setData(ClipboardData(text: code));
-                              AppFeedback.success(
-                                context,
-                                "Voucher code '$code' copied! Apply during checkout.",
-                              );
-                            },
-                            child: const Text(
-                              "Copy Code",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                              onPressed: () {
+                                final code = _customCodeController.text.trim().toUpperCase();
+                                if (code.isEmpty) return;
+                                Clipboard.setData(ClipboardData(text: code));
+                                AppFeedback.success(
+                                  context,
+                                  "Voucher code '$code' copied! Apply during checkout.",
+                                );
+                              },
+                              child: const Text(
+                                "Copy Code",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),
@@ -380,146 +317,124 @@ class _OffersPageState extends State<OffersPage> {
                   ),
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Available Coupons & Vouchers",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 17,
-                        color: primaryTextColor,
-                      ),
-                    ),
-                    if (_isLoading)
-                      const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFFEC4899),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
+                // Category Selector Filter Chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children:
-                        [
-                          "All Offers",
-                          "Discounts",
-                          "Spa Packages",
-                          "Cashback",
-                        ].map((cat) {
-                          final isSel = _selectedCategory == cat;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(cat),
-                              selected: isSel,
-                              onSelected: (val) {
-                                if (val) {
-                                  setState(() => _selectedCategory = cat);
-                                }
-                              },
-                              selectedColor: const Color(0xFFEC4899),
-                              backgroundColor: isDark
-                                  ? const Color(0xFF1E1C1B)
-                                  : Colors.white,
-                              labelStyle: TextStyle(
-                                color: isSel
-                                    ? Colors.white
-                                    : (isDark
-                                          ? Colors.white70
-                                          : Colors.black87),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                              side: BorderSide(
-                                color: isSel
-                                    ? const Color(0xFFEC4899)
-                                    : (isDark
-                                          ? const Color(0xFF2C2A29)
-                                          : Colors.grey.shade300),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                if (_errorMessage != null && _offers.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withAlpha(15),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.red.withAlpha(40)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            "Showing offline promotions. Server: $_errorMessage",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.red,
+                    children: _categories.map((cat) {
+                      final isSelected = _selectedCategory == cat;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          selected: isSelected,
+                          showCheckmark: false,
+                          label: Text(
+                            cat,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isDark ? Colors.white70 : Colors.black87),
                             ),
                           ),
+                          backgroundColor: isDark
+                              ? const Color(0xFF1E1C1B)
+                              : Colors.grey.shade100,
+                          selectedColor: const Color(0xFFEC4899),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? const Color(0xFFEC4899)
+                                  : (isDark
+                                      ? Colors.white10
+                                      : Colors.grey.shade300),
+                            ),
+                          ),
+                          onSelected: (_) {
+                            setState(() => _selectedCategory = cat);
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Loading / Error / Content List
+                if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_errorMessage != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E1C1B) : Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.red.withAlpha(50)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.error_outline_rounded, color: Colors.red, size: 36),
+                        const SizedBox(height: 8),
+                        Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: _loadOffers,
+                          child: const Text("Retry Loading"),
                         ),
                       ],
                     ),
-                  ),
-
-                if (filteredOffers.isEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(40),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.local_offer_outlined,
-                            size: 48,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "No active offers available in this category.",
-                            style: TextStyle(
-                              color: secondaryTextColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                  )
+                else if (filteredOffers.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: cardBgColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.local_offer_outlined, color: Colors.grey, size: 48),
+                        SizedBox(height: 12),
+                        Text(
+                          "No offers available in this category",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "Check back soon for new partner salon discounts!",
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
                     ),
                   )
                 else
-                  ...filteredOffers.map(
-                    (offer) => _buildOfferCard(
-                      context,
-                      isDark,
-                      primaryTextColor,
-                      secondaryTextColor,
-                      cardBgColor,
-                      offer,
-                    ),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredOffers.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final offer = filteredOffers[index];
+                      return _OfferCard(offer: offer, isDark: isDark, primaryTextColor: primaryTextColor);
+                    },
                   ),
               ],
             ),
@@ -528,199 +443,201 @@ class _OffersPageState extends State<OffersPage> {
       ),
     );
   }
+}
 
-  Widget _buildOfferCard(
-    BuildContext context,
-    bool isDark,
-    Color primaryTextColor,
-    Color secondaryTextColor,
-    Color cardBgColor,
-    OfferModel offer,
-  ) {
+class _OfferCard extends StatelessWidget {
+  final OfferModel offer;
+  final bool isDark;
+  final Color primaryTextColor;
+
+  const _OfferCard({
+    required this.offer,
+    required this.isDark,
+    required this.primaryTextColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        color: cardBgColor,
-        borderRadius: BorderRadius.circular(24),
+        color: isDark ? const Color(0xFF181716) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark
-              ? offer.badgeColor.withAlpha(80)
-              : offer.badgeColor.withAlpha(60),
+          color: offer.badgeColor.withAlpha(60),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 0 : 6),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+            color: Colors.black.withAlpha(isDark ? 0 : 5),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: offer.badgeColor.withAlpha(isDark ? 35 : 20),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(22),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(offer.icon, color: offer.badgeColor, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      offer.discountLabel,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
-                        color: offer.badgeColor,
-                      ),
-                    ),
-                  ],
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: offer.badgeColor.withAlpha(25),
+                  child: Icon(offer.icon, color: offer.badgeColor, size: 22),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.black38 : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    offer.expiryLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white70 : Colors.grey.shade700,
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: offer.badgeColor.withAlpha(25),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              offer.discountLabel,
+                              style: TextStyle(
+                                color: offer.badgeColor,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              offer.category,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        offer.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: primaryTextColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        offer.description,
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: Colors.grey,
+                          height: 1.3,
+                        ),
+                      ),
+                      if (offer.minOrderAmount > 0) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          "Min Order: Rs. ${offer.minOrderAmount.toInt()}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white60 : Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
             ),
           ),
 
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Bottom Promo Action Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF22201E) : Colors.grey.shade50,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
+            ),
+            child: Row(
               children: [
-                Text(
-                  offer.title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16,
-                    color: primaryTextColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  offer.description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: secondaryTextColor,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF141312)
-                        : const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF2C2A29)
-                          : Colors.grey.shade300,
+                Expanded(
+                  child: Text(
+                    offer.code,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
+                      color: offer.badgeColor,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 14),
-                        child: Text(
-                          offer.code,
+                ),
+                InkWell(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: offer.code));
+                    AppFeedback.success(
+                      context,
+                      "Promo code '${offer.code}' copied to clipboard!",
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.copy_rounded, size: 14, color: offer.badgeColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          "Copy",
                           style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2.0,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                             color: offer.badgeColor,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                SizedBox(
+                  height: 36,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: offer.badgeColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      minimumSize: Size.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      Row(
-                        children: [
-                          TextButton.icon(
-                            style: TextButton.styleFrom(
-                              foregroundColor: offer.badgeColor,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
-                              ),
-                            ),
-                            icon: const Icon(Icons.copy_rounded, size: 16),
-                            label: const Text(
-                              "Copy",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: offer.code),
-                              );
-                              AppFeedback.success(
-                                context,
-                                "Promo code '${offer.code}' copied to clipboard!",
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 4),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: offer.badgeColor,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 11,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: offer.code),
-                              );
-                              AppFeedback.success(
-                                context,
-                                "Promo code '${offer.code}' applied! Select your salon to book.",
-                              );
-                              context.go('/home');
-                            },
-                            child: const Text(
-                              "Apply & Book",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12.5,
-                              ),
-                            ),
-                          ),
-                        ],
+                    ),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: offer.code));
+                      AppFeedback.success(
+                        context,
+                        "Promo code '${offer.code}' applied! Select your salon to book.",
+                      );
+                      context.go('/home');
+                    },
+                    child: const Text(
+                      "Apply & Book",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.5,
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],

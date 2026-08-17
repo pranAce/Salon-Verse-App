@@ -86,24 +86,20 @@ class AdminApiService {
   Future<ApiResult<List<dynamic>>> getStaffList({
     required String salonId,
   }) async {
-    final result = await _client.request<List<dynamic>>(
-      "GET",
-      "/api/v1/admin/users?role=salon_staff",
-      auth: true,
-      onSuccess: (data) => data is List ? data : [],
-    );
-
-    if (result is Success<List<dynamic>> && result.data.isNotEmpty) {
-      return result;
-    }
-
+    final path = salonId.isNotEmpty
+        ? "/api/v1/stylists/salon/$salonId"
+        : "/api/v1/stylists";
     return _client.request<List<dynamic>>(
       "GET",
-      salonId.isNotEmpty
-          ? "/api/v1/stylists/salon/$salonId"
-          : "/api/v1/stylists",
+      path,
       auth: true,
-      onSuccess: (data) => data is List ? data : [],
+      onSuccess: (data) => data is List
+          ? data
+          : (data is Map && data['data'] is List
+              ? data['data'] as List
+              : (data is Map && data['items'] is List
+                  ? data['items'] as List
+                  : [])),
     );
   }
 

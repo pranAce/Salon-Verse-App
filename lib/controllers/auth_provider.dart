@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:salonverse/models/user_model.dart';
 import 'package:salonverse/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _service = AppService.instance;
@@ -31,9 +32,12 @@ class AuthProvider extends ChangeNotifier {
     required String email,
     required String password,
     String? phone,
+    String? referralCode,
+    String? dateOfBirth,
   }) async {
     _isLoading = true;
     _error = null;
+    AppLogger.logState('Auth', 'Registering user: $email');
     notifyListeners();
 
     final result = await _service.register(
@@ -41,14 +45,19 @@ class AuthProvider extends ChangeNotifier {
       email: email,
       password: password,
       phone: phone,
+      referralCode: referralCode,
+      dateOfBirth: dateOfBirth,
     );
 
     _isLoading = false;
     if (result is Success<UserModel>) {
+      _service.socket.connect();
+      AppLogger.logState('Auth', 'Register SUCCESS: ${result.data.id}');
       notifyListeners();
       return true;
     } else {
       _error = (result as Failure).message;
+      AppLogger.logState('Auth', 'Register FAILED: $_error');
       notifyListeners();
       return false;
     }
@@ -57,16 +66,20 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> login({required String email, required String password}) async {
     _isLoading = true;
     _error = null;
+    AppLogger.logState('Auth', 'Logging in user: $email');
     notifyListeners();
 
     final result = await _service.login(email: email, password: password);
 
     _isLoading = false;
     if (result is Success<UserModel>) {
+      _service.socket.connect();
+      AppLogger.logState('Auth', 'Login SUCCESS: ${result.data.id} (${result.data.role})');
       notifyListeners();
       return true;
     } else {
       _error = (result as Failure).message;
+      AppLogger.logState('Auth', 'Login FAILED: $_error');
       notifyListeners();
       return false;
     }
@@ -76,6 +89,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final success = await _service.tryAutoLogin();
       if (success) {
+        _service.socket.connect();
         notifyListeners();
       }
     } finally {
@@ -88,6 +102,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    _service.socket.disconnect();
     await _service.logout();
     notifyListeners();
   }
@@ -113,6 +128,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> updateProfile({
     String? name,
     String? phone,
+    String? dateOfBirth,
     Map<String, dynamic>? homeLocation,
   }) async {
     _isLoading = true;
@@ -122,6 +138,7 @@ class AuthProvider extends ChangeNotifier {
     final result = await _service.updateProfile(
       name: name,
       phone: phone,
+      dateOfBirth: dateOfBirth,
       homeLocation: homeLocation,
     );
 

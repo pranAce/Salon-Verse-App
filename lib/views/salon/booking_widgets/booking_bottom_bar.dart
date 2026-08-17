@@ -76,7 +76,9 @@ class BookingBottomBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
                   children: [
                     if (provider.discountAmount > 0) ...[
                       Text(
@@ -97,9 +99,10 @@ class BookingBottomBar extends StatelessWidget {
                       ),
                     ),
                     if (isStep1) ...[
-                      const SizedBox(width: 6),
                       Text(
                         "• $stylistName",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
@@ -115,7 +118,8 @@ class BookingBottomBar extends StatelessWidget {
 
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              minimumSize: const Size(140, 50),
+              minimumSize: const Size(140, 48),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               backgroundColor: const Color(0xFFEC4899),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

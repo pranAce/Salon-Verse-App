@@ -1,6 +1,6 @@
 class ApiConfig {
   static const String prodUrl = 'https://api.salonverse.live';
-  static const String localUrl = 'http://localhost:3000';
+  static const String localUrl = 'http://localhost:5000';
 
   static String? customUrl;
 
@@ -12,7 +12,7 @@ class ApiConfig {
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-    return prodUrl;
+    return localUrl;
   }
 
   static Map<String, String> headers([String? token]) {
@@ -24,5 +24,17 @@ class ApiConfig {
       map['Authorization'] = 'Bearer $token';
     }
     return map;
+  }
+
+  static String resolveImageUrl(String? url) {
+    if (url == null || url.trim().isEmpty) return '';
+    final trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/')) {
+      return '$baseUrl$trimmed';
+    }
+    return '$baseUrl/$trimmed';
   }
 }

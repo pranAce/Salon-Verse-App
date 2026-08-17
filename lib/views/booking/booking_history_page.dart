@@ -436,6 +436,29 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                         height: 44,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: BorderSide(color: Colors.red.withAlpha(50)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () => _confirmCancelBooking(context, booking),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFFEC4899),
                             backgroundColor: const Color(
                               0xFFEC4899,
@@ -451,13 +474,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                             "Reschedule",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                              fontSize: 12,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: SizedBox(
                         height: 44,
@@ -474,10 +497,10 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
                             context.push('/payment-confirmation');
                           },
                           child: const Text(
-                            "View Details",
+                            "Details",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
+                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -572,6 +595,51 @@ class _BookingHistoryPageState extends State<BookingHistoryPage>
           ),
         );
       },
+    );
+  }
+
+  void _confirmCancelBooking(BuildContext context, BookingModel booking) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 24),
+            SizedBox(width: 8),
+            Text("Cancel Booking?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ],
+        ),
+        content: Text(
+          "Are you sure you want to cancel your appointment at ${booking.salonName} for ${booking.serviceName} on ${booking.date} at ${booking.timeSlot}?",
+          style: const TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Keep Booking", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final ok = await context.read<BookingProvider>().cancelBooking(booking.id);
+              if (context.mounted) {
+                if (ok) {
+                  AppFeedback.success(context, "Booking cancelled successfully.");
+                } else {
+                  AppFeedback.error(context, "Failed to cancel booking.");
+                }
+              }
+            },
+            child: const Text("Yes, Cancel"),
+          ),
+        ],
+      ),
     );
   }
 

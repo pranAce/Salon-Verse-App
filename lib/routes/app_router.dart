@@ -28,7 +28,11 @@ import 'package:salonverse/views/profile/favorites_page.dart';
 import 'package:salonverse/views/profile/addresses_page.dart';
 import 'package:salonverse/views/profile/payments_page.dart';
 import 'package:salonverse/views/profile/offers_page.dart';
+import 'package:salonverse/views/profile/loyalty_home_page.dart';
+import 'package:salonverse/views/profile/rewards_store_page.dart';
+import 'package:salonverse/views/profile/my_vouchers_page.dart';
 import 'package:salonverse/views/notifications/notifications_page.dart';
+
 
 import 'package:salonverse/views/support/support_page.dart';
 import 'package:salonverse/views/support/contact_support_page.dart';
@@ -38,6 +42,7 @@ import 'package:salonverse/views/admin_workspace/salon_admin_dashboard.dart';
 import 'package:salonverse/views/admin_workspace/salon_admin_services.dart';
 import 'package:salonverse/views/admin_workspace/salon_admin_staff.dart';
 import 'package:salonverse/views/admin_workspace/salon_admin_settings.dart';
+import 'package:salonverse/views/admin_workspace/subscription_manage_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _customerShellKey = GlobalKey<NavigatorState>();
@@ -208,6 +213,13 @@ final GoRouter appRouter = GoRouter(
             state: state,
           ),
         ),
+        GoRoute(
+          path: '/salon-workspace/subscription',
+          pageBuilder: (context, state) => _slideRightPage(
+            child: const SubscriptionManagePage(),
+            state: state,
+          ),
+        ),
       ],
     ),
 
@@ -236,6 +248,22 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     GoRoute(
+      path: '/loyalty',
+
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const LoyaltyHomePage(), state: state),
+    ),
+    GoRoute(
+      path: '/loyalty/rewards',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const RewardsStorePage(), state: state),
+    ),
+    GoRoute(
+      path: '/loyalty/vouchers',
+      pageBuilder: (context, state) =>
+          _slideRightPage(child: const MyVouchersPage(), state: state),
+    ),
+    GoRoute(
       path: '/profile/account',
       pageBuilder: (context, state) =>
           _slideRightPage(child: const AccountPage(), state: state),
@@ -250,6 +278,7 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) =>
           _slideRightPage(child: const FavoritesPage(), state: state),
     ),
+
     GoRoute(
       path: '/profile/addresses',
       pageBuilder: (context, state) =>
@@ -373,6 +402,12 @@ class _SalonWorkspaceShell extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          if (!isStaffOnly)
+            IconButton(
+              icon: const Icon(Icons.card_membership_rounded),
+              tooltip: 'Subscription & Billing',
+              onPressed: () => context.push('/salon-workspace/subscription'),
+            ),
           IconButton(
             icon: const Icon(Icons.logout_rounded),
             onPressed: () async {

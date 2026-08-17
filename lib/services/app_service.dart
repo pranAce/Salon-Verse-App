@@ -15,6 +15,8 @@ import 'package:salonverse/services/review_service.dart';
 import 'package:salonverse/services/notification_service.dart';
 import 'package:salonverse/services/target_service.dart';
 import 'package:salonverse/services/offer_service.dart';
+import 'package:salonverse/services/subscription_service.dart';
+import 'package:salonverse/services/socket_service.dart';
 import 'package:salonverse/models/offer_model.dart';
 
 class AppService {
@@ -30,6 +32,8 @@ class AppService {
   final notification = NotificationService();
   final target = TargetService();
   final offer = OfferService();
+  final subscription = SubscriptionService();
+  final socket = SocketService.instance;
 
   UserModel? get currentUser => auth.currentUser;
   bool get isMockMode => auth.isMockMode;
@@ -39,12 +43,16 @@ class AppService {
     required String email,
     required String password,
     String? phone,
+    String? referralCode,
+    String? dateOfBirth,
   }) {
     return auth.register(
       name: name,
       email: email,
       password: password,
       phone: phone,
+      referralCode: referralCode,
+      dateOfBirth: dateOfBirth,
     );
   }
 
@@ -70,11 +78,13 @@ class AppService {
   Future<ApiResult<UserModel>> updateProfile({
     String? name,
     String? phone,
+    String? dateOfBirth,
     Map<String, dynamic>? homeLocation,
   }) {
     return auth.updateProfile(
       name: name,
       phone: phone,
+      dateOfBirth: dateOfBirth,
       homeLocation: homeLocation,
     );
   }
@@ -306,6 +316,10 @@ class AppService {
       date: date,
       timeSlot: timeSlot,
     );
+  }
+
+  Future<ApiResult<BookingModel>> cancelBooking(String bookingId) {
+    return booking.cancelBooking(bookingId);
   }
 
   Future<ApiResult<void>> recordPayment({

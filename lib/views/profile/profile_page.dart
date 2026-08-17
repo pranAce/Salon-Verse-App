@@ -366,7 +366,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => context.push('/profile/offers'),
+                      onTap: () => context.push('/loyalty'),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -379,7 +379,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: const Row(
                           children: [
                             Text(
-                              "View Benefits",
+                              "Loyalty Hub",
                               style: TextStyle(
                                 color: Color(0xFFEC4899),
                                 fontWeight: FontWeight.bold,
@@ -399,6 +399,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
+
 
               const SizedBox(height: 28),
 
@@ -740,26 +741,29 @@ class _ProfilePageState extends State<ProfilePage> {
     final isDark = theme.brightness == Brightness.dark;
     return Column(
       children: [
-        ListTile(
-          onTap: onTap,
-          leading: Icon(icon, color: iconColor, size: 22),
-          title: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 13.5,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.lightTextPrimary,
-            ),
-          ),
-          trailing:
-              trailing ??
-              Icon(
-                Icons.chevron_right_rounded,
-                color: theme.colorScheme.onSurfaceVariant.withAlpha(120),
-                size: 20,
+        Material(
+          color: Colors.transparent,
+          child: ListTile(
+            onTap: onTap,
+            leading: Icon(icon, color: iconColor, size: 22),
+            title: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13.5,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
+            ),
+            trailing:
+                trailing ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: theme.colorScheme.onSurfaceVariant.withAlpha(120),
+                  size: 20,
+                ),
+          ),
         ),
         if (showDivider)
           Padding(

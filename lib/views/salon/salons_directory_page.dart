@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:salonverse/services/api_config.dart';
 import 'package:salonverse/controllers/auth_provider.dart';
 import 'package:salonverse/controllers/salon_provider.dart';
 import 'package:salonverse/models/salon_model.dart';
@@ -20,6 +21,17 @@ class SalonsDirectoryPage extends StatefulWidget {
 class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final salonProv = context.read<SalonProvider>();
+      if (salonProv.salons.isEmpty) {
+        salonProv.fetchSalons();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -43,8 +55,10 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Explore Salons'), elevation: 0),
       body: SafeArea(
-        child: Column(
-          children: [
+        child: RefreshIndicator(
+          onRefresh: () => salonProvider.fetchSalons(forceRefresh: true),
+          child: Column(
+            children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               child: Container(
@@ -103,7 +117,8 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildTile(BuildContext context, UserModel? user, SalonModel salon) {
@@ -132,7 +147,7 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
-                imageUrl: salon.imageUrl,
+                imageUrl: ApiConfig.resolveImageUrl(salon.imageUrl),
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,

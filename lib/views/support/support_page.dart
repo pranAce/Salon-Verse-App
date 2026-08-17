@@ -229,59 +229,65 @@ class _SupportPageState extends State<SupportPage> {
                             ),
                             child: Column(
                               children: [
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.phone_rounded,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  title: const Text(
-                                    "Call Customer Helpline",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
+                                Material(
+                                  color: Colors.transparent,
+                                  child: ListTile(
+                                    leading: Icon(
+                                      Icons.phone_rounded,
+                                      color: theme.colorScheme.primary,
                                     ),
-                                  ),
-                                  subtitle: const Text(
-                                    "+977 1 4567890",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey,
+                                    title: const Text(
+                                      "Call Customer Helpline",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
+                                    subtitle: const Text(
+                                      "+977 1 4567890",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    trailing: const Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 20,
+                                    ),
+                                    onTap: () {},
                                   ),
-                                  trailing: const Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 20,
-                                  ),
-                                  onTap: () {},
                                 ),
                                 const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 16),
                                   child: Divider(height: 1),
                                 ),
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.email_rounded,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  title: const Text(
-                                    "Email Support Team",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
+                                Material(
+                                  color: Colors.transparent,
+                                  child: ListTile(
+                                    leading: Icon(
+                                      Icons.email_rounded,
+                                      color: theme.colorScheme.primary,
                                     ),
-                                  ),
-                                  subtitle: const Text(
-                                    "support@salonverse.com",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey,
+                                    title: const Text(
+                                      "Email Support Team",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
+                                    subtitle: const Text(
+                                      "support@salonverse.com",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    trailing: const Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 20,
+                                    ),
+                                    onTap: () {},
                                   ),
-                                  trailing: const Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 20,
-                                  ),
-                                  onTap: () {},
                                 ),
                               ],
                             ),
@@ -381,36 +387,40 @@ class _SupportPageState extends State<SupportPage> {
           ),
         ],
       ),
-      child: ListTile(
-        onTap: () async {
-          await context.push(
-            '/support/detail/${ticket.id}',
-            extra: {'subject': ticket.subject},
-          );
-          _loadTickets();
-        },
-        leading: CircleAvatar(
-          backgroundColor: statusColor.withAlpha(20),
-          child: Icon(
-            isClosed
-                ? Icons.lock_outline_rounded
-                : Icons.question_answer_outlined,
-            color: statusColor,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: ListTile(
+          onTap: () async {
+            await context.push(
+              '/support/detail/${ticket.id}',
+              extra: {'subject': ticket.subject},
+            );
+            _loadTickets();
+          },
+          leading: CircleAvatar(
+            backgroundColor: statusColor.withAlpha(20),
+            child: Icon(
+              isClosed
+                  ? Icons.lock_outline_rounded
+                  : Icons.question_answer_outlined,
+              color: statusColor,
+            ),
           ),
-        ),
-        title: Text(
-          ticket.subject,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-        ),
-        subtitle: Text(
-          'Status: ${ticket.status}',
-          style: TextStyle(
-            color: statusColor,
-            fontWeight: FontWeight.w700,
-            fontSize: 11,
+          title: Text(
+            ticket.subject,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           ),
+          subtitle: Text(
+            'Status: ${ticket.status}',
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
+          ),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, size: 20),
       ),
     );
   }

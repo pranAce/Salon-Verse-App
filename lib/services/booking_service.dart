@@ -110,7 +110,13 @@ class BookingService {
       "/api/v1/bookings",
       auth: true,
       onSuccess: (data) {
-        final List list = data is List ? data : [];
+        final List list = data is List
+            ? data
+            : (data is Map && data['data'] is List
+                ? data['data'] as List
+                : (data is Map && data['items'] is List
+                    ? data['items'] as List
+                    : []));
         return list
             .map((e) => BookingModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
@@ -164,6 +170,17 @@ class BookingService {
       "/api/v1/bookings/$bookingId/status",
       auth: true,
       body: {'date': date, 'timeSlot': timeSlot, 'status': 'confirmed'},
+      onSuccess: (data) =>
+          BookingModel.fromJson(Map<String, dynamic>.from(data)),
+    );
+  }
+
+  Future<ApiResult<BookingModel>> cancelBooking(String bookingId) async {
+    return _client.request<BookingModel>(
+      "PATCH",
+      "/api/v1/bookings/$bookingId/status",
+      auth: true,
+      body: {'status': 'cancelled'},
       onSuccess: (data) =>
           BookingModel.fromJson(Map<String, dynamic>.from(data)),
     );

@@ -21,6 +21,8 @@ class _RegisterPageState extends State<RegisterPage>
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _referralController = TextEditingController();
+  final _dobController = TextEditingController();
   bool _obscurePassword = true;
 
   late final AnimationController _animController;
@@ -51,6 +53,8 @@ class _RegisterPageState extends State<RegisterPage>
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _referralController.dispose();
+    _dobController.dispose();
     _animController.dispose();
     super.dispose();
   }
@@ -66,6 +70,12 @@ class _RegisterPageState extends State<RegisterPage>
       phone: _phoneController.text.trim().isEmpty
           ? null
           : _phoneController.text.trim(),
+      referralCode: _referralController.text.trim().isEmpty
+          ? null
+          : _referralController.text.trim().toUpperCase(),
+      dateOfBirth: _dobController.text.trim().isEmpty
+          ? null
+          : _dobController.text.trim(),
     );
 
     if (!mounted) return;
@@ -229,6 +239,38 @@ class _RegisterPageState extends State<RegisterPage>
                           }
                           return null;
                         },
+                      ),
+                      const SizedBox(height: 16),
+
+                      GestureDetector(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+                            firstDate: DateTime(1940),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            final month = picked.month.toString().padLeft(2, '0');
+                            final day = picked.day.toString().padLeft(2, '0');
+                            _dobController.text = "${picked.year}-$month-$day";
+                          }
+                        },
+                        child: AbsorbPointer(
+                          child: AppTextField(
+                            controller: _dobController,
+                            label: "Date of Birth (Optional)",
+                            prefixIcon: Icons.cake_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      AppTextField(
+                        controller: _referralController,
+                        label: "Referral Code (Optional)",
+                        prefixIcon: Icons.card_giftcard_outlined,
+                        textCapitalization: TextCapitalization.characters,
                       ),
                       const SizedBox(height: 32),
 

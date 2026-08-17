@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:salonverse/models/booking_model.dart';
 import 'package:salonverse/models/salon_model.dart';
 import 'package:salonverse/services/app_service.dart';
+import 'package:salonverse/services/socket_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/utils/app_logger.dart';
 
 class BookingProvider extends ChangeNotifier {
   final _service = AppService.instance;
@@ -59,6 +62,7 @@ class BookingProvider extends ChangeNotifier {
         _selectedStylist = _selectedSalon!.stylists.first;
       }
     }
+    AppLogger.logState('BookingFlow', 'ServiceSelected: ${service.name}');
     notifyListeners();
     fetchDynamicSlots();
   }
@@ -99,6 +103,15 @@ class BookingProvider extends ChangeNotifier {
     _contactNumber = "";
     _appliedPromoCode = null;
     _discountAmount = 0.0;
+    AppLogger.logBookingFlow(
+      step: 'START_FLOW',
+      salonId: salon.id,
+      serviceId: service.id,
+      stylistId: _selectedStylist?.id,
+      date: _selectedDate.toString(),
+      timeSlot: 'UNSELECTED',
+      status: 'INIT',
+    );
     notifyListeners();
     fetchDynamicSlots();
   }
@@ -115,6 +128,15 @@ class BookingProvider extends ChangeNotifier {
     _contactNumber = "";
     _appliedPromoCode = null;
     _discountAmount = 0.0;
+    AppLogger.logBookingFlow(
+      step: 'START_SALON_FLOW',
+      salonId: salon.id,
+      serviceId: _selectedService?.id ?? 'NONE',
+      stylistId: _selectedStylist?.id,
+      date: _selectedDate.toString(),
+      timeSlot: 'UNSELECTED',
+      status: 'INIT',
+    );
     notifyListeners();
     fetchDynamicSlots();
   }
@@ -169,40 +191,19 @@ class BookingProvider extends ChangeNotifier {
 
       _backendAvailableSlots = rawAvailable.map((e) => e.toString()).toList();
       _backendBookedSlots = rawBooked.map((e) => e.toString()).toList();
-    } else {
-      _isSalonClosed = false;
-      _backendAvailableSlots = _selectedSalon!.publishedTimeSlots.isNotEmpty
-          ? _selectedSalon!.publishedTimeSlots
-          : [
-              "09:00 AM",
-              "09:30 AM",
-              "10:00 AM",
-              "10:30 AM",
-              "11:00 AM",
-              "11:30 AM",
-              "12:00 PM",
-              "12:30 PM",
-              "01:00 PM",
-              "01:30 PM",
-              "02:00 PM",
-              "02:30 PM",
-              "03:00 PM",
-              "03:30 PM",
-              "04:00 PM",
-              "04:30 PM",
-              "05:00 PM",
-              "05:30 PM",
-              "06:00 PM",
-              "06:30 PM",
-              "07:00 PM",
-              "07:30 PM",
-              "08:00 PM",
-            ];
-      _backendBookedSlots = getBookedSlotsFor(
-        _selectedSalon!.id,
-        date,
-        _selectedStylist?.id,
+
+      AppLogger.logAvailability(
+        salonId: _selectedSalon!.id,
+        serviceId: _selectedService?.id,
+        stylistId: _selectedStylist?.id,
+        date: dateStr,
+        slotCount: _backendAvailableSlots.length,
       );
+    } else if (result is Failure<Map<String, dynamic>>) {
+      _isSalonClosed = false;
+      _backendAvailableSlots = [];
+      _backendBookedSlots = [];
+      _error = (result as Failure).message;
     }
     notifyListeners();
   }
@@ -210,6 +211,7 @@ class BookingProvider extends ChangeNotifier {
   Future<void> fetchBookings() async {
     _isLoading = true;
     _error = null;
+    AppLogger.logState('BookingHistory', 'StateChanged -> LOADING');
     notifyListeners();
 
     final result = await _service.getBookings();
@@ -217,8 +219,10 @@ class BookingProvider extends ChangeNotifier {
     _isLoading = false;
     if (result is Success<List<BookingModel>>) {
       _bookings = result.data;
+      AppLogger.logState('BookingHistory', 'StateChanged -> SUCCESS (${_bookings.length} items)');
     } else {
       _error = (result as Failure).message;
+      AppLogger.logState('BookingHistory', 'StateChanged -> ERROR ($_error)');
     }
     notifyListeners();
   }
@@ -240,6 +244,16 @@ class BookingProvider extends ChangeNotifier {
     final dateStr =
         "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
+    AppLogger.logBookingFlow(
+      step: 'CONFIRM_SUBMISSION',
+      salonId: _selectedSalon!.id,
+      serviceId: _selectedService!.id,
+      stylistId: _selectedStylist?.id,
+      date: dateStr,
+      timeSlot: _selectedTime!,
+      status: 'SUBMITTING',
+    );
+
     final result = await _service.createBooking(
       salon: _selectedSalon!,
       service: _selectedService!,
@@ -257,6 +271,15 @@ class BookingProvider extends ChangeNotifier {
 
     _isLoading = false;
     if (result is Success<BookingModel>) {
+      AppLogger.logBookingFlow(
+        step: 'CONFIRM_SUCCESS',
+        salonId: _selectedSalon!.id,
+        serviceId: _selectedService!.id,
+        stylistId: _selectedStylist?.id,
+        date: dateStr,
+        timeSlot: _selectedTime!,
+        status: 'CREATED',
+      );
       if (!_bookings.any((b) => b.id == result.data.id)) {
         _bookings.insert(0, result.data);
       }
@@ -264,6 +287,15 @@ class BookingProvider extends ChangeNotifier {
       return result.data;
     } else {
       _error = (result as Failure).message;
+      AppLogger.logBookingFlow(
+        step: 'CONFIRM_FAILED',
+        salonId: _selectedSalon!.id,
+        serviceId: _selectedService!.id,
+        stylistId: _selectedStylist?.id,
+        date: dateStr,
+        timeSlot: _selectedTime!,
+        status: 'REJECTED: $_error',
+      );
       notifyListeners();
       return null;
     }
@@ -273,6 +305,48 @@ class BookingProvider extends ChangeNotifier {
   double _discountAmount = 0.0;
   String? get appliedPromoCode => _appliedPromoCode;
   double get discountAmount => _discountAmount;
+
+  StreamSubscription? _bookingCreatedSub;
+  StreamSubscription? _bookingUpdatedSub;
+  StreamSubscription? _availabilityUpdatedSub;
+
+  BookingProvider() {
+    _initSocketListeners();
+  }
+
+  void _initSocketListeners() {
+    _bookingCreatedSub = SocketService.instance.onBookingCreated.listen((data) {
+      final booking = BookingModel.fromJson(data['booking'] ?? data);
+      if (!_bookings.any((b) => b.id == booking.id)) {
+        _bookings.insert(0, booking);
+        notifyListeners();
+      }
+    });
+
+    _bookingUpdatedSub = SocketService.instance.onBookingUpdated.listen((data) {
+      final booking = BookingModel.fromJson(data['booking'] ?? data);
+      final idx = _bookings.indexWhere((b) => b.id == booking.id);
+      if (idx != -1) {
+        _bookings[idx] = booking;
+        notifyListeners();
+      }
+    });
+
+    _availabilityUpdatedSub = SocketService.instance.onAvailabilityUpdated.listen((data) {
+      final salonId = data['salonId']?.toString();
+      if (_selectedSalon != null && _selectedSalon!.id == salonId) {
+        fetchDynamicSlots();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _bookingCreatedSub?.cancel();
+    _bookingUpdatedSub?.cancel();
+    _availabilityUpdatedSub?.cancel();
+    super.dispose();
+  }
 
   Future<bool> applyPromoCodeAsync(String code, double basePrice) async {
     final cleanCode = code.trim().toUpperCase();
@@ -292,31 +366,12 @@ class BookingProvider extends ChangeNotifier {
         _discountAmount = (data['discountAmount'] as num?)?.toDouble() ?? 0.0;
         notifyListeners();
         return true;
+      } else if (res is Failure) {
+        _error = (res as Failure).message;
+        notifyListeners();
+        return false;
       }
     }
-
-    if (cleanCode == "SALON500") {
-      _appliedPromoCode = cleanCode;
-      _discountAmount = basePrice > 500 ? 500.0 : basePrice * 0.5;
-      notifyListeners();
-      return true;
-    } else if (cleanCode == "GLOW20") {
-      _appliedPromoCode = cleanCode;
-      _discountAmount = (basePrice * 0.20).roundToDouble();
-      notifyListeners();
-      return true;
-    } else if (cleanCode == "BEAUTY50") {
-      _appliedPromoCode = cleanCode;
-      _discountAmount = (basePrice * 0.50).clamp(0.0, 500.0);
-      notifyListeners();
-      return true;
-    } else if (cleanCode == "WEEKEND15") {
-      _appliedPromoCode = cleanCode;
-      _discountAmount = (basePrice * 0.15).roundToDouble();
-      notifyListeners();
-      return true;
-    }
-
     return false;
   }
 
@@ -372,6 +427,28 @@ class BookingProvider extends ChangeNotifier {
       date: dateStr,
       timeSlot: newTimeSlot,
     );
+
+    _isLoading = false;
+    if (result is Success<BookingModel>) {
+      final idx = _bookings.indexWhere((b) => b.id == bookingId);
+      if (idx != -1) {
+        _bookings[idx] = result.data;
+      }
+      notifyListeners();
+      return true;
+    } else {
+      _error = (result as Failure).message;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> cancelBooking(String bookingId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _service.cancelBooking(bookingId);
 
     _isLoading = false;
     if (result is Success<BookingModel>) {
