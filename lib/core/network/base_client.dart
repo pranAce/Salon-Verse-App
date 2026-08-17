@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:salonverse/core/network/api_result.dart';
-import 'package:salonverse/core/utils/app_logger.dart';
-import 'package:salonverse/services/api_config.dart';
+import 'package:salonverse/app/config/api_config.dart';
 
 class BaseClient {
   static String get baseUrl => ApiConfig.baseUrl;
@@ -15,6 +14,15 @@ class BaseClient {
   static final BaseClient _instance = BaseClient._();
   static BaseClient get instance => _instance;
   BaseClient._();
+
+  http.Client _client = http.Client();
+
+  void _resetClient() {
+    try {
+      _client.close();
+    } catch (_) {}
+    _client = http.Client();
+  }
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -27,6 +35,7 @@ class BaseClient {
     Map<String, dynamic>? body,
     bool auth = false,
     required T Function(dynamic data) onSuccess,
+    int maxAttempts = 2,
   }) async {
     final headers = <String, String>{
       "Content-Type": "application/json",
@@ -43,53 +52,61 @@ class BaseClient {
     final fullPath = path.startsWith('/') ? path : '/$path';
     final url = Uri.parse("$baseUrl$fullPath");
 
-    try {
-      AppLogger.logApiRequest(method, url.toString(), headers: headers, body: body);
+    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        http.Response response;
+        final encodedBody = body != null ? jsonEncode(body) : null;
 
-      http.Response response;
-      final encodedBody = body != null ? jsonEncode(body) : null;
+        if (method == "GET") {
+          response = await _client.get(url, headers: headers).timeout(_timeout);
+        } else if (method == "POST") {
+          response = await _client
+              .post(url, headers: headers, body: encodedBody)
+              .timeout(_timeout);
+        } else if (method == "PUT") {
+          response = await _client
+              .put(url, headers: headers, body: encodedBody)
+              .timeout(_timeout);
+        } else if (method == "PATCH") {
+          response = await _client
+              .patch(url, headers: headers, body: encodedBody)
+              .timeout(_timeout);
+        } else if (method == "DELETE") {
+          response = await _client
+              .delete(url, headers: headers)
+              .timeout(_timeout);
+        } else {
+          return const Failure("Unsupported HTTP method");
+        }
 
-      if (method == "GET") {
-        response = await http.get(url, headers: headers).timeout(_timeout);
-      } else if (method == "POST") {
-        response = await http
-            .post(url, headers: headers, body: encodedBody)
-            .timeout(_timeout);
-      } else if (method == "PUT") {
-        response = await http
-            .put(url, headers: headers, body: encodedBody)
-            .timeout(_timeout);
-      } else if (method == "PATCH") {
-        response = await http
-            .patch(url, headers: headers, body: encodedBody)
-            .timeout(_timeout);
-      } else if (method == "DELETE") {
-        response = await http.delete(url, headers: headers).timeout(_timeout);
-      } else {
-        AppLogger.logApiError(url.toString(), 400, "UNSUPPORTED_METHOD", "Unsupported HTTP method: $method");
-        return const Failure("Unsupported HTTP method");
+        final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final data = json is Map<String, dynamic> && json.containsKey('data')
+              ? json['data']
+              : json;
+          return Success(onSuccess(data));
+        } else {
+          final message = json is Map<String, dynamic>
+              ? (json['message'] ?? 'Request failed (${response.statusCode})')
+              : 'Request failed (${response.statusCode})';
+          return Failure(message, statusCode: response.statusCode);
+        }
+      } catch (e) {
+        _resetClient();
+        if (attempt < maxAttempts) {
+          await Future.delayed(const Duration(milliseconds: 250));
+          continue;
+        }
+        final errText = e.toString();
+        if (errText.contains('Connection closed') ||
+            errText.contains('ClientException') ||
+            errText.contains('SocketException')) {
+          return const Failure("Network connection unavailable. Please check backend connection.");
+        }
+        return Failure(errText);
       }
-
-      AppLogger.logApiResponse(response.statusCode, url.toString(), response.body);
-
-      final json = response.body.isNotEmpty ? jsonDecode(response.body) : {};
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final data = json is Map<String, dynamic> && json.containsKey('data')
-            ? json['data']
-            : json;
-        return Success(onSuccess(data));
-      } else {
-        final message = json is Map<String, dynamic>
-            ? (json['message'] ?? 'Request failed (${response.statusCode})')
-            : 'Request failed (${response.statusCode})';
-        AppLogger.logApiError(url.toString(), response.statusCode, "HTTP_ERROR", message);
-        return Failure(message, statusCode: response.statusCode);
-      }
-    } catch (e) {
-      AppLogger.logApiError(url.toString(), 0, "EXCEPTION", e.toString());
-      return Failure(e.toString());
     }
+    return const Failure("Request failed after retries.");
   }
 }
-

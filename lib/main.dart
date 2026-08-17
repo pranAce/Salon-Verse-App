@@ -1,65 +1,45 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:salonverse/theme/app_theme.dart';
-import 'package:salonverse/routes/app_router.dart';
+import 'package:salonverse/app/theme/app_theme.dart';
+import 'package:salonverse/app/routes/app_router.dart';
 import 'package:salonverse/core/storage/app_storage.dart';
-import 'package:salonverse/controllers/settings_provider.dart';
-import 'package:salonverse/controllers/auth_provider.dart';
-import 'package:salonverse/controllers/salon_provider.dart';
-import 'package:salonverse/controllers/booking_provider.dart';
-import 'package:salonverse/controllers/salon_workspace_provider.dart';
-import 'package:salonverse/controllers/subscription_provider.dart';
-import 'package:salonverse/controllers/loyalty_provider.dart';
-import 'package:salonverse/widgets/offline_banner.dart';
+import 'package:salonverse/features/home/services/settings_provider.dart';
+import 'package:salonverse/features/auth/services/auth_provider.dart';
+import 'package:salonverse/features/salons/services/salon_provider.dart';
+import 'package:salonverse/features/booking/services/booking_provider.dart';
+import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
+import 'package:salonverse/core/widgets/offline_banner.dart';
 
-
-import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
-    if (kDebugMode) {
-      debugPrint('[FlutterError] ${details.exceptionAsString()}');
-    }
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    if (kDebugMode) {
-      debugPrint('[AsyncError] $error\n$stack');
-    }
     return true;
   };
 
   try {
     await AppServices.init();
-  } catch (e, stack) {
-    if (kDebugMode) {
-      debugPrint('[AppServices] Init error: $e\n$stack');
-    }
-  }
+  } catch (_) {}
 
   final authProvider = AuthProvider();
   try {
     await authProvider.tryAutoLogin();
-  } catch (e, stack) {
-    if (kDebugMode) {
-      debugPrint('[AuthProvider] Auto-login error: $e\n$stack');
-    }
-  }
+  } catch (_) {}
 
   runApp(
-
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => SalonProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
-        ChangeNotifierProvider(create: (_) => SalonWorkspaceProvider()),
-        ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ChangeNotifierProvider(create: (_) => LoyaltyProvider()),
       ],
       child: const SalonVerseApp(),

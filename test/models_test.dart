@@ -1,10 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:salonverse/models/user_model.dart';
-import 'package:salonverse/models/salon_model.dart';
-import 'package:salonverse/models/booking_model.dart';
-import 'package:salonverse/models/staff_model.dart';
+import 'package:salonverse/features/auth/models/user_model.dart';
+import 'package:salonverse/features/salons/models/salon_model.dart';
+import 'package:salonverse/features/booking/models/booking_model.dart';
+import 'package:salonverse/features/salons/models/staff_model.dart';
+import 'package:salonverse/features/salons/models/nearby_service_model.dart';
 import 'package:salonverse/core/constants/app_constants.dart';
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/utils/currency_formatter.dart';
 
 void main() {
   group('Model Serialization & Business Logic Tests', () {
@@ -93,6 +95,35 @@ void main() {
       expect(success.data, 'ok');
       expect(failure.message, 'error message');
       expect(failure.statusCode, 404);
+    });
+
+    test('AppCurrencyFormatter formats prices correctly without Bitcoin symbol', () {
+      expect(AppCurrencyFormatter.format(800), 'NPR 800');
+      expect(AppCurrencyFormatter.format(1200.50), 'NPR 1,200.50');
+      expect(AppCurrencyFormatter.format(null), 'Price unavailable');
+    });
+
+    test('NearbyServiceModel parsing and properties', () {
+      final nearbySvc = NearbyServiceModel.fromJson({
+        'serviceId': 's1',
+        'serviceName': 'Executive Haircut',
+        'price': 800,
+        'salonName': 'Looks Salon',
+        'rating': 4.7,
+        'reviewCount': 124,
+        'distanceKm': 1.2,
+        'isCheapest': true,
+        'currency': 'NPR',
+      });
+
+      expect(nearbySvc.serviceId, 's1');
+      expect(nearbySvc.serviceName, 'Executive Haircut');
+      expect(nearbySvc.price, 800);
+      expect(nearbySvc.salonName, 'Looks Salon');
+      expect(nearbySvc.rating, 4.7);
+      expect(nearbySvc.distanceKm, 1.2);
+      expect(nearbySvc.isCheapest, isTrue);
+      expect(nearbySvc.currency, 'NPR');
     });
 
     test('KConstants default values', () {

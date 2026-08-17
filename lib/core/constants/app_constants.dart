@@ -1,4 +1,4 @@
-import 'package:salonverse/services/api_config.dart';
+import 'package:salonverse/app/config/api_config.dart';
 
 class KConstants {
   KConstants._();
