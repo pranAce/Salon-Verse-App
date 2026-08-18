@@ -125,7 +125,7 @@ class AppService {
     );
   }
 
-  Future<ApiResult<void>> toggleFavorite(String salonId) {
+  Future<ApiResult<UserModel>> toggleFavorite(String salonId) {
     return salon.toggleFavorite(salonId, auth.currentUser, (updatedUser) {
       auth.syncCurrentUser(updatedUser);
     });

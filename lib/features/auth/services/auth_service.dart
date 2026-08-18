@@ -143,8 +143,6 @@ class AuthService {
     String? dateOfBirth,
     Map<String, dynamic>? homeLocation,
   }) async {
-    if (_token == null) return const Failure("Not logged in");
-
     final body = <String, dynamic>{};
     if (name != null && name.isNotEmpty) body['name'] = name;
     if (phone != null && phone.isNotEmpty) body['phone'] = phone;

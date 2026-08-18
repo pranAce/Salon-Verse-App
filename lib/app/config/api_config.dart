@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
-
 class ApiConfig {
   static const String prodUrl = 'https://api.salonverse.live';
-  static const String localDesktopUrl = 'http://localhost:5000';
-  static const String localAndroidUrl = 'http://localhost:5000';
+  static const String localDesktopUrl = prodUrl;
+  static const String localAndroidUrl = prodUrl;
 
   static String? customUrl;
 
@@ -15,13 +13,7 @@ class ApiConfig {
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-    if (kReleaseMode) {
-      return prodUrl;
-    }
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return localAndroidUrl;
-    }
-    return localDesktopUrl;
+    return prodUrl;
   }
 
   static Map<String, String> headers([String? token]) {

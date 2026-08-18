@@ -114,28 +114,14 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Official Invoice',
+                      booking.status.toLowerCase().contains('cancel') ? 'Cancelled Invoice' : 'Official Invoice',
                       style: GoogleFonts.outfit(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryTint,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        booking.status.toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
+                    SVStatusBadge(status: booking.status, isCompact: true),
                   ],
                 ),
                 const SizedBox(height: 16),

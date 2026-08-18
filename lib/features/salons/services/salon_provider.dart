@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
 import 'package:salonverse/features/salons/models/nearby_service_model.dart';
 import 'package:salonverse/features/home/services/app_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/storage/app_storage.dart';
 
 class SalonProvider extends ChangeNotifier {
   final _service = AppService.instance;
@@ -17,6 +19,43 @@ class SalonProvider extends ChangeNotifier {
 
   List<NearbyServiceModel> _nearbyServices = [];
   List<NearbyServiceModel> get nearbyServices => _nearbyServices;
+
+  List<String> _recentSearches = [];
+  List<String> get recentSearches => _recentSearches;
+
+  void loadRecentSearches() {
+    try {
+      final list = AppStorage.prefs.getStringList('recent_salon_searches');
+      if (list != null) {
+        _recentSearches = List<String>.from(list);
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  void addRecentSearch(String query) {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
+    _recentSearches.removeWhere((item) => item.toLowerCase() == trimmed.toLowerCase());
+    _recentSearches.insert(0, trimmed);
+    if (_recentSearches.length > 8) {
+      _recentSearches = _recentSearches.sublist(0, 8);
+    }
+    AppStorage.prefs.setStringList('recent_salon_searches', _recentSearches);
+    notifyListeners();
+  }
+
+  void removeRecentSearch(String term) {
+    _recentSearches.remove(term);
+    AppStorage.prefs.setStringList('recent_salon_searches', _recentSearches);
+    notifyListeners();
+  }
+
+  void clearRecentSearches() {
+    _recentSearches.clear();
+    AppStorage.prefs.remove('recent_salon_searches');
+    notifyListeners();
+  }
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -37,9 +76,6 @@ class SalonProvider extends ChangeNotifier {
   String _selectedSort = "recommended";
   String get selectedSort => _selectedSort;
 
-  String _selectedCity = "All Locations";
-  String get selectedCity => _selectedCity;
-
   double _minPrice = 0.0;
   double get minPrice => _minPrice;
 
@@ -57,10 +93,27 @@ class SalonProvider extends ChangeNotifier {
   double? _userLng;
   double? get userLng => _userLng;
   double? _userRadius;
-  double? get userRadius => _userRadius;
+
+  bool get hasActiveFilters {
+    return _searchQuery.isNotEmpty ||
+        (_selectedCategory != "All" && _selectedCategory.isNotEmpty) ||
+        _selectedSort != "recommended" ||
+        _minPrice > 0.0 ||
+        _maxPrice < 10000.0 ||
+        _minRating > 0.0 ||
+        _homeServiceOnly;
+  }
 
   List<SalonModel> get featuredSalons =>
       _allSalons.where((salon) => salon.isFeatured).toList();
+
+  static double? _calculateDistanceKm(double? lat1, double? lon1, double lat2, double lon2) {
+    if (lat1 == null || lon1 == null) return null;
+    const p = 0.017453292519943295;
+    final a = 0.5 - math.cos((lat2 - lat1) * p) / 2 +
+        math.cos(lat1 * p) * math.cos(lat2 * p) * (1 - math.cos((lon2 - lon1) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(a));
+  }
 
   /// Returns the current active list of salons matching all criteria
   List<SalonModel> get filteredSalons {
@@ -78,12 +131,17 @@ class SalonProvider extends ChangeNotifier {
         }
       }
 
-      // 2. City Filter
-      if (_selectedCity != "All Locations" && _selectedCity.isNotEmpty) {
-        final c = _selectedCity.toLowerCase();
-        final salonCity = s.city.toLowerCase();
-        final salonAddr = s.address.toLowerCase();
-        if (!salonCity.contains(c) && !salonAddr.contains(c)) {
+      // 2. Category Filter
+      if (_selectedCategory != "All" && _selectedCategory.trim().isNotEmpty) {
+        final catLower = _selectedCategory.toLowerCase().trim();
+        final serviceCatMatch = s.services.any((srv) {
+          final sCat = srv.category.toLowerCase();
+          final sName = srv.name.toLowerCase();
+          return sCat.contains(catLower) || sName.contains(catLower);
+        });
+        final descMatch = s.description.toLowerCase().contains(catLower);
+        final nameMatch = s.name.toLowerCase().contains(catLower);
+        if (!serviceCatMatch && !descMatch && !nameMatch) {
           return false;
         }
       }
@@ -106,6 +164,13 @@ class SalonProvider extends ChangeNotifier {
       }
 
       return true;
+    }).map((s) {
+      if (s.distanceKm != null) return s;
+      if (_userLat != null && _userLng != null) {
+        final dist = _calculateDistanceKm(_userLat, _userLng, s.latitude, s.longitude);
+        return s.copyWith(distanceKm: dist);
+      }
+      return s;
     }).toList()
       ..sort((a, b) {
         if (_selectedSort == "rating") {
@@ -262,7 +327,6 @@ class SalonProvider extends ChangeNotifier {
   void applyFilters({
     String? category,
     String? sort,
-    String? city,
     double? minPrice,
     double? maxPrice,
     double? minRating,
@@ -270,7 +334,6 @@ class SalonProvider extends ChangeNotifier {
   }) {
     if (category != null) _selectedCategory = category;
     if (sort != null) _selectedSort = sort;
-    if (city != null) _selectedCity = city;
     if (minPrice != null) _minPrice = minPrice;
     if (maxPrice != null) _maxPrice = maxPrice;
     if (minRating != null) _minRating = minRating;
@@ -284,7 +347,6 @@ class SalonProvider extends ChangeNotifier {
     _searchQuery = "";
     _selectedCategory = "All";
     _selectedSort = "recommended";
-    _selectedCity = "All Locations";
     _minPrice = 0.0;
     _maxPrice = 10000.0;
     _minRating = 0.0;

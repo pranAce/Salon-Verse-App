@@ -98,8 +98,8 @@ void main() {
     });
 
     test('AppCurrencyFormatter formats prices correctly without Bitcoin symbol', () {
-      expect(AppCurrencyFormatter.format(800), 'NPR 800');
-      expect(AppCurrencyFormatter.format(1200.50), 'NPR 1,200.50');
+      expect(AppCurrencyFormatter.format(800), 'Rs. 800');
+      expect(AppCurrencyFormatter.format(1200.50), 'Rs. 1,200.50');
       expect(AppCurrencyFormatter.format(null), 'Price unavailable');
     });
 

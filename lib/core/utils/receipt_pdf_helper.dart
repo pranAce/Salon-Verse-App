@@ -63,9 +63,10 @@ class ReceiptPdfHelper {
           .toString()
           .toUpperCase();
       final double price = (booking.servicePrice as num?)?.toDouble() ?? 500.0;
-      final String pStatus =
-          booking.paymentStatus?.toString().toLowerCase() ?? '';
-      final bool isPaid = pStatus == 'completed' || pStatus == 'paid';
+      final String status = (booking.status?.toString() ?? '').toLowerCase();
+      final String pStatus = (booking.paymentStatus?.toString() ?? '').toLowerCase();
+      final bool isCancelled = status.contains('cancel') || pStatus.contains('cancel');
+      final bool isPaid = (pStatus == 'completed' || pStatus == 'paid') && !isCancelled;
       final String txnId =
           "TXN-${bookingId.length >= 6 ? bookingId.substring(0, 6).toUpperCase() : bookingId.toUpperCase()}-$paymentMethod";
 
@@ -90,7 +91,7 @@ class ReceiptPdfHelper {
                             height: 36,
                             padding: const pw.EdgeInsets.all(5),
                             decoration: pw.BoxDecoration(
-                              color: PdfColor.fromHex("#EC4899"),
+                              color: isCancelled ? PdfColor.fromHex("#DC2626") : PdfColor.fromHex("#A060C0"),
                               borderRadius: pw.BorderRadius.circular(8),
                             ),
                             child: pw.Image(logoImage, fit: pw.BoxFit.contain),
@@ -105,12 +106,14 @@ class ReceiptPdfHelper {
                               style: pw.TextStyle(
                                 fontSize: 20,
                                 fontWeight: pw.FontWeight.bold,
-                                color: PdfColor.fromHex("#EC4899"),
+                                color: isCancelled ? PdfColor.fromHex("#DC2626") : PdfColor.fromHex("#A060C0"),
                               ),
                             ),
                             pw.SizedBox(height: 2),
                             pw.Text(
-                              "Official Appointment Receipt & Invoice",
+                              isCancelled
+                                  ? "Cancelled Appointment Invoice & Void Summary"
+                                  : "Official Appointment Receipt & Invoice",
                               style: const pw.TextStyle(
                                 fontSize: 10,
                                 color: PdfColors.grey700,
@@ -126,17 +129,19 @@ class ReceiptPdfHelper {
                         vertical: 6,
                       ),
                       decoration: pw.BoxDecoration(
-                        color: isPaid
-                            ? PdfColor.fromHex("#DEF7EC")
-                            : PdfColor.fromHex("#FEF08A"),
+                        color: isCancelled
+                            ? PdfColor.fromHex("#FEE2E2")
+                            : (isPaid ? PdfColor.fromHex("#DEF7EC") : PdfColor.fromHex("#FEF08A")),
                         borderRadius: pw.BorderRadius.circular(8),
                       ),
                       child: pw.Text(
-                        isPaid ? "PAID IN FULL" : "PAYMENT PENDING",
+                        isCancelled
+                            ? "CANCELLED"
+                            : (isPaid ? "PAID IN FULL" : "PAYMENT PENDING"),
                         style: pw.TextStyle(
-                          color: isPaid
-                              ? PdfColor.fromHex("#03543F")
-                              : PdfColor.fromHex("#713F12"),
+                          color: isCancelled
+                              ? PdfColor.fromHex("#991B1B")
+                              : (isPaid ? PdfColor.fromHex("#03543F") : PdfColor.fromHex("#713F12")),
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
@@ -210,7 +215,40 @@ class ReceiptPdfHelper {
                     ),
                   ],
                 ),
-                pw.SizedBox(height: 24),
+                pw.SizedBox(height: 16),
+                if (isCancelled) ...[
+                  pw.Container(
+                    width: double.infinity,
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColor.fromHex("#FEF2F2"),
+                      borderRadius: pw.BorderRadius.circular(8),
+                      border: pw.Border.all(color: PdfColor.fromHex("#FCA5A5")),
+                    ),
+                    child: pw.Row(
+                      children: [
+                        pw.Text(
+                          "CANCELLATION NOTICE: ",
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                            color: PdfColor.fromHex("#991B1B"),
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Text(
+                            "This booking was cancelled. No payment was captured or invoice is void.",
+                            style: pw.TextStyle(
+                              fontSize: 9.5,
+                              color: PdfColor.fromHex("#7F1D1D"),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(height: 16),
+                ],
 
                 pw.Container(
                   decoration: pw.BoxDecoration(
@@ -220,7 +258,7 @@ class ReceiptPdfHelper {
                   child: pw.Column(
                     children: [
                       pw.Container(
-                        color: PdfColor.fromHex("#F9FAFB"),
+                        color: PdfColor.fromHex("#F6EEFB"),
                         padding: const pw.EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 10,
@@ -393,7 +431,7 @@ class ReceiptPdfHelper {
                                 style: pw.TextStyle(
                                   fontWeight: pw.FontWeight.bold,
                                   fontSize: 12,
-                                  color: PdfColor.fromHex("#EC4899"),
+                                  color: PdfColor.fromHex("#A060C0"),
                                 ),
                               ),
                             ],

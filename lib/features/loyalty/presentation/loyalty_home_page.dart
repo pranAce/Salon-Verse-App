@@ -79,13 +79,13 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
         Color(0xFF0A0512),
       ];
     } else {
-      tierPrimary = AppColors.primary;
-      tierSecondary = const Color(0xFFBE185D);
-      tierAccent = const Color(0xFFFCE7F3);
+      tierPrimary = const Color(0xFFE11D48);
+      tierSecondary = const Color(0xFF9F1239);
+      tierAccent = const Color(0xFFFFE4E6);
       cardBgGradient = const [
-        Color(0xFF2B0F20),
-        Color(0xFF1A0713),
-        Color(0xFF0F040B),
+        Color(0xFF2E0914),
+        Color(0xFF1F050D),
+        Color(0xFF100207),
       ];
     }
 

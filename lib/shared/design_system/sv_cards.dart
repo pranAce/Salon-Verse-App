@@ -35,7 +35,7 @@ class SVFallbackLogo extends StatelessWidget {
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFEC4899), Color(0xFFBE185D)],
+          colors: [AppColors.primary, AppColors.primaryGradientEnd],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -80,6 +80,12 @@ class SVSalonCard extends StatelessWidget {
         ? salon.services.map((s) => s.price).reduce((a, b) => a < b ? a : b)
         : null;
 
+    final formattedDistance = salon.distanceKm != null
+        ? (salon.distanceKm! < 1.0
+            ? '${(salon.distanceKm! * 1000).round()} m'
+            : '${salon.distanceKm!.toStringAsFixed(1)} km')
+        : null;
+
     if (isCompact) {
       return GestureDetector(
         onTap: onTap,
@@ -102,21 +108,27 @@ class SVSalonCard extends StatelessWidget {
               // Photo Header
               Stack(
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: resolvedImageUrl,
-                    height: 130,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      height: 130,
-                      color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
-                    ),
-                    errorWidget: (context, url, err) => const SVFallbackLogo(
-                      height: 130,
-                      width: double.infinity,
-                      logoSize: 42,
-                    ),
-                  ),
+                  resolvedImageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: resolvedImageUrl,
+                          height: 130,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 130,
+                            color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          ),
+                          errorWidget: (context, url, err) => const SVFallbackLogo(
+                            height: 130,
+                            width: double.infinity,
+                            logoSize: 42,
+                          ),
+                        )
+                      : const SVFallbackLogo(
+                          height: 130,
+                          width: double.infinity,
+                          logoSize: 42,
+                        ),
                   if (salon.isPremium)
                     Positioned(
                       top: 10,
@@ -132,7 +144,7 @@ class SVSalonCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFF59E0B).withOpacity(0.45),
+                              color: const Color(0xFFF59E0B).withAlpha(115),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -249,7 +261,9 @@ class SVSalonCard extends StatelessWidget {
                         const SizedBox(width: 3),
                         Expanded(
                           child: Text(
-                            salon.address,
+                            formattedDistance != null
+                                ? '${salon.address} • $formattedDistance'
+                                : salon.address,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.plusJakartaSans(
@@ -318,21 +332,27 @@ class SVSalonCard extends StatelessWidget {
             // Wide Photo
             Stack(
               children: [
-                CachedNetworkImage(
-                  imageUrl: resolvedImageUrl,
-                  height: 160,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    height: 160,
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
-                  ),
-                  errorWidget: (context, url, err) => const SVFallbackLogo(
-                    height: 160,
-                    width: double.infinity,
-                    logoSize: 52,
-                  ),
-                ),
+                resolvedImageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: resolvedImageUrl,
+                        height: 160,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          height: 160,
+                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                        ),
+                        errorWidget: (context, url, err) => const SVFallbackLogo(
+                          height: 160,
+                          width: double.infinity,
+                          logoSize: 52,
+                        ),
+                      )
+                    : const SVFallbackLogo(
+                        height: 160,
+                        width: double.infinity,
+                        logoSize: 52,
+                      ),
                 if (salon.isPremium)
                   Positioned(
                     top: 12,
@@ -348,7 +368,7 @@ class SVSalonCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFF59E0B).withOpacity(0.45),
+                            color: const Color(0xFFF59E0B).withAlpha(115),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -445,7 +465,7 @@ class SVSalonCard extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
-                                    '${salon.address}, ${salon.city}',
+                                    salon.address,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.plusJakartaSans(
@@ -454,6 +474,31 @@ class SVSalonCard extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                if (formattedDistance != null) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF361421) : AppColors.primaryTint,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.near_me_rounded, size: 10.5, color: AppColors.primary),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          formattedDistance,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ],

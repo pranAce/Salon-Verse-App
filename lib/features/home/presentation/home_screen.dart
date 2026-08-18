@@ -22,7 +22,6 @@ import 'package:salonverse/shared/design_system/sv_button.dart';
 import 'package:salonverse/shared/design_system/sv_cards.dart';
 import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
 import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
-import 'package:salonverse/features/home/presentation/search_filter_sheet.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -39,15 +38,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   double? _userLng;
 
   List<OfferModel> _featuredOffers = [];
-
-  final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded},
-    {'name': 'Hair', 'icon': Icons.content_cut_rounded},
-    {'name': 'Facial', 'icon': Icons.face_retouching_natural_rounded},
-    {'name': 'Nails', 'icon': Icons.brush_rounded},
-    {'name': 'Massage', 'icon': Icons.spa_rounded},
-    {'name': 'Bridal', 'icon': Icons.diamond_rounded},
-  ];
 
   @override
   void initState() {
@@ -164,13 +154,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _openFilterSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const SearchFilterSheet(),
-    );
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning 👋';
+    if (hour < 17) return 'Good afternoon 👋';
+    return 'Good evening 👋';
   }
 
   @override
@@ -215,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // 1. Header Bar: Location Selector & Notifications
+              // 1. Header Bar: Location Selector & Greeting
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
@@ -226,6 +214,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              _getGreeting(),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Hello, $firstName',
+                              style: GoogleFonts.outfit(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
                             GestureDetector(
                               onTap: _fetchLiveGpsAndSalons,
                               child: Row(
@@ -239,9 +246,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 12.5,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
                                       ),
                                     ),
                                   ),
@@ -261,16 +268,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Hello, $firstName',
-                              style: GoogleFonts.outfit(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -284,14 +281,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
 
-              // 2. Integrated Search Bar
+              // 2. Integrated Search Bar (Pushes dedicated /search screen)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 6, 18, 14),
                   child: SVSearchField(
                     readOnly: true,
-                    onTap: () => context.push('/salon-tab'),
-                    onFilterTap: _openFilterSheet,
+                    hasActiveFilter: salonProv.hasActiveFilters,
+                    onTap: () => context.push('/search'),
                     hintText: 'Search salons, styling, facials, nails...',
                   ),
                 ),
@@ -400,35 +397,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                 ),
 
-              // 4. Category Pills Row
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    itemCount: _categories.length,
-                    itemBuilder: (context, index) {
-                      final cat = _categories[index];
-                      final isSelected = salonProv.selectedCategory == cat['name'];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: SVCFilterChip(
-                          label: cat['name'] as String,
-                          icon: cat['icon'] as IconData,
-                          isSelected: isSelected,
-                          onSelected: () {
-                            salonProv.selectCategory(cat['name'] as String);
-                            if (cat['name'] != 'All') {
-                              context.push('/salon-tab');
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
+
 
               // 5. Featured Salons Section
               SliverToBoxAdapter(

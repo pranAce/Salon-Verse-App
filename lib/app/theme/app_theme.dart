@@ -7,40 +7,49 @@ import 'package:google_fonts/google_fonts.dart';
 class AppColors {
   AppColors._();
 
-  // Core Brand Hues
-  static const Color primary = Color(0xFFEC4899); // Vibrant Glow Pink
-  static const Color primaryDark = Color(0xFFD92672); // Deep Rose
-  static const Color primaryGradientEnd = Color(0xFFFB7185); // Soft Coral Pink
-  static const Color primaryTint = Color(0xFFFDF2F6); // Soft Pink Tint
-  static const Color primaryGlow = Color(0x29EC4899);
+  // Core Brand Hues (mapped from colorpallate.json)
+  static const Color primary = Color(0xFFA060C0); // Primary Purple #A060C0
+  static const Color primaryDark = Color(0xFF8E4CB0); // Deep Purple
+  static const Color primaryGradientEnd = Color(0xFFB060C0); // Orchid #B060C0
+  static const Color primaryTint = Color(0xFFF6EEFB); // Soft Purple Tint
+  static const Color primaryGlow = Color(0x29A060C0);
 
-  // Light Mode Surfaces & Canvas (Editorial Warm Studio Tones)
-  static const Color lightBackground = Color(0xFFF8F9FA); // Crisp Off-White Canvas
+  // Palette Additions from colorpallate.json
+  static const Color orchid = Color(0xFFB060C0); // #B060C0
+  static const Color softMagenta = Color(0xFFC060C0); // #C060C0
+  static const Color brandPink = Color(0xFFD070D0); // #D070D0
+  static const Color brandLightPink = Color(0xFFE070D0); // #E070D0
+  static const Color brandWhite = Color(0xFFF5F5F5); // #F5F5F5
+  static const Color brandCharcoal = Color(0xFF2F2F38); // #2F2F38
+  static const Color brandLightGray = Color(0xFFF3F4F6); // #F3F4F6
+
+  // Light Mode Surfaces & Canvas (Editorial Clean Tones)
+  static const Color lightBackground = Color(0xFFF3F4F6); // Brand Light Gray #F3F4F6
   static const Color lightSurface = Color(0xFFFFFFFF); // Pure White Surface
-  static const Color lightSurfaceSecondary = Color(0xFFF1F3F6); // Muted Group Container
+  static const Color lightSurfaceSecondary = Color(0xFFF8F9FA); // Muted Container
   static const Color lightSurfaceTertiary = Color(0xFFE9ECEF);
-  static const Color lightBorder = Color(0xFFE5E7EB); // Hairline Subtle Border
+  static const Color lightBorder = Color(0xFFE2E8F0); // Subtle Hairline Border
   static const Color lightBorderSubtle = Color(0xFFF0F2F5);
 
-  // Light Mode Typography
-  static const Color lightTextPrimary = Color(0xFF111827); // Deep Ink
-  static const Color lightTextSecondary = Color(0xFF4B5563); // Balanced Slate
-  static const Color lightTextTertiary = Color(0xFF9CA3AF); // Muted Meta
+  // Light Mode Typography (Charcoal #2F2F38 Primary)
+  static const Color lightTextPrimary = Color(0xFF2F2F38); // Charcoal #2F2F38
+  static const Color lightTextSecondary = Color(0xFF475569); // Balanced Slate
+  static const Color lightTextTertiary = Color(0xFF94A3B8); // Muted Meta
   static const Color lightTextMuted = Color(0xFFCBD5E1);
 
-  // Dark Mode Surfaces & Canvas (Refined Obsidian Tones)
-  static const Color darkBackground = Color(0xFF0C0D0E);
-  static const Color darkSurface = Color(0xFF16181A);
-  static const Color darkSurfaceElevated = Color(0xFF1F2226);
-  static const Color darkSurfaceTertiary = Color(0xFF282B30);
-  static const Color darkBorder = Color(0xFF2A2D32);
-  static const Color darkBorderSubtle = Color(0xFF1D2024);
+  // Dark Mode Surfaces & Canvas (Refined Obsidian Tones with Purple Glow)
+  static const Color darkBackground = Color(0xFF0F0C14);
+  static const Color darkSurface = Color(0xFF171320);
+  static const Color darkSurfaceElevated = Color(0xFF241E32);
+  static const Color darkSurfaceTertiary = Color(0xFF322944);
+  static const Color darkBorder = Color(0xFF2B2438);
+  static const Color darkBorderSubtle = Color(0xFF1F1A28);
 
   // Dark Mode Typography
-  static const Color darkTextPrimary = Color(0xFFF9FAFB);
-  static const Color darkTextSecondary = Color(0xFFD1D5DB);
-  static const Color darkTextTertiary = Color(0xFF9CA3AF);
-  static const Color darkTextMuted = Color(0xFF6B7280);
+  static const Color darkTextPrimary = Color(0xFFF5F5F5); // Brand White #F5F5F5
+  static const Color darkTextSecondary = Color(0xFFCBD5E1);
+  static const Color darkTextTertiary = Color(0xFF94A3B8);
+  static const Color darkTextMuted = Color(0xFF64748B);
 
   // Semantic & Status
   static const Color success = Color(0xFF10B981);

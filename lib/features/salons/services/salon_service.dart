@@ -131,7 +131,7 @@ class SalonService {
     );
   }
 
-  Future<ApiResult<void>> toggleFavorite(
+  Future<ApiResult<UserModel>> toggleFavorite(
     String salonId,
     UserModel? currentUser,
     Function(UserModel) onUserUpdated,
@@ -140,20 +140,22 @@ class SalonService {
       return const Failure("User not logged in");
     }
 
-    return _client.request<void>(
+    final result = await _client.request<UserModel>(
       "POST",
-      "/api/v1/salons/$salonId/favorite",
+      "/api/v1/users/toggle-favorite",
       auth: true,
+      body: {"salonId": salonId},
       onSuccess: (data) {
-        final favorites = List<String>.from(currentUser.favoriteSalons);
-        if (favorites.contains(salonId)) {
-          favorites.remove(salonId);
-        } else {
-          favorites.add(salonId);
-        }
-        final updatedUser = currentUser.copyWith(favoriteSalons: favorites);
-        onUserUpdated(updatedUser);
+        final map = data is Map<String, dynamic>
+            ? data
+            : Map<String, dynamic>.from(data as Map);
+        return UserModel.fromJson(map);
       },
     );
+
+    if (result is Success<UserModel>) {
+      onUserUpdated(result.data);
+    }
+    return result;
   }
 }

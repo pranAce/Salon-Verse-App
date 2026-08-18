@@ -34,7 +34,6 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
 
   final List<Map<String, dynamic>> _paymentMethods = const [
     {'name': 'Cash', 'label': 'Pay at Salon / Cash on Delivery', 'icon': Icons.payments_outlined},
-    {'name': 'Card', 'label': 'Credit / Debit Card', 'icon': Icons.credit_card_rounded},
     {'name': 'Digital Wallet', 'label': 'eSewa / Khalti Wallet', 'icon': Icons.account_balance_wallet_outlined},
   ];
 

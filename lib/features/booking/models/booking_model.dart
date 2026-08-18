@@ -168,10 +168,9 @@ class BookingModel {
       salonAddress: sal is Map && sal['address'] != null
           ? sal['address'].toString()
           : (json['salonAddress'] ?? ''),
-      salonImageUrl:
-          sal is Map && (sal['coverImage'] != null || sal['logo'] != null)
-          ? (sal['coverImage'] ?? sal['logo'] ?? '').toString()
-          : (json['salonImageUrl'] ?? ''),
+      salonImageUrl: sal is Map && (sal['coverImage'] != null || sal['logo'] != null)
+          ? (sal['coverImage'] ?? sal['logo'] ?? '').toString().trim()
+          : (json['salonImageUrl'] ?? '').toString().trim(),
       serviceId: extractId(srv, 'serviceId'),
       serviceName: extractName(srv, 'serviceName'),
       servicePrice: srv is Map && srv['price'] != null

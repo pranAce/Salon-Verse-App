@@ -243,7 +243,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                               borderRadius: BorderRadius.circular(6),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFF59E0B).withOpacity(0.45),
+                                  color: const Color(0xFFF59E0B).withAlpha(115),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),

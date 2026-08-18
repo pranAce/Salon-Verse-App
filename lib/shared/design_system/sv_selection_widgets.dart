@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/booking/models/booking_slot_model.dart';
@@ -102,6 +103,7 @@ class SVSearchField extends StatelessWidget {
   final VoidCallback? onClear;
   final bool autofocus;
   final bool readOnly;
+  final bool hasActiveFilter;
   final VoidCallback? onTap;
 
   const SVSearchField({
@@ -113,6 +115,7 @@ class SVSearchField extends StatelessWidget {
     this.onClear,
     this.autofocus = false,
     this.readOnly = false,
+    this.hasActiveFilter = false,
     this.onTap,
   });
 
@@ -122,25 +125,35 @@ class SVSearchField extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      height: 48,
+      height: 50,
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurfaceElevated : Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 1,
+          color: isDark
+              ? AppColors.darkBorder
+              : AppColors.primary.withAlpha(40),
+          width: 1.2,
         ),
-        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withAlpha(50)
+                : AppColors.primary.withAlpha(15),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          const SizedBox(width: 12),
-          Icon(
+          const SizedBox(width: 14),
+          const Icon(
             Icons.search_rounded,
-            size: 19,
-            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+            size: 20,
+            color: AppColors.primary,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: controller,
@@ -149,13 +162,15 @@ class SVSearchField extends StatelessWidget {
               onTap: onTap,
               onChanged: onChanged,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
                 color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
                   color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
                 ),
                 border: InputBorder.none,
@@ -177,7 +192,7 @@ class SVSearchField extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Icon(
                   Icons.close_rounded,
-                  size: 16,
+                  size: 18,
                   color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
                 ),
               ),
@@ -186,30 +201,58 @@ class SVSearchField extends StatelessWidget {
             Container(
               height: 24,
               width: 1,
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+              color: isDark ? AppColors.darkBorder : Colors.grey.shade200,
               margin: const EdgeInsets.symmetric(horizontal: 4),
             ),
             GestureDetector(
               onTap: onFilterTap,
               behavior: HitTestBehavior.opaque,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(
-                  Icons.tune_rounded,
-                  size: 18,
-                  color: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: hasActiveFilter
+                            ? AppColors.primary
+                            : (isDark ? AppColors.darkSurface : AppColors.primaryTint),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.tune_rounded,
+                        size: 16,
+                        color: hasActiveFilter ? Colors.white : AppColors.primary,
+                      ),
+                    ),
+                    if (hasActiveFilter)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF59E0B),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
           ] else
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
         ],
       ),
     );
   }
 }
 
-/// Category / Filter Pill Chip
+/// Premium Category / Filter Pill Chip
 class SVCFilterChip extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -230,21 +273,47 @@ class SVCFilterChip extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
-      onTap: onSelected,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onSelected();
+      },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8.5),
         decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [Color(0xFFA060C0), Color(0xFFC060C0)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
           color: isSelected
-              ? (isDark ? const Color(0xFF32121E) : AppColors.primaryTint)
+              ? null
               : (isDark ? AppColors.darkSurfaceElevated : Colors.white),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected
-                ? AppColors.primary
+                ? Colors.transparent
                 : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
             width: 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFA060C0).withAlpha(90),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(isDark ? 20 : 6),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -254,7 +323,7 @@ class SVCFilterChip extends StatelessWidget {
                 icon,
                 size: 15,
                 color: isSelected
-                    ? AppColors.primary
+                    ? Colors.white
                     : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
               ),
               const SizedBox(width: 6),
@@ -262,11 +331,12 @@ class SVCFilterChip extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
-                    ? AppColors.primary
+                    ? Colors.white
                     : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                letterSpacing: 0.2,
               ),
             ),
           ],

@@ -35,13 +35,13 @@ class UserModel {
     this.homeLocationLng,
   });
 
-  bool get isCustomer => true;
-  bool get isSalonStaff => false;
-  bool get isSalonAdmin => false;
-  bool get isSuperAdmin => false;
-  bool get isSalonRole => false;
+  bool get isCustomer => role == 'user';
+  bool get isSalonStaff => role == 'salon_staff';
+  bool get isSalonAdmin => role == 'salon_admin';
+  bool get isSuperAdmin => role == 'super_admin';
+  bool get isSalonRole => role == 'salon_staff' || role == 'salon_admin';
 
-  String? get salonId => null;
+  String? get salonId => assignedSalons.isNotEmpty ? assignedSalons.first : null;
 
   bool hasPermission(String permission) {
     return permissions.contains('*') || permissions.contains(permission);

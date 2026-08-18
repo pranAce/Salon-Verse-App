@@ -16,18 +16,17 @@ class SearchFilterSheet extends StatefulWidget {
 class _SearchFilterSheetState extends State<SearchFilterSheet> {
   late String _selectedCategory;
   late String _selectedSort;
-  String _selectedCity = 'All Locations';
   RangeValues _priceRange = const RangeValues(200, 4500);
   double _minRating = 0.0;
 
   final List<Map<String, dynamic>> _categories = const [
     {'name': 'All', 'icon': Icons.grid_view_rounded},
     {'name': 'Hair', 'icon': Icons.content_cut_rounded},
-    {'name': 'Skin', 'icon': Icons.face_retouching_natural_rounded},
-    {'name': 'Nails', 'icon': Icons.spa_rounded},
-    {'name': 'Massage', 'icon': Icons.self_improvement_rounded},
-    {'name': 'Makeup', 'icon': Icons.brush_rounded},
-    {'name': 'Spa', 'icon': Icons.hot_tub_rounded},
+    {'name': 'Facial', 'icon': Icons.face_retouching_natural_rounded},
+    {'name': 'Nails', 'icon': Icons.brush_rounded},
+    {'name': 'Massage', 'icon': Icons.spa_rounded},
+    {'name': 'Bridal', 'icon': Icons.diamond_rounded},
+    {'name': 'Skin', 'icon': Icons.face_rounded},
   ];
 
   final List<Map<String, dynamic>> _sortOptions = const [
@@ -35,14 +34,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     {'id': 'rating', 'label': 'Top Rated', 'icon': Icons.star_rounded},
     {'id': 'nearest', 'label': 'Nearest', 'icon': Icons.near_me_rounded},
     {'id': 'price_asc', 'label': 'Best Price', 'icon': Icons.sell_rounded},
-  ];
-
-  final List<String> _cities = const [
-    'All Locations',
-    'Kathmandu',
-    'Lalitpur',
-    'Bhaktapur',
-    'Pokhara',
   ];
 
   final List<Map<String, dynamic>> _ratings = const [
@@ -58,7 +49,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     final prov = context.read<SalonProvider>();
     _selectedCategory = prov.selectedCategory.isEmpty ? 'All' : prov.selectedCategory;
     _selectedSort = prov.selectedSort.isEmpty ? 'recommended' : prov.selectedSort;
-    _selectedCity = prov.selectedCity.isEmpty ? 'All Locations' : prov.selectedCity;
     _minRating = prov.minRating;
     _priceRange = RangeValues(
       prov.minPrice > 0 ? prov.minPrice : 200,
@@ -70,7 +60,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     int count = 0;
     if (_selectedCategory != 'All') count++;
     if (_selectedSort != 'recommended') count++;
-    if (_selectedCity != 'All Locations') count++;
     if (_minRating > 0.0) count++;
     if (_priceRange.start > 200 || _priceRange.end < 4500) count++;
     return count;
@@ -82,7 +71,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     setState(() {
       _selectedCategory = 'All';
       _selectedSort = 'recommended';
-      _selectedCity = 'All Locations';
       _priceRange = const RangeValues(200, 4500);
       _minRating = 0.0;
     });
@@ -97,7 +85,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.88,
+        maxHeight: MediaQuery.of(context).size.height * 0.86,
       ),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
@@ -120,11 +108,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               padding: const EdgeInsets.only(top: 12, bottom: 4),
               child: Center(
                 child: Container(
-                  width: 42,
-                  height: 4.5,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF383535) : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
@@ -132,7 +120,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
             // Header Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+              padding: const EdgeInsets.fromLTRB(22, 10, 22, 14),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -172,7 +160,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryTint,
+                          color: isDark ? const Color(0xFF361421) : AppColors.primaryTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -207,19 +195,20 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
             const Divider(height: 1),
 
-            // Scrollable Content
+            // Scrollable Filter Content
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
                 children: [
-                  // 1. Service Category
-                  _buildSectionTitle('Category', 'Filter by specialty & treatment', isDark),
+                  // 1. Service Category Section
+                  _buildSectionHeader('Specialty Category', isDark),
                   const SizedBox(height: 10),
                   SizedBox(
-                    height: 42,
+                    height: 40,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
                       itemCount: _categories.length,
                       itemBuilder: (context, index) {
                         final cat = _categories[index];
@@ -228,16 +217,57 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                         final isSel = _selectedCategory == name;
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
-                          child: _buildCategoryChip(name, icon, isSel, isDark),
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _selectedCategory = name);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSel
+                                    ? AppColors.primary
+                                    : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSel
+                                      ? AppColors.primary
+                                      : (isDark ? AppColors.darkBorder : Colors.transparent),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    icon,
+                                    size: 14,
+                                    color: isSel ? Colors.white : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    name,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: isSel
+                                          ? Colors.white
+                                          : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         );
                       },
                     ),
                   ),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
 
-                  // 2. Sort Order
-                  _buildSectionTitle('Sort By', 'Choose salon ranking criteria', isDark),
+                  // 2. Sort Order Section
+                  _buildSectionHeader('Sort By', isDark),
                   const SizedBox(height: 10),
                   GridView.count(
                     crossAxisCount: 2,
@@ -251,39 +281,79 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       final label = opt['label'] as String;
                       final icon = opt['icon'] as IconData;
                       final isSel = _selectedSort == id;
-                      return _buildSortTile(id, label, icon, isSel, isDark);
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedSort = id);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSel
+                                ? (isDark ? const Color(0xFF361421) : AppColors.primaryTint)
+                                : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade50),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSel
+                                  ? AppColors.primary
+                                  : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                              width: isSel ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: isSel
+                                      ? AppColors.primary
+                                      : (isDark ? AppColors.darkSurface : Colors.white),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  icon,
+                                  size: 13,
+                                  color: isSel ? Colors.white : AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                                    color: isSel
+                                        ? AppColors.primary
+                                        : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     }).toList(),
                   ),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
 
-                  // 3. Location / City
-                  _buildSectionTitle('Location', 'Select city or operational area', isDark),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _cities.map((city) {
-                      final isSel = _selectedCity == city;
-                      return _buildCityChip(city, isSel, isDark);
-                    }).toList(),
-                  ),
-
-                  const SizedBox(height: 22),
-
-                  // 4. Price Budget Range
+                  // 3. Budget Range Slider Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSectionTitle('Budget Range', 'Filter by service price', isDark),
+                      _buildSectionHeader('Price Budget', isDark),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryTint,
+                          color: isDark ? const Color(0xFF361421) : AppColors.primaryTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          'Rs. ${_priceRange.start.round()} - ${_priceRange.end.round()}',
+                          'NPR ${_priceRange.start.round()} - ${_priceRange.end.round()}',
                           style: GoogleFonts.outfit(
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
@@ -293,17 +363,17 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       activeTrackColor: AppColors.primary,
                       inactiveTrackColor: isDark ? AppColors.darkBorder : Colors.grey.shade200,
                       thumbColor: AppColors.primary,
                       overlayColor: AppColors.primary.withAlpha(40),
-                      trackHeight: 5,
+                      trackHeight: 4,
                       rangeThumbShape: const RoundRangeSliderThumbShape(
-                        enabledThumbRadius: 10,
-                        elevation: 3,
+                        enabledThumbRadius: 9,
+                        elevation: 2,
                       ),
                     ),
                     child: RangeSlider(
@@ -315,10 +385,10 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                     ),
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
 
-                  // 5. Minimum Rating
-                  _buildSectionTitle('Rating', 'Minimum customer satisfaction score', isDark),
+                  // 5. Minimum Rating Section
+                  _buildSectionHeader('Rating Score', isDark),
                   const SizedBox(height: 10),
                   Row(
                     children: _ratings.map((r) {
@@ -378,7 +448,7 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -395,15 +465,14 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                 ),
               ),
               child: SVButton(
-                text: 'Show Salons',
-                icon: Icons.check_circle_outline_rounded,
+                text: 'Apply Filters',
+                icon: Icons.tune_rounded,
                 isFullWidth: true,
                 onPressed: () {
                   HapticFeedback.mediumImpact();
                   salonProv.applyFilters(
                     category: _selectedCategory,
                     sort: _selectedSort,
-                    city: _selectedCity,
                     minPrice: _priceRange.start,
                     maxPrice: _priceRange.end,
                     minRating: _minRating,
@@ -418,174 +487,13 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
     );
   }
 
-  Widget _buildSectionTitle(String title, String subtitle, bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.outfit(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 11.5,
-            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryChip(String name, IconData icon, bool isSel, bool isDark) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _selectedCategory = name);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSel
-              ? AppColors.primary
-              : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSel
-                ? AppColors.primary
-                : (isDark ? AppColors.darkBorder : Colors.transparent),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isSel ? Colors.white : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              name,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: isSel
-                    ? Colors.white
-                    : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSortTile(String id, String label, IconData icon, bool isSel, bool isDark) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _selectedSort = id);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSel
-              ? (isDark ? const Color(0xFF361421) : AppColors.primaryTint)
-              : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade50),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSel
-                ? AppColors.primary
-                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
-            width: isSel ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isSel
-                    ? AppColors.primary
-                    : (isDark ? AppColors.darkSurface : Colors.white),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 13,
-                color: isSel ? Colors.white : AppColors.primary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
-                  color: isSel
-                      ? AppColors.primary
-                      : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCityChip(String city, bool isSel, bool isDark) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _selectedCity = city);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSel
-              ? AppColors.primary
-              : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade50),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSel
-                ? AppColors.primary
-                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.location_on_outlined,
-              size: 13,
-              color: isSel ? Colors.white : AppColors.primary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              city,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
-                color: isSel
-                    ? Colors.white
-                    : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
-              ),
-            ),
-          ],
-        ),
+  Widget _buildSectionHeader(String title, bool isDark) {
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
       ),
     );
   }

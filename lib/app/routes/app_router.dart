@@ -12,6 +12,7 @@ import 'package:salonverse/features/auth/presentation/forgot_password_page.dart'
 
 import 'package:salonverse/features/home/presentation/main_shell.dart';
 import 'package:salonverse/features/home/presentation/home_screen.dart';
+import 'package:salonverse/features/home/presentation/search_screen.dart';
 import 'package:salonverse/features/booking/presentation/booking_history_page.dart';
 import 'package:salonverse/features/salons/presentation/salons_directory_page.dart';
 import 'package:salonverse/features/profile/presentation/profile_page.dart';
@@ -120,6 +121,16 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => const ProfilePage(),
         ),
       ],
+    ),
+
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/search',
+      builder: (context, state) {
+        final q = state.uri.queryParameters['q'];
+        final category = state.uri.queryParameters['category'];
+        return SearchScreen(initialQuery: q, initialCategory: category);
+      },
     ),
 
     GoRoute(

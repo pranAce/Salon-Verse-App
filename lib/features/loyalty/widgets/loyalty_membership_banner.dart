@@ -43,7 +43,7 @@ class LoyaltyMembershipBanner extends StatelessWidget {
     } else if (tierKey == 'luxe') {
       tierColor = const Color(0xFF8B5CF6);
     } else {
-      tierColor = AppColors.primary;
+      tierColor = const Color(0xFFE11D48);
     }
 
     return GestureDetector(

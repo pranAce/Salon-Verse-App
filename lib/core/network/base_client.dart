@@ -29,6 +29,8 @@ class BaseClient {
     return prefs.getString(_tokenKey);
   }
 
+  static bool readOnlyMode = false;
+
   Future<ApiResult<T>> request<T>(
     String method,
     String path, {
@@ -37,6 +39,11 @@ class BaseClient {
     required T Function(dynamic data) onSuccess,
     int maxAttempts = 2,
   }) async {
+    // Strict Read-Only Guard
+    if (readOnlyMode && method != "GET") {
+      return const Failure("Read-only mode active: Data mutations are disabled on mobile client.");
+    }
+
     final headers = <String, String>{
       "Content-Type": "application/json",
       "Accept": "application/json",

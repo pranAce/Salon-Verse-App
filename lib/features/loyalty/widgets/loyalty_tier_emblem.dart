@@ -43,9 +43,9 @@ class SVTierEmblem extends StatelessWidget {
 
     switch (level) {
       case SVTierLevel.glow:
-        gradientColors = const [Color(0xFFF472B6), Color(0xFFEC4899), Color(0xFFBE185D)];
-        accentColor = const Color(0xFFEC4899);
-        emblemIcon = Icons.auto_awesome_rounded;
+        gradientColors = const [Color(0xFFFB7185), Color(0xFFE11D48), Color(0xFF9F1239)];
+        accentColor = const Color(0xFFE11D48);
+        emblemIcon = Icons.workspace_premium_rounded;
         label = 'GLOW';
         break;
       case SVTierLevel.luxe:

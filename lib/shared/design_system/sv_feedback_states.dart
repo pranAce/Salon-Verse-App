@@ -125,15 +125,16 @@ class SVEmptyState extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: iconSize * 1.7,
-              height: iconSize * 1.7,
+              width: iconSize * 1.5,
+              height: iconSize * 1.5,
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
                 shape: BoxShape.circle,
@@ -145,39 +146,39 @@ class SVEmptyState extends StatelessWidget {
               child: Center(
                 child: Icon(
                   icon,
-                  size: iconSize,
+                  size: iconSize * 0.9,
                   color: AppColors.primary,
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             Text(
               title,
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
-                fontSize: 19,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               description,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w400,
                 color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                height: 1.4,
+                height: 1.35,
               ),
             ),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               SVButton(
                 text: actionLabel!,
                 onPressed: onAction,
                 variant: SVButtonVariant.secondary,
-                size: SVButtonSize.md,
+                size: SVButtonSize.sm,
               ),
             ],
           ],

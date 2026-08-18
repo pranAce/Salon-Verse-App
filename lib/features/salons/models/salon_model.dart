@@ -94,10 +94,12 @@ class StylistModel {
 
     final id = (json['id'] ?? json['_id'])?.toString() ?? '';
     final name = json['name'] ?? '';
+    final String parsedStylistImg = (json['imageUrl'] ?? json['avatar'])?.toString().trim() ?? '';
+
     final model = StylistModel(
       id: id,
       name: name,
-      imageUrl: json['imageUrl'] ?? json['avatar'] ?? '',
+      imageUrl: parsedStylistImg,
       specialty: specs.isNotEmpty ? specs.join(", ") : '',
       specialties: specs,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
@@ -139,6 +141,32 @@ class SalonModel {
   double get lat => latitude;
   double get lng => longitude;
   bool get isPremium => subscription == 'premium' || isFeatured;
+
+  SalonModel copyWith({
+    double? distanceKm,
+  }) {
+    return SalonModel(
+      id: id,
+      name: name,
+      imageUrl: imageUrl,
+      address: address,
+      city: city,
+      latitude: latitude,
+      longitude: longitude,
+      distanceKm: distanceKm ?? this.distanceKm,
+      rating: rating,
+      reviewCount: reviewCount,
+      openingHours: openingHours,
+      priceRange: priceRange,
+      description: description,
+      phoneNumber: phoneNumber,
+      subscription: subscription,
+      isFeatured: isFeatured,
+      homeServiceAvailable: homeServiceAvailable,
+      services: services,
+      stylists: stylists,
+    );
+  }
 
   SalonModel({
     required this.id,
@@ -212,10 +240,31 @@ class SalonModel {
         : (json['subscription'] ?? 'basic').toString();
     final bool feat = (json['isFeatured'] as bool? ?? false) || subStr == 'premium';
 
+    String hours = '9:00 AM - 8:00 PM';
+    if (json['openingHours'] is String) {
+      hours = json['openingHours'];
+    } else if (json['openingHours'] is List && (json['openingHours'] as List).isNotEmpty) {
+      final openDay = (json['openingHours'] as List).firstWhere(
+        (element) => element is Map && (element['isClosed'] == false),
+        orElse: () => (json['openingHours'] as List).first,
+      );
+      if (openDay is Map && openDay['open'] != null && openDay['close'] != null) {
+        hours = '${openDay['open']} - ${openDay['close']}';
+      }
+    }
+
+    final String parsedSalonImg = (json['coverImage'] != null && json['coverImage'].toString().trim().isNotEmpty)
+        ? json['coverImage'].toString().trim()
+        : ((json['logo'] != null && json['logo'].toString().trim().isNotEmpty)
+            ? json['logo'].toString().trim()
+            : ((json['imageUrl'] != null && json['imageUrl'].toString().trim().isNotEmpty)
+                ? json['imageUrl'].toString().trim()
+                : ''));
+
     final model = SalonModel(
       id: id,
       name: name,
-      imageUrl: json['imageUrl'] ?? json['coverImage'] ?? '',
+      imageUrl: parsedSalonImg,
       address: json['address'] ?? '',
       city: json['city'] ?? 'Kathmandu',
       latitude: lat,
@@ -223,9 +272,7 @@ class SalonModel {
       distanceKm: (json['distanceKm'] as num?)?.toDouble(),
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       reviewCount: json['reviewCount'] as int? ?? 0,
-      openingHours: json['openingHours'] is String
-          ? json['openingHours']
-          : '9:00 AM - 8:00 PM',
+      openingHours: hours,
       priceRange: json['priceRange'] ?? 'Rs. 200 - 1500',
       description: json['description'] ?? '',
       phoneNumber: (json['phoneNumber'] ?? json['phone'])?.toString() ?? '',
