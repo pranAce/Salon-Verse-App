@@ -15,11 +15,12 @@ class ApiConfig {
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-    if (kReleaseMode) {
+    const useProd = bool.fromEnvironment('USE_PROD_URL', defaultValue: false);
+    if (useProd) {
       return prodUrl;
     }
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return localAndroidUrl;
+      return localDesktopUrl;
     }
     return localDesktopUrl;
   }
