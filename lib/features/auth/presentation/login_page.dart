@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                                 gradient: AppGradients.primary,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.spa_rounded, color: Colors.white, size: 36),
+                              child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 36),
                             ),
                           ),
                         ),

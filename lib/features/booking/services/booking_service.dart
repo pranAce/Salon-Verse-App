@@ -86,7 +86,9 @@ class BookingService {
       'servicePrice': service.price,
       'date': date,
       'timeSlot': timeSlot,
-      'paymentMethod': paymentMethod,
+      'paymentMethod': paymentMethod.toLowerCase().contains('wallet')
+          ? 'digital_wallet'
+          : paymentMethod.toLowerCase(),
       'isHomeService': isHomeService,
       'homeAddress': homeAddress,
       'contactNumber': contactNumber,

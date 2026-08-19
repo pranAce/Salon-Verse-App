@@ -90,7 +90,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             gradient: AppGradients.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.spa_rounded, color: Colors.white, size: 18),
+                          child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 18),
                         ),
                         const SizedBox(width: 8),
                         Text(

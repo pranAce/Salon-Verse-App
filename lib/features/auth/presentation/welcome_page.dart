@@ -120,7 +120,7 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                       gradient: AppGradients.primary,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.spa_rounded, color: Colors.white, size: 48),
+                                    child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 48),
                                   ),
                                 ),
                               ),
