@@ -8,9 +8,9 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class BookingStep2SchedulePayment extends StatefulWidget {
   final SalonModel salon;
@@ -25,16 +25,26 @@ class BookingStep2SchedulePayment extends StatefulWidget {
   });
 
   @override
-  State<BookingStep2SchedulePayment> createState() => _BookingStep2SchedulePaymentState();
+  State<BookingStep2SchedulePayment> createState() =>
+      _BookingStep2SchedulePaymentState();
 }
 
-class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePayment> {
+class _BookingStep2SchedulePaymentState
+    extends State<BookingStep2SchedulePayment> {
   final TextEditingController _promoController = TextEditingController();
   bool _isApplyingPromo = false;
 
   final List<Map<String, dynamic>> _paymentMethods = const [
-    {'name': 'Cash', 'label': 'Pay at Salon / Cash on Delivery', 'icon': Icons.payments_outlined},
-    {'name': 'Digital Wallet', 'label': 'eSewa / Khalti Wallet', 'icon': Icons.account_balance_wallet_outlined},
+    {
+      'name': 'Cash',
+      'label': 'Pay at Salon / Cash on Delivery',
+      'icon': Icons.payments_outlined,
+    },
+    {
+      'name': 'Digital Wallet',
+      'label': 'eSewa / Khalti Wallet',
+      'icon': Icons.account_balance_wallet_outlined,
+    },
   ];
 
   @override
@@ -56,7 +66,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Promo code "$code" applied! Saved Rs. ${prov.discountAmount}'),
+            content: Text(
+              'Promo code "$code" applied! Saved Rs. ${prov.discountAmount}',
+            ),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -79,14 +91,15 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
 
     final servicePrice = widget.service?.price ?? 500.0;
     final discount = provider.discountAmount;
-    final finalPrice = servicePrice - discount > 0 ? servicePrice - discount : 0.0;
+    final finalPrice = servicePrice - discount > 0
+        ? servicePrice - discount
+        : 0.0;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Appointment Summary Recap Card
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -106,20 +119,19 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                     height: 46,
                     child: widget.salon.imageUrl.isNotEmpty
                         ? CachedNetworkImage(
-                            imageUrl: ApiConfig.resolveImageUrl(widget.salon.imageUrl),
+                            imageUrl: ApiConfig.resolveImageUrl(
+                              widget.salon.imageUrl,
+                            ),
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                              color: isDark
+                                  ? AppColors.darkSurfaceElevated
+                                  : AppColors.lightSurfaceSecondary,
                             ),
-                            errorWidget: (context, url, err) => const SVFallbackLogo(
-                              logoSize: 22,
-                              padding: 6,
-                            ),
+                            errorWidget: (context, url, err) =>
+                                const SVFallbackLogo(logoSize: 22, padding: 6),
                           )
-                        : const SVFallbackLogo(
-                            logoSize: 22,
-                            padding: 6,
-                          ),
+                        : const SVFallbackLogo(logoSize: 22, padding: 6),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -134,7 +146,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                         style: GoogleFonts.outfit(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -144,7 +158,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                     ],
@@ -164,7 +180,6 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
           ),
           const SizedBox(height: 20),
 
-          // 2. Date Selection
           SVSectionHeader(
             title: 'Select Date',
             subtitle: 'Choose your appointment date',
@@ -176,7 +191,6 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
           ),
           const SizedBox(height: 20),
 
-          // 3. Dynamic Backend Time Slots
           SVSectionHeader(
             title: 'Available Time Slots',
             subtitle: 'Real-time slots from salon availability',
@@ -193,9 +207,10 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
           ),
           const SizedBox(height: 20),
 
-          // 4. Stylist Selection (Above Promo Code)
           () {
-            final sourceStylists = provider.stylists.isNotEmpty ? provider.stylists : widget.salon.stylists;
+            final sourceStylists = provider.stylists.isNotEmpty
+                ? provider.stylists
+                : widget.salon.stylists;
             List<StylistModel> matchingStylists = sourceStylists;
             if (widget.service != null) {
               final catLower = widget.service!.category.toLowerCase().trim();
@@ -204,7 +219,10 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                 if (st.specialties.isEmpty) return true;
                 return st.specialties.any((spec) {
                   final s = spec.toLowerCase();
-                  return s.contains(catLower) || catLower.contains(s) || s.contains(nameLower) || nameLower.contains(s);
+                  return s.contains(catLower) ||
+                      catLower.contains(s) ||
+                      s.contains(nameLower) ||
+                      nameLower.contains(s);
                 });
               }).toList();
               if (filtered.isNotEmpty) {
@@ -246,16 +264,26 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                     color: isAnySel
-                                        ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
-                                        : (isDark ? AppColors.darkSurface : Colors.white),
-                                    borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                                        ? (isDark
+                                              ? AppColors.primaryTintDark
+                                              : AppColors.primaryTint)
+                                        : (isDark
+                                              ? AppColors.darkSurface
+                                              : Colors.white),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.cardRadius,
+                                    ),
                                     border: Border.all(
                                       color: isAnySel
                                           ? AppColors.primary
-                                          : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                          : (isDark
+                                                ? AppColors.darkBorder
+                                                : AppColors.lightBorder),
                                       width: isAnySel ? 1.5 : 1.0,
                                     ),
-                                    boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                                    boxShadow: isDark
+                                        ? null
+                                        : AppSpacing.softShadow(context),
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -264,11 +292,16 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                                         radius: 26,
                                         backgroundColor: isAnySel
                                             ? AppColors.primary
-                                            : (isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint),
+                                            : (isDark
+                                                  ? AppColors
+                                                        .darkSurfaceElevated
+                                                  : AppColors.primaryTint),
                                         child: Icon(
                                           Icons.groups_rounded,
                                           size: 22,
-                                          color: isAnySel ? Colors.white : AppColors.primary,
+                                          color: isAnySel
+                                              ? Colors.white
+                                              : AppColors.primary,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -280,7 +313,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                          color: isDark
+                                              ? AppColors.darkTextPrimary
+                                              : AppColors.lightTextPrimary,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
@@ -291,7 +326,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 10.5,
-                                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                          color: isDark
+                                              ? AppColors.darkTextTertiary
+                                              : AppColors.lightTextTertiary,
                                         ),
                                       ),
                                     ],
@@ -301,7 +338,8 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                             }
 
                             final stylist = matchingStylists[index - 1];
-                            final isSel = provider.selectedStylist?.id == stylist.id;
+                            final isSel =
+                                provider.selectedStylist?.id == stylist.id;
                             return SVStylistCard(
                               stylist: stylist,
                               isSelected: isSel,
@@ -315,7 +353,6 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
             );
           }(),
 
-          // 5. Promo Code Entry
           SVSectionHeader(
             title: 'Promo & Discount',
             subtitle: 'Have a coupon or voucher code?',
@@ -338,7 +375,10 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                     textCapitalization: TextCapitalization.characters,
                     decoration: InputDecoration(
                       hintText: provider.appliedPromoCode ?? 'Enter Promo Code',
-                      prefixIcon: const Icon(Icons.confirmation_number_outlined, size: 20),
+                      prefixIcon: const Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 20,
+                      ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -372,7 +412,6 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
           ),
           const SizedBox(height: 20),
 
-          // 5. Payment Method Selection
           SVSectionHeader(
             title: 'Payment Method',
             subtitle: 'Select payment option',
@@ -385,16 +424,23 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: isSel
-                      ? (isDark ? const Color(0xFF301520) : AppColors.primaryTint)
+                      ? (isDark
+                            ? const Color(0xFF301520)
+                            : AppColors.primaryTint)
                       : (isDark ? AppColors.darkSurface : Colors.white),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isSel
                         ? AppColors.primary
-                        : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                        : (isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder),
                     width: isSel ? 1.5 : 1,
                   ),
                 ),
@@ -402,7 +448,11 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                   children: [
                     Icon(
                       pm['icon'] as IconData,
-                      color: isSel ? AppColors.primary : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                      color: isSel
+                          ? AppColors.primary
+                          : (isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.lightTextSecondary),
                       size: 22,
                     ),
                     const SizedBox(width: 14),
@@ -415,14 +465,18 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                             style: GoogleFonts.outfit(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           Text(
                             pm['label'] as String,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                         ],
@@ -437,12 +491,18 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                         border: Border.all(
                           color: isSel
                               ? AppColors.primary
-                              : (isDark ? AppColors.darkBorder : Colors.grey.shade400),
+                              : (isDark
+                                    ? AppColors.darkBorder
+                                    : Colors.grey.shade400),
                           width: 1.5,
                         ),
                       ),
                       child: isSel
-                          ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 13,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                   ],
@@ -453,7 +513,6 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
 
           const SizedBox(height: 20),
 
-          // 6. Pricing Breakdown Card
           () {
             final isCash = provider.paymentMethod.toLowerCase() == 'cash';
             final onlineFee = isCash ? (finalPrice * 0.10) : finalPrice;
@@ -470,7 +529,11 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
               ),
               child: Column(
                 children: [
-                  _buildPriceRow('Total Service Price', CurrencyFormatter.formatNPR(servicePrice), isDark),
+                  _buildPriceRow(
+                    'Total Service Price',
+                    CurrencyFormatter.formatNPR(servicePrice),
+                    isDark,
+                  ),
                   if (discount > 0) ...[
                     const SizedBox(height: 8),
                     _buildPriceRow(
@@ -482,7 +545,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                   ],
                   const SizedBox(height: 8),
                   _buildPriceRow(
-                    isCash ? '10% Online Booking Fee (Paid Now)' : '100% Online Payment (Paid Now)',
+                    isCash
+                        ? '10% Online Booking Fee (Paid Now)'
+                        : '100% Online Payment (Paid Now)',
                     CurrencyFormatter.formatNPR(onlineFee),
                     isDark,
                     isHighlight: true,
@@ -511,7 +576,13 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
     );
   }
 
-  Widget _buildPriceRow(String label, String value, bool isDark, {bool isBold = false, bool isHighlight = false}) {
+  Widget _buildPriceRow(
+    String label,
+    String value,
+    bool isDark, {
+    bool isBold = false,
+    bool isHighlight = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -522,7 +593,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
             fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
             color: isHighlight
                 ? AppColors.success
-                : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                : (isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary),
           ),
         ),
         Text(
@@ -538,7 +611,9 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
                   fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
                   color: isHighlight
                       ? AppColors.success
-                      : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                      : (isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.lightTextPrimary),
                 ),
         ),
       ],

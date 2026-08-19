@@ -1,4 +1,3 @@
-
 class UserModel {
   final String id;
   final String name;
@@ -41,7 +40,8 @@ class UserModel {
   bool get isSuperAdmin => role == 'super_admin';
   bool get isSalonRole => role == 'salon_staff' || role == 'salon_admin';
 
-  String? get salonId => assignedSalons.isNotEmpty ? assignedSalons.first : null;
+  String? get salonId =>
+      assignedSalons.isNotEmpty ? assignedSalons.first : null;
 
   bool hasPermission(String permission) {
     return permissions.contains('*') || permissions.contains(permission);
@@ -155,4 +155,3 @@ class UserModel {
     return model;
   }
 }
-

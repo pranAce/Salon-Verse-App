@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/booking/models/booking_slot_model.dart';
 
-/// Section Header with optical typography
 class SVSectionHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -42,7 +41,9 @@ class SVSectionHeader extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -52,7 +53,9 @@ class SVSectionHeader extends StatelessWidget {
                     subtitle!,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                      color: isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.lightTextTertiary,
                     ),
                   ),
                 ],
@@ -94,7 +97,6 @@ class SVSectionHeader extends StatelessWidget {
   }
 }
 
-/// Search Field with integrated clear & filter actions
 class SVSearchField extends StatelessWidget {
   final TextEditingController? controller;
   final String hintText;
@@ -148,11 +150,7 @@ class SVSearchField extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 14),
-          const Icon(
-            Icons.search_rounded,
-            size: 20,
-            color: AppColors.primary,
-          ),
+          const Icon(Icons.search_rounded, size: 20, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -164,14 +162,18 @@ class SVSearchField extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                  color: isDark
+                      ? AppColors.darkTextTertiary
+                      : AppColors.lightTextTertiary,
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -182,7 +184,9 @@ class SVSearchField extends StatelessWidget {
               ),
             ),
           ),
-          if (controller != null && controller!.text.isNotEmpty && onClear != null)
+          if (controller != null &&
+              controller!.text.isNotEmpty &&
+              onClear != null)
             GestureDetector(
               onTap: () {
                 controller!.clear();
@@ -193,7 +197,9 @@ class SVSearchField extends StatelessWidget {
                 child: Icon(
                   Icons.close_rounded,
                   size: 18,
-                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                  color: isDark
+                      ? AppColors.darkTextTertiary
+                      : AppColors.lightTextTertiary,
                 ),
               ),
             ),
@@ -217,13 +223,17 @@ class SVSearchField extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: hasActiveFilter
                             ? AppColors.primary
-                            : (isDark ? AppColors.darkSurface : AppColors.primaryTint),
+                            : (isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.primaryTint),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.tune_rounded,
                         size: 16,
-                        color: hasActiveFilter ? Colors.white : AppColors.primary,
+                        color: hasActiveFilter
+                            ? Colors.white
+                            : AppColors.primary,
                       ),
                     ),
                     if (hasActiveFilter)
@@ -252,7 +262,6 @@ class SVSearchField extends StatelessWidget {
   }
 }
 
-/// Premium Category / Filter Pill Chip
 class SVCFilterChip extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -324,7 +333,9 @@ class SVCFilterChip extends StatelessWidget {
                 size: 15,
                 color: isSelected
                     ? Colors.white
-                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                    : (isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary),
               ),
               const SizedBox(width: 6),
             ],
@@ -335,7 +346,9 @@ class SVCFilterChip extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
                     ? Colors.white
-                    : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                    : (isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary),
                 letterSpacing: 0.2,
               ),
             ),
@@ -346,7 +359,6 @@ class SVCFilterChip extends StatelessWidget {
   }
 }
 
-/// Step Progress Indicator for Multistep Flows
 class SVStepIndicator extends StatelessWidget {
   final int currentStep;
   final List<String> steps;
@@ -391,12 +403,18 @@ class SVStepIndicator extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isCompleted || isCurrent
                           ? AppColors.primary
-                          : (isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary),
+                          : (isDark
+                                ? AppColors.darkSurfaceElevated
+                                : AppColors.lightSurfaceSecondary),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: isCompleted
-                          ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            )
                           : Text(
                               '${index + 1}',
                               style: GoogleFonts.plusJakartaSans(
@@ -404,7 +422,9 @@ class SVStepIndicator extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                                 color: isCurrent
                                     ? Colors.white
-                                    : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                                    : (isDark
+                                          ? AppColors.darkTextTertiary
+                                          : AppColors.lightTextTertiary),
                               ),
                             ),
                     ),
@@ -417,10 +437,16 @@ class SVStepIndicator extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
-                        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isCurrent
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: isCurrent
-                            ? (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary)
-                            : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                            ? (isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary)
+                            : (isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary),
                       ),
                     ),
                   ),
@@ -431,7 +457,9 @@ class SVStepIndicator extends StatelessWidget {
                       height: 1.5,
                       color: isCompleted
                           ? AppColors.primary
-                          : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                          : (isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -445,7 +473,6 @@ class SVStepIndicator extends StatelessWidget {
   }
 }
 
-/// Calendar Date Selector
 class SVDateSelector extends StatelessWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateSelected;
@@ -465,7 +492,6 @@ class SVDateSelector extends StatelessWidget {
   }
 }
 
-/// Dynamic Backend Time Slot Grid Selector
 class SVTimeSlotSelector extends StatelessWidget {
   final List<dynamic> availableSlots;
   final List<dynamic> bookedSlots;
@@ -495,7 +521,10 @@ class SVTimeSlotSelector extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Center(
-          child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 2,
+          ),
         ),
       );
     }
@@ -510,7 +539,11 @@ class SVTimeSlotSelector extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.info_outline_rounded, color: AppColors.error, size: 20),
+            const Icon(
+              Icons.info_outline_rounded,
+              color: AppColors.error,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -537,7 +570,9 @@ class SVTimeSlotSelector extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+          color: isDark
+              ? AppColors.darkSurfaceElevated
+              : AppColors.lightSurfaceSecondary,
           borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           border: Border.all(
             color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
@@ -545,7 +580,11 @@ class SVTimeSlotSelector extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.event_busy_rounded, color: AppColors.primary, size: 22),
+            const Icon(
+              Icons.event_busy_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -553,7 +592,9 @@ class SVTimeSlotSelector extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                 ),
               ),
             ),
@@ -578,15 +619,17 @@ class SVTimeSlotSelector extends StatelessWidget {
               color: isSelected
                   ? AppColors.primary
                   : isBooked
-                      ? (isDark ? Colors.white10 : Colors.grey.shade200)
-                      : (isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary),
+                  ? (isDark ? Colors.white10 : Colors.grey.shade200)
+                  : (isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: isSelected
                     ? AppColors.primary
                     : isBooked
-                        ? Colors.transparent
-                        : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    ? Colors.transparent
+                    : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
               ),
             ),
             child: Text(
@@ -597,8 +640,10 @@ class SVTimeSlotSelector extends StatelessWidget {
                 color: isSelected
                     ? Colors.white
                     : isBooked
-                        ? (isDark ? Colors.white30 : Colors.grey.shade400)
-                        : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                    ? (isDark ? Colors.white30 : Colors.grey.shade400)
+                    : (isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary),
                 decoration: isBooked ? TextDecoration.lineThrough : null,
               ),
             ),
@@ -609,7 +654,6 @@ class SVTimeSlotSelector extends StatelessWidget {
   }
 }
 
-/// Calendar Date Scroller for Appointments
 class SVDateScroller extends StatelessWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateSelected;
@@ -629,7 +673,20 @@ class SVDateScroller extends StatelessWidget {
     final now = DateTime.now();
 
     final weekdayNames = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-    final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
 
     return SizedBox(
       height: 78,
@@ -638,7 +695,8 @@ class SVDateScroller extends StatelessWidget {
         itemCount: daysCount,
         itemBuilder: (context, index) {
           final date = now.add(Duration(days: index));
-          final isSelected = date.year == selectedDate.year &&
+          final isSelected =
+              date.year == selectedDate.year &&
               date.month == selectedDate.month &&
               date.day == selectedDate.day;
 
@@ -673,7 +731,9 @@ class SVDateScroller extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: isSelected
                           ? Colors.white.withAlpha(210)
-                          : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                          : (isDark
+                                ? AppColors.darkTextTertiary
+                                : AppColors.lightTextTertiary),
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -684,7 +744,9 @@ class SVDateScroller extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                       color: isSelected
                           ? Colors.white
-                          : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                          : (isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary),
                     ),
                   ),
                   Text(
@@ -694,7 +756,9 @@ class SVDateScroller extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: isSelected
                           ? Colors.white.withAlpha(210)
-                          : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                          : (isDark
+                                ? AppColors.darkTextTertiary
+                                : AppColors.lightTextTertiary),
                     ),
                   ),
                 ],

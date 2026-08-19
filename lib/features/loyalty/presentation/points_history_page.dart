@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/features/loyalty/widgets/loyalty_tier_emblem.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class PointsHistoryPage extends StatefulWidget {
   const PointsHistoryPage({super.key});
@@ -15,7 +15,7 @@ class PointsHistoryPage extends StatefulWidget {
 }
 
 class _PointsHistoryPageState extends State<PointsHistoryPage> {
-  int _selectedFilterIndex = 0; // 0: All, 1: Earned, 2: Referrals, 3: Redeemed
+  int _selectedFilterIndex = 0;
 
   @override
   void initState() {
@@ -43,9 +43,15 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
     const Color roseColor = Color(0xFFEF4444);
 
     final filteredActivity = loyalty.activity.where((txn) {
-      if (_selectedFilterIndex == 1) return txn.amount > 0 && !txn.type.contains('REFERRAL');
-      if (_selectedFilterIndex == 2) return txn.type.contains('REFERRAL') || txn.source.contains('referral');
-      if (_selectedFilterIndex == 3) return txn.amount < 0 || txn.type.contains('REDEEMED');
+      if (_selectedFilterIndex == 1) {
+        return txn.amount > 0 && !txn.type.contains('REFERRAL');
+      }
+      if (_selectedFilterIndex == 2) {
+        return txn.type.contains('REFERRAL') || txn.source.contains('referral');
+      }
+      if (_selectedFilterIndex == 3) {
+        return txn.amount < 0 || txn.type.contains('REDEEMED');
+      }
       return true;
     }).toList();
 
@@ -66,7 +72,6 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Authoritative Statement Header
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -74,7 +79,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                     color: isDark ? AppColors.darkSurface : Colors.white,
                     borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
                     ),
                     boxShadow: isDark ? null : AppSpacing.softShadow(context),
                   ),
@@ -91,7 +98,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w800,
-                                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                  color: isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
                                   letterSpacing: 0.6,
                                 ),
                               ),
@@ -114,7 +123,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
-                                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.lightTextSecondary,
                                     ),
                                   ),
                                 ],
@@ -143,7 +154,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                         ],
@@ -153,10 +166,11 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                 ),
                 const SizedBox(height: 18),
 
-                // 2. Filter Tabs
                 Container(
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   padding: const EdgeInsets.all(4),
@@ -171,22 +185,28 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                 ),
                 const SizedBox(height: 18),
 
-                // 3. Activity Ledger List
                 if (loyalty.isLoading && loyalty.activity.isEmpty)
-                  const Center(child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  ))
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  )
                 else if (filteredActivity.isEmpty)
                   const SVEmptyState(
                     icon: Icons.history_toggle_off_rounded,
                     title: 'No Transactions Found',
-                    description: 'Your verified points ledger and earning activity will appear here.',
+                    description:
+                        'Your verified points ledger and earning activity will appear here.',
                   )
                 else
                   ...filteredActivity.map((txn) {
                     final isPositive = txn.amount > 0;
-                    final isReferral = txn.type.contains('REFERRAL') || txn.source.contains('referral');
+                    final isReferral =
+                        txn.type.contains('REFERRAL') ||
+                        txn.source.contains('referral');
                     final dateDisplay = txn.createdAt.contains('T')
                         ? txn.createdAt.split('T')[0]
                         : txn.createdAt;
@@ -210,11 +230,17 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.darkSurface : Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                        border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.cardRadius,
                         ),
-                        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
+                        ),
+                        boxShadow: isDark
+                            ? null
+                            : AppSpacing.softShadow(context),
                       ),
                       child: Row(
                         children: [
@@ -239,7 +265,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 3),
@@ -249,14 +277,21 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                                       dateDisplay,
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
-                                        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                        color: isDark
+                                            ? AppColors.darkTextTertiary
+                                            : AppColors.lightTextTertiary,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 1,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                                        color: isDark
+                                            ? AppColors.darkSurfaceElevated
+                                            : AppColors.lightSurfaceSecondary,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
@@ -264,7 +299,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                          color: isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.lightTextSecondary,
                                         ),
                                       ),
                                     ),
@@ -290,7 +327,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                  color: isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
                                 ),
                               ),
                             ],
@@ -342,7 +381,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                 ? (isDark ? AppColors.darkSurface : Colors.white)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: isSelected && !isDark ? AppSpacing.softShadow(context) : null,
+            boxShadow: isSelected && !isDark
+                ? AppSpacing.softShadow(context)
+                : null,
           ),
           child: Center(
             child: Text(
@@ -352,7 +393,9 @@ class _PointsHistoryPageState extends State<PointsHistoryPage> {
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected
                     ? AppColors.primary
-                    : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                    : (isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.lightTextTertiary),
               ),
             ),
           ),

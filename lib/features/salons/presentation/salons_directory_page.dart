@@ -7,9 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/auth/services/auth_provider.dart';
 import 'package:salonverse/features/salons/services/salon_provider.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 import 'package:salonverse/features/home/presentation/search_filter_sheet.dart';
 
 class SalonsDirectoryPage extends StatefulWidget {
@@ -82,7 +82,9 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
     }
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
@@ -97,13 +99,18 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                   style: GoogleFonts.outfit(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                     letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2.5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryTint,
                     borderRadius: BorderRadius.circular(10),
@@ -126,7 +133,9 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                   : 'Discover top-rated beauty artists near you',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11.5,
-                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                color: isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.lightTextTertiary,
               ),
             ),
           ],
@@ -135,7 +144,9 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
           IconButton(
             icon: Icon(
               _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
               size: 22,
             ),
             tooltip: _isGridView ? 'List View' : 'Grid View',
@@ -150,7 +161,11 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
               children: [
                 Icon(
                   Icons.tune_rounded,
-                  color: hasActiveFilter ? AppColors.primary : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                  color: hasActiveFilter
+                      ? AppColors.primary
+                      : (isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary),
                   size: 22,
                 ),
                 if (hasActiveFilter)
@@ -180,7 +195,6 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
           color: AppColors.primary,
           child: Column(
             children: [
-              // 1. Hero Search Input (Tap launches dedicated /search)
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 8, 18, 10),
                 child: SVSearchField(
@@ -196,89 +210,103 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
                 ),
               ),
 
-              // 2. Active Removable Filter Chips Bar (Shown ONLY when filters are active)
               if (hasActiveFilter) _buildActiveFiltersBar(salonProv, isDark),
 
-              // 3. Salons List / Grid View Content
               Expanded(
                 child: salonProv.isLoading && list.isEmpty
                     ? ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 8,
+                        ),
                         itemCount: 4,
-                        itemBuilder: (context, _) => SVSkeleton.salonCardSkeleton(context),
+                        itemBuilder: (context, _) =>
+                            SVSkeleton.salonCardSkeleton(context),
                       )
                     : salonProv.error != null && list.isEmpty
-                        ? SVErrorState(
-                            title: 'Failed to Load Salons',
-                            message: salonProv.error!,
-                            onRetry: () => salonProv.fetchSalons(forceRefresh: true),
-                          )
-                        : list.isEmpty
-                            ? SVEmptyState(
-                                icon: Icons.storefront_outlined,
-                                title: 'No Salons Found',
-                                description:
-                                    'No venues match your current criteria. Try adjusting your search query or removing active filters.',
-                                actionLabel: 'Reset All Filters',
-                                onAction: () {
-                                  _searchController.clear();
-                                  salonProv.clearAllFilters();
-                                },
-                              )
-                            : _isGridView
-                                ? GridView.builder(
-                                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 80),
-                                    physics: const BouncingScrollPhysics(),
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: 0.72,
-                                    ),
-                                    itemCount: list.length,
-                                    itemBuilder: (context, index) {
-                                      final salon = list[index];
-                                      final isFav = user?.favoriteSalons.contains(salon.id) ?? false;
-                                      return SVSalonCard(
-                                        salon: salon,
-                                        isFavorite: isFav,
-                                        isCompact: true,
-                                        onTap: () => context.push('/salon/${salon.id}', extra: {'salon': salon}),
-                                        onFavoriteToggle: () {
-                                          auth.toggleFavorite(salon.id);
-                                        },
-                                      );
-                                    },
-                                  )
-                                : ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 80),
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: list.length,
-                                    itemBuilder: (context, index) {
-                                      final salon = list[index];
-                                      final isFav = user?.favoriteSalons.contains(salon.id) ?? false;
-                                      return SVSalonCard(
-                                        salon: salon,
-                                        isFavorite: isFav,
-                                        onTap: () => context.push('/salon/${salon.id}', extra: {'salon': salon}),
-                                        onFavoriteToggle: () {
-                                          auth.toggleFavorite(salon.id);
-                                          final isNowFav = !(user?.favoriteSalons.contains(salon.id) ?? false);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                isNowFav
-                                                    ? 'Added ${salon.name} to favorites ❤️'
-                                                    : 'Removed ${salon.name} from favorites',
-                                              ),
-                                              duration: const Duration(seconds: 2),
-                                              backgroundColor: AppColors.primary,
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
+                    ? SVErrorState(
+                        title: 'Failed to Load Salons',
+                        message: salonProv.error!,
+                        onRetry: () =>
+                            salonProv.fetchSalons(forceRefresh: true),
+                      )
+                    : list.isEmpty
+                    ? SVEmptyState(
+                        icon: Icons.storefront_outlined,
+                        title: 'No Salons Found',
+                        description:
+                            'No venues match your current criteria. Try adjusting your search query or removing active filters.',
+                        actionLabel: 'Reset All Filters',
+                        onAction: () {
+                          _searchController.clear();
+                          salonProv.clearAllFilters();
+                        },
+                      )
+                    : _isGridView
+                    ? GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 80),
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.72,
+                            ),
+                        itemCount: list.length,
+                        itemBuilder: (context, index) {
+                          final salon = list[index];
+                          final isFav =
+                              user?.favoriteSalons.contains(salon.id) ?? false;
+                          return SVSalonCard(
+                            salon: salon,
+                            isFavorite: isFav,
+                            isCompact: true,
+                            onTap: () => context.push(
+                              '/salon/${salon.id}',
+                              extra: {'salon': salon},
+                            ),
+                            onFavoriteToggle: () {
+                              auth.toggleFavorite(salon.id);
+                            },
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 80),
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: list.length,
+                        itemBuilder: (context, index) {
+                          final salon = list[index];
+                          final isFav =
+                              user?.favoriteSalons.contains(salon.id) ?? false;
+                          return SVSalonCard(
+                            salon: salon,
+                            isFavorite: isFav,
+                            onTap: () => context.push(
+                              '/salon/${salon.id}',
+                              extra: {'salon': salon},
+                            ),
+                            onFavoriteToggle: () {
+                              auth.toggleFavorite(salon.id);
+                              final isNowFav =
+                                  !(user?.favoriteSalons.contains(salon.id) ??
+                                      false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isNowFav
+                                        ? 'Added ${salon.name} to favorites ❤️'
+                                        : 'Removed ${salon.name} from favorites',
                                   ),
+                                  duration: const Duration(seconds: 2),
+                                  backgroundColor: AppColors.primary,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -291,51 +319,61 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
     final chips = <Widget>[];
 
     if (prov.selectedCategory != 'All' && prov.selectedCategory.isNotEmpty) {
-      chips.add(_buildRemovableChip(
-        label: prov.selectedCategory,
-        icon: Icons.category_rounded,
-        onRemove: () => prov.selectCategory('All'),
-        isDark: isDark,
-      ));
+      chips.add(
+        _buildRemovableChip(
+          label: prov.selectedCategory,
+          icon: Icons.category_rounded,
+          onRemove: () => prov.selectCategory('All'),
+          isDark: isDark,
+        ),
+      );
     }
 
     if (prov.searchQuery.isNotEmpty) {
-      chips.add(_buildRemovableChip(
-        label: '"${prov.searchQuery}"',
-        icon: Icons.search_rounded,
-        onRemove: () {
-          _searchController.clear();
-          prov.clearSearch();
-        },
-        isDark: isDark,
-      ));
+      chips.add(
+        _buildRemovableChip(
+          label: '"${prov.searchQuery}"',
+          icon: Icons.search_rounded,
+          onRemove: () {
+            _searchController.clear();
+            prov.clearSearch();
+          },
+          isDark: isDark,
+        ),
+      );
     }
 
     if (prov.minRating > 0.0) {
-      chips.add(_buildRemovableChip(
-        label: '${prov.minRating}+ ★',
-        icon: Icons.star_rounded,
-        onRemove: () => prov.applyFilters(minRating: 0.0),
-        isDark: isDark,
-      ));
+      chips.add(
+        _buildRemovableChip(
+          label: '${prov.minRating}+ ★',
+          icon: Icons.star_rounded,
+          onRemove: () => prov.applyFilters(minRating: 0.0),
+          isDark: isDark,
+        ),
+      );
     }
 
     if (prov.homeServiceOnly) {
-      chips.add(_buildRemovableChip(
-        label: 'Home Service',
-        icon: Icons.home_work_rounded,
-        onRemove: () => prov.applyFilters(homeServiceOnly: false),
-        isDark: isDark,
-      ));
+      chips.add(
+        _buildRemovableChip(
+          label: 'Home Service',
+          icon: Icons.home_work_rounded,
+          onRemove: () => prov.applyFilters(homeServiceOnly: false),
+          isDark: isDark,
+        ),
+      );
     }
 
     if (prov.selectedSort != 'recommended') {
-      chips.add(_buildRemovableChip(
-        label: _formatSortName(prov.selectedSort),
-        icon: Icons.sort_rounded,
-        onRemove: () => prov.setSortOption('recommended'),
-        isDark: isDark,
-      ));
+      chips.add(
+        _buildRemovableChip(
+          label: _formatSortName(prov.selectedSort),
+          icon: Icons.sort_rounded,
+          onRemove: () => prov.setSortOption('recommended'),
+          isDark: isDark,
+        ),
+      );
     }
 
     if (chips.isEmpty) return const SizedBox.shrink();
@@ -409,7 +447,11 @@ class _SalonsDirectoryPageState extends State<SalonsDirectoryPage> {
             },
             child: const Padding(
               padding: EdgeInsets.all(2.0),
-              child: Icon(Icons.close_rounded, size: 14, color: AppColors.primary),
+              child: Icon(
+                Icons.close_rounded,
+                size: 14,
+                color: AppColors.primary,
+              ),
             ),
           ),
         ],

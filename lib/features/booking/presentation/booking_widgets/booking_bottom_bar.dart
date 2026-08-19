@@ -6,7 +6,7 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class BookingBottomBar extends StatelessWidget {
   final int currentStep;
@@ -39,11 +39,17 @@ class BookingBottomBar extends StatelessWidget {
     final booking = await provider.confirmBooking();
     if (context.mounted) {
       if (booking != null && booking.id.isNotEmpty) {
-        context.pushReplacement('/payment-confirmation', extra: {'booking': booking});
+        context.pushReplacement(
+          '/payment-confirmation',
+          extra: {'booking': booking},
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.error ?? 'Failed to create booking. Please select another slot or retry.'),
+            content: Text(
+              provider.error ??
+                  'Failed to create booking. Please select another slot or retry.',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -58,7 +64,9 @@ class BookingBottomBar extends StatelessWidget {
 
     final servicePrice = selectedService?.price ?? 0.0;
     final discount = provider.discountAmount;
-    final finalPrice = servicePrice - discount > 0 ? servicePrice - discount : 0.0;
+    final finalPrice = servicePrice - discount > 0
+        ? servicePrice - discount
+        : 0.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -89,7 +97,9 @@ class BookingBottomBar extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                    color: isDark
+                        ? AppColors.darkTextTertiary
+                        : AppColors.lightTextTertiary,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -108,7 +118,9 @@ class BookingBottomBar extends StatelessWidget {
             SVButton(
               text: 'Confirm Booking',
               isLoading: provider.isLoading,
-              onPressed: provider.isLoading ? null : () => _handleConfirmBooking(context),
+              onPressed: provider.isLoading
+                  ? null
+                  : () => _handleConfirmBooking(context),
               icon: Icons.check_circle_rounded,
               size: SVButtonSize.md,
             ),

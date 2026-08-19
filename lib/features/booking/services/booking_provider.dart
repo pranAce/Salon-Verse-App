@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:salonverse/features/booking/models/booking_model.dart';
 import 'package:salonverse/features/booking/models/booking_slot_model.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
+import 'package:salonverse/features/booking/services/booking_service.dart';
+import 'package:salonverse/features/auth/services/auth_service.dart';
+import 'package:salonverse/features/loyalty/services/offer_service.dart';
 import 'package:salonverse/features/notifications/services/socket_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
 
 class BookingProvider extends ChangeNotifier {
-  final _service = AppService.instance;
+  final BookingService _service = BookingService();
+  final AuthService _authService = AuthService();
+  final OfferService _offerService = OfferService();
 
   List<BookingModel> _bookings = [];
   List<BookingModel> get bookings => _bookings;
@@ -88,17 +92,23 @@ class BookingProvider extends ChangeNotifier {
     fetchDynamicSlots();
   }
 
-  Future<void> fetchStylistsForSalon(String salonId, {String? serviceId}) async {
+  Future<void> fetchStylistsForSalon(
+    String salonId, {
+    String? serviceId,
+  }) async {
     _isLoadingStylists = true;
     notifyListeners();
 
-    final res = await _service.booking.getStylistsBySalon(salonId, serviceId: serviceId);
+    final res = await _service.getStylistsBySalon(
+      salonId,
+      serviceId: serviceId,
+    );
     _isLoadingStylists = false;
 
     if (res is Success<List<StylistModel>>) {
       _stylists = res.data;
-    } else if (_selectedSalon != null && _selectedSalon!.stylists.isNotEmpty) {
-      _stylists = _selectedSalon!.stylists;
+    } else {
+      _stylists = _selectedSalon?.stylists ?? [];
     }
     notifyListeners();
   }
@@ -130,7 +140,7 @@ class BookingProvider extends ChangeNotifier {
   void startBookingFlow(SalonModel salon, ServiceModel service) {
     _selectedSalon = salon;
     _selectedService = service;
-    _selectedStylist = null; // Default: Any Specialist
+    _selectedStylist = null;
     _stylists = salon.stylists;
     _selectedDate ??= DateTime.now();
     _selectedTime = null;
@@ -151,7 +161,7 @@ class BookingProvider extends ChangeNotifier {
   void startBookingFlowForSalon(SalonModel salon) {
     _selectedSalon = salon;
     _selectedService = salon.services.isNotEmpty ? salon.services.first : null;
-    _selectedStylist = null; // Default: Any Specialist
+    _selectedStylist = null;
     _stylists = salon.stylists;
     _selectedDate ??= DateTime.now();
     _selectedTime = null;
@@ -207,7 +217,7 @@ class BookingProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final result = await _service.booking.getAvailability(
+    final result = await _service.getAvailability(
       salonId: _selectedSalon!.id,
       date: dateStr,
       serviceId: _selectedService?.id,
@@ -239,7 +249,7 @@ class BookingProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final result = await _service.getBookings();
+    final result = await _service.getBookings(_authService.currentUser);
 
     _isLoading = false;
     if (result is Success<List<BookingModel>>) {
@@ -270,6 +280,7 @@ class BookingProvider extends ChangeNotifier {
     _currentBookingAttemptId ??= _generateAttemptId();
 
     final result = await _service.createBooking(
+      currentUser: _authService.currentUser,
       salon: _selectedSalon!,
       service: _selectedService!,
       stylist: _selectedStylist,
@@ -344,12 +355,13 @@ class BookingProvider extends ChangeNotifier {
       }
     });
 
-    _availabilityUpdatedSub = SocketService.instance.onAvailabilityUpdated.listen((data) {
-      final salonId = data['salonId']?.toString();
-      if (_selectedSalon != null && _selectedSalon!.id == salonId) {
-        fetchDynamicSlots();
-      }
-    });
+    _availabilityUpdatedSub = SocketService.instance.onAvailabilityUpdated
+        .listen((data) {
+          final salonId = data['salonId']?.toString();
+          if (_selectedSalon != null && _selectedSalon!.id == salonId) {
+            fetchDynamicSlots();
+          }
+        });
   }
 
   @override
@@ -365,7 +377,7 @@ class BookingProvider extends ChangeNotifier {
     if (cleanCode.isEmpty) return false;
 
     if (_selectedSalon != null) {
-      final res = await _service.validateOffer(
+      final res = await _offerService.validateOffer(
         code: cleanCode,
         salonId: _selectedSalon!.id,
         orderAmount: basePrice,
@@ -457,7 +469,7 @@ class BookingProvider extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>?> getCancellationQuote(String bookingId) async {
-    final result = await _service.booking.getCancellationQuote(bookingId);
+    final result = await _service.getCancellationQuote(bookingId);
     if (result is Success<Map<String, dynamic>>) {
       return result.data;
     } else if (result is Failure<Map<String, dynamic>>) {
@@ -472,7 +484,10 @@ class BookingProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final result = await _service.booking.cancelBooking(bookingId, cancelReason: cancelReason);
+    final result = await _service.cancelBooking(
+      bookingId,
+      cancelReason: cancelReason,
+    );
 
     _isLoading = false;
     final idx = _bookings.indexWhere((b) => b.id == bookingId);

@@ -7,15 +7,19 @@ class AppCurrencyFormatter {
     final isWhole = val % 1 == 0;
     final formattedNum = isWhole
         ? val.toInt().toString().replaceAllMapped(
-              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-              (Match m) => '${m[1]},',
-            )
-        : val.toStringAsFixed(2).replaceAllMapped(
-              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-              (Match m) => '${m[1]},',
-            );
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]},',
+          )
+        : val
+              .toStringAsFixed(2)
+              .replaceAllMapped(
+                RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                (Match m) => '${m[1]},',
+              );
 
-    final currCode = currency.toUpperCase() == 'NPR' || currency.isEmpty ? 'Rs.' : currency;
+    final currCode = currency.toUpperCase() == 'NPR' || currency.isEmpty
+        ? 'Rs.'
+        : currency;
     return '$currCode $formattedNum';
   }
 }

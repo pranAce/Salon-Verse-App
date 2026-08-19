@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/auth/services/auth_provider.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -44,11 +44,15 @@ class _RegisterPageState extends State<RegisterPage> {
       name: _nameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      phone: _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
       referralCode: _referralController.text.trim().isEmpty
           ? null
           : _referralController.text.trim().toUpperCase(),
-      dateOfBirth: _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
+      dateOfBirth: _dobController.text.trim().isEmpty
+          ? null
+          : _dobController.text.trim(),
     );
 
     if (!mounted) return;
@@ -93,7 +97,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: GoogleFonts.outfit(
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                   ),
@@ -104,7 +110,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
                       ),
                     ),
                   ),
@@ -117,7 +125,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       labelText: 'Full Name',
                       prefixIcon: Icon(Icons.person_outline_rounded),
                     ),
-                    validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Please enter your name'
+                        : null,
                   ),
                   const SizedBox(height: 14),
 
@@ -129,8 +139,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
                     validator: (val) {
-                      if (val == null || val.isEmpty) return 'Please enter your email';
-                      if (!val.contains('@')) return 'Please enter a valid email';
+                      if (val == null || val.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!val.contains('@')) {
+                        return 'Please enter a valid email';
+                      }
                       return null;
                     },
                   ),
@@ -144,7 +158,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       prefixIcon: Icon(Icons.phone_outlined),
                     ),
                     validator: (val) {
-                      if (val == null || val.trim().isEmpty) return 'Please enter your phone number';
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Please enter your phone number';
+                      }
                       return null;
                     },
                   ),
@@ -158,15 +174,23 @@ class _RegisterPageState extends State<RegisterPage> {
                       prefixIcon: const Icon(Icons.lock_outline_rounded),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           size: 20,
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
                     validator: (val) {
-                      if (val == null || val.isEmpty) return 'Please enter a password';
-                      if (val.length < 6) return 'Must be at least 6 characters';
+                      if (val == null || val.isEmpty) {
+                        return 'Please enter a password';
+                      }
+                      if (val.length < 6) {
+                        return 'Must be at least 6 characters';
+                      }
                       return null;
                     },
                   ),
@@ -223,7 +247,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         'Already have an account? ',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       GestureDetector(

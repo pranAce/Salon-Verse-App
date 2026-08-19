@@ -17,7 +17,7 @@ class LoyaltyHomePage extends StatefulWidget {
 }
 
 class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
-  int _selectedTierTab = 0; // 0: Glow, 1: Luxe, 2: Icon
+  int _selectedTierTab = 0;
 
   @override
   void initState() {
@@ -48,13 +48,13 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
     final user = auth.currentUser;
     final profile = loyalty.profile;
     final tierKey = profile?.currentTier ?? 'glow';
-    final tierName = (loyalty.currentTierDetails?.name ?? tierKey).toUpperCase();
+    final tierName = (loyalty.currentTierDetails?.name ?? tierKey)
+        .toUpperCase();
     final points = profile?.loyaltyCredits ?? 0;
     final nextTierName = loyalty.nextTierDetails?.name.toUpperCase();
     final progress = loyalty.progressRatio.clamp(0.0, 1.0);
     final pointsNeeded = loyalty.creditsNeededForNext;
 
-    // Rich luxury card colors based on tier
     final Color tierPrimary;
     final Color tierSecondary;
     final Color tierAccent;
@@ -110,7 +110,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
       ),
       body: SafeArea(
         child: loyalty.isLoading && !loyalty.hasLoadedData
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
             : RefreshIndicator(
                 onRefresh: () => loyalty.loadLoyaltyData(),
                 color: AppColors.primary,
@@ -120,7 +122,6 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 1. Luxury Metallic VIP Membership Pass
                       _buildLuxuryVIPCard(
                         tierKey: tierKey,
                         tierName: tierName,
@@ -134,12 +135,13 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                         tierSecondary: tierSecondary,
                         tierAccent: tierAccent,
                         cardBgGradient: cardBgGradient,
-                        multiplier: loyalty.currentTierDetails?.earningMultiplier ?? 1.0,
+                        multiplier:
+                            loyalty.currentTierDetails?.earningMultiplier ??
+                            1.0,
                         isDark: isDark,
                       ),
                       const SizedBox(height: 22),
 
-                      // 2. Quick Hub Grid (2x2 Layout)
                       Row(
                         children: [
                           Expanded(
@@ -193,7 +195,6 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                       ),
                       const SizedBox(height: 28),
 
-                      // 3. Featured Rewards Store Catalog (Instant Redeem)
                       if (loyalty.rewards.isNotEmpty) ...[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -203,7 +204,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                               style: GoogleFonts.outfit(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             GestureDetector(
@@ -225,7 +228,8 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: loyalty.rewards.length,
-                            separatorBuilder: (context, index) => const SizedBox(width: 12),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 12),
                             itemBuilder: (context, index) {
                               final r = loyalty.rewards[index];
                               final canAfford = points >= r.creditsRequired;
@@ -234,16 +238,25 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                                 width: 220,
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: isDark ? AppColors.darkSurface : Colors.white,
-                                  borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                                  border: Border.all(
-                                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                                  color: isDark
+                                      ? AppColors.darkSurface
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.cardRadius,
                                   ),
-                                  boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? AppColors.darkBorder
+                                        : AppColors.lightBorder,
+                                  ),
+                                  boxShadow: isDark
+                                      ? null
+                                      : AppSpacing.softShadow(context),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
@@ -251,9 +264,15 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
                                             color: AppColors.primaryTint,
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
-                                          child: const Icon(Icons.card_giftcard_rounded, size: 18, color: AppColors.primary),
+                                          child: const Icon(
+                                            Icons.card_giftcard_rounded,
+                                            size: 18,
+                                            color: AppColors.primary,
+                                          ),
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
@@ -264,7 +283,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w700,
-                                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                              color: isDark
+                                                  ? AppColors.darkTextPrimary
+                                                  : AppColors.lightTextPrimary,
                                             ),
                                           ),
                                         ),
@@ -276,36 +297,54 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
-                                        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                        color: isDark
+                                            ? AppColors.darkTextTertiary
+                                            : AppColors.lightTextTertiary,
                                         height: 1.2,
                                       ),
                                     ),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           '${r.creditsRequired} pts',
                                           style: GoogleFonts.outfit(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w900,
-                                            color: canAfford ? AppColors.primary : Colors.grey,
+                                            color: canAfford
+                                                ? AppColors.primary
+                                                : Colors.grey,
                                           ),
                                         ),
                                         GestureDetector(
-                                          onTap: () => context.push('/loyalty/rewards'),
+                                          onTap: () =>
+                                              context.push('/loyalty/rewards'),
                                           child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 4,
+                                            ),
                                             decoration: BoxDecoration(
-                                              color: canAfford ? AppColors.primary : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade200),
-                                              borderRadius: BorderRadius.circular(6),
+                                              color: canAfford
+                                                  ? AppColors.primary
+                                                  : (isDark
+                                                        ? AppColors
+                                                              .darkSurfaceElevated
+                                                        : Colors.grey.shade200),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
                                             ),
                                             child: Text(
                                               'Claim',
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: canAfford ? Colors.white : Colors.grey,
-                                              ),
+                                              style:
+                                                  GoogleFonts.plusJakartaSans(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: canAfford
+                                                        ? Colors.white
+                                                        : Colors.grey,
+                                                  ),
                                             ),
                                           ),
                                         ),
@@ -320,13 +359,14 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                         const SizedBox(height: 28),
                       ],
 
-                      // 4. Membership Tiers & VIP Perks Breakdown
                       Text(
                         'Membership Tiers & VIP Perks',
                         style: GoogleFonts.outfit(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -334,38 +374,52 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                         'Unlock higher earning multipliers, birthday gifts, and exclusive VIP access.',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12.5,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       const SizedBox(height: 14),
 
-                      // Tier Segmented Switcher
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           children: [
                             _buildTierTab('GLOW', 0, AppColors.primary, isDark),
-                            _buildTierTab('LUXE', 1, const Color(0xFF8B5CF6), isDark),
-                            _buildTierTab('ICON', 2, const Color(0xFFF59E0B), isDark),
+                            _buildTierTab(
+                              'LUXE',
+                              1,
+                              const Color(0xFF8B5CF6),
+                              isDark,
+                            ),
+                            _buildTierTab(
+                              'ICON',
+                              2,
+                              const Color(0xFFF59E0B),
+                              isDark,
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 14),
 
-                      // Tier Details Card
                       if (loyalty.allTiers.isNotEmpty)
                         _buildActiveTierInspectionCard(
-                          loyalty.allTiers[_selectedTierTab.clamp(0, loyalty.allTiers.length - 1)],
+                          loyalty.allTiers[_selectedTierTab.clamp(
+                            0,
+                            loyalty.allTiers.length - 1,
+                          )],
                           tierKey,
                           isDark,
                         ),
                       const SizedBox(height: 28),
 
-                      // 5. How to Earn Points (At Last)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -374,7 +428,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                             style: GoogleFonts.outfit(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           GestureDetector(
@@ -396,11 +452,17 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.darkSurface : Colors.white,
-                          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                          border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.cardRadius,
                           ),
-                          boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
+                          ),
+                          boxShadow: isDark
+                              ? null
+                              : AppSpacing.softShadow(context),
                         ),
                         child: Column(
                           children: loyalty.rules.map((r) {
@@ -412,22 +474,31 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                                     width: 34,
                                     height: 34,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF10B981).withAlpha(20),
+                                      color: const Color(
+                                        0xFF10B981,
+                                      ).withAlpha(20),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF10B981), size: 18),
+                                    child: const Icon(
+                                      Icons.add_circle_outline_rounded,
+                                      color: Color(0xFF10B981),
+                                      size: 18,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           r.name,
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w700,
-                                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                            color: isDark
+                                                ? AppColors.darkTextPrimary
+                                                : AppColors.lightTextPrimary,
                                           ),
                                         ),
                                         Text(
@@ -436,16 +507,23 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.plusJakartaSans(
                                             fontSize: 11,
-                                            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                            color: isDark
+                                                ? AppColors.darkTextTertiary
+                                                : AppColors.lightTextTertiary,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF10B981).withAlpha(25),
+                                      color: const Color(
+                                        0xFF10B981,
+                                      ).withAlpha(25),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
@@ -487,7 +565,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
     required double multiplier,
     required bool isDark,
   }) {
-    final shortId = userId.length > 6 ? userId.substring(userId.length - 6).toUpperCase() : userId.toUpperCase();
+    final shortId = userId.length > 6
+        ? userId.substring(userId.length - 6).toUpperCase()
+        : userId.toUpperCase();
 
     return Container(
       width: double.infinity,
@@ -498,10 +578,7 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: tierPrimary.withAlpha(90),
-          width: 1.5,
-        ),
+        border: Border.all(color: tierPrimary.withAlpha(90), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: tierPrimary.withAlpha(isDark ? 35 : 22),
@@ -517,7 +594,6 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
       ),
       child: Stack(
         children: [
-          // Background decorative foil arc
           Positioned(
             right: -30,
             top: -30,
@@ -527,10 +603,7 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [
-                    tierPrimary.withAlpha(30),
-                    Colors.transparent,
-                  ],
+                  colors: [tierPrimary.withAlpha(30), Colors.transparent],
                 ),
               ),
             ),
@@ -541,13 +614,16 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Tier Emblem & VIP Brand Title
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        SVTierEmblem(tierKey: tierKey, size: 40, isGlowEnabled: true),
+                        SVTierEmblem(
+                          tierKey: tierKey,
+                          size: 40,
+                          isGlowEnabled: true,
+                        ),
                         const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,7 +652,10 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                     ),
                     if (multiplier > 1.0)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -600,7 +679,6 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Balance & User Info Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -671,9 +749,11 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Frosted Progress to Next Tier Pill
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withAlpha(12),
                     borderRadius: BorderRadius.circular(12),
@@ -695,7 +775,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                             ),
                           ),
                           Text(
-                            nextTierName != null ? '${(progress * 100).toInt()}%' : 'MAX',
+                            nextTierName != null
+                                ? '${(progress * 100).toInt()}%'
+                                : 'MAX',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -710,7 +792,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                         child: LinearProgressIndicator(
                           value: nextTierName != null ? progress : 1.0,
                           backgroundColor: Colors.white12,
-                          valueColor: AlwaysStoppedAnimation<Color>(tierPrimary),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            tierPrimary,
+                          ),
                           minHeight: 5,
                         ),
                       ),
@@ -735,9 +819,13 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? (isDark ? AppColors.darkSurface : Colors.white) : Colors.transparent,
+            color: isSelected
+                ? (isDark ? AppColors.darkSurface : Colors.white)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(9),
-            boxShadow: isSelected && !isDark ? AppSpacing.softShadow(context) : null,
+            boxShadow: isSelected && !isDark
+                ? AppSpacing.softShadow(context)
+                : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -745,10 +833,7 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 6),
               Text(
@@ -758,7 +843,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   color: isSelected
                       ? color
-                      : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                      : (isDark
+                            ? AppColors.darkTextTertiary
+                            : AppColors.lightTextTertiary),
                 ),
               ),
             ],
@@ -768,8 +855,13 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
     );
   }
 
-  Widget _buildActiveTierInspectionCard(LoyaltyTierModel tier, String currentTierKey, bool isDark) {
-    final isCurrent = tier.tierKey.toLowerCase() == currentTierKey.toLowerCase();
+  Widget _buildActiveTierInspectionCard(
+    LoyaltyTierModel tier,
+    String currentTierKey,
+    bool isDark,
+  ) {
+    final isCurrent =
+        tier.tierKey.toLowerCase() == currentTierKey.toLowerCase();
     final level = SVTierLevel.fromString(tier.tierKey);
 
     final Color tierAccent;
@@ -790,7 +882,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
         border: Border.all(
-          color: isCurrent ? tierAccent : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+          color: isCurrent
+              ? tierAccent
+              : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
           width: isCurrent ? 1.8 : 1.0,
         ),
         boxShadow: isCurrent
@@ -806,12 +900,13 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: tierAccent.withAlpha(isDark ? 24 : 14),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.cardRadius)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(AppSpacing.cardRadius),
+              ),
             ),
             child: Row(
               children: [
@@ -828,13 +923,18 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                             style: GoogleFonts.outfit(
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           const SizedBox(width: 8),
                           if (isCurrent)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: tierAccent,
                                 borderRadius: BorderRadius.circular(4),
@@ -863,7 +963,10 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: tierAccent.withAlpha(25),
                     borderRadius: BorderRadius.circular(8),
@@ -881,7 +984,6 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
             ),
           ),
 
-          // Core Perks Grid
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -889,9 +991,17 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
               children: [
                 Row(
                   children: [
-                    _buildStatPill('Birthday Reward', 'Rs. ${tier.birthdayRewardValue}', isDark),
+                    _buildStatPill(
+                      'Birthday Reward',
+                      'Rs. ${tier.birthdayRewardValue}',
+                      isDark,
+                    ),
                     const SizedBox(width: 8),
-                    _buildStatPill('Referral Bonus', '${tier.referralBonusCredits} pts', isDark),
+                    _buildStatPill(
+                      'Referral Bonus',
+                      '${tier.referralBonusCredits} pts',
+                      isDark,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -902,7 +1012,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -924,7 +1036,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w500,
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
                               height: 1.3,
                             ),
                           ),
@@ -946,7 +1060,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+          color: isDark
+              ? AppColors.darkSurfaceElevated
+              : AppColors.lightSurfaceSecondary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -956,7 +1072,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
               label,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
-                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                color: isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.lightTextTertiary,
               ),
             ),
             const SizedBox(height: 2),
@@ -965,7 +1083,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
               style: GoogleFonts.outfit(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
           ],
@@ -1017,7 +1137,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -1028,7 +1150,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                      color: isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.lightTextTertiary,
                     ),
                   ),
                 ],
@@ -1037,7 +1161,9 @@ class _LoyaltyHomePageState extends State<LoyaltyHomePage> {
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 11,
-              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+              color: isDark
+                  ? AppColors.darkTextTertiary
+                  : AppColors.lightTextTertiary,
             ),
           ],
         ),

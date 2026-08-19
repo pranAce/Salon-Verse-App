@@ -4,8 +4,7 @@ import 'package:salonverse/core/constants/app_constants.dart';
 
 class SettingsProvider extends ChangeNotifier {
   bool _isDarkMode = false;
-  String _accentColor =
-      "salonverse";
+  String _accentColor = "salonverse";
   int _selectedPage = 0;
 
   bool get isDarkMode => _isDarkMode;
@@ -17,15 +16,15 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   void _loadSettings() {
-    _isDarkMode = AppServices.prefs.getBool(KConstants.themeModeKey) ?? false;
+    _isDarkMode = AppStorage.prefs.getBool(KConstants.themeModeKey) ?? false;
     _accentColor =
-        AppServices.prefs.getString(KConstants.accentColorKey) ?? "salonverse";
+        AppStorage.prefs.getString(KConstants.accentColorKey) ?? "salonverse";
     notifyListeners();
   }
 
   void setDarkMode(bool value) {
     _isDarkMode = value;
-    AppServices.prefs.setBool(KConstants.themeModeKey, value);
+    AppStorage.prefs.setBool(KConstants.themeModeKey, value);
     notifyListeners();
   }
 
@@ -33,7 +32,7 @@ class SettingsProvider extends ChangeNotifier {
 
   void setAccentColor(String color) {
     _accentColor = color;
-    AppServices.prefs.setString(KConstants.accentColorKey, color);
+    AppStorage.prefs.setString(KConstants.accentColorKey, color);
     notifyListeners();
   }
 

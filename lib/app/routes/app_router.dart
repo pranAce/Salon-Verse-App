@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
+import 'package:salonverse/features/auth/services/auth_service.dart';
 import 'package:salonverse/core/storage/app_storage.dart';
 import 'package:salonverse/core/constants/app_constants.dart';
 
@@ -8,7 +8,6 @@ import 'package:salonverse/features/auth/presentation/welcome_page.dart';
 import 'package:salonverse/features/auth/presentation/onboarding_page.dart';
 import 'package:salonverse/features/auth/presentation/login_page.dart';
 import 'package:salonverse/features/auth/presentation/register_page.dart';
-import 'package:salonverse/features/auth/presentation/forgot_password_page.dart';
 
 import 'package:salonverse/features/home/presentation/main_shell.dart';
 import 'package:salonverse/features/home/presentation/home_screen.dart';
@@ -37,15 +36,19 @@ import 'package:salonverse/features/support/presentation/support_page.dart';
 import 'package:salonverse/features/support/presentation/contact_support_page.dart';
 import 'package:salonverse/features/support/presentation/contact_detail_page.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNav');
-final GlobalKey<NavigatorState> _customerShellKey = GlobalKey<NavigatorState>(debugLabel: 'shellNav');
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'rootNav',
+);
+final GlobalKey<NavigatorState> _customerShellKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellNav',
+);
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
-  refreshListenable: AppService.instance.auth.currentUserNotifier,
+  refreshListenable: AuthService().currentUserNotifier,
   initialLocation: '/',
   redirect: (context, state) {
-    final prefs = AppServices.prefs;
+    final prefs = AppStorage.prefs;
     final onboardingSeen = prefs.getBool(KConstants.onboardingSeenKey) ?? false;
     final loc = state.matchedLocation;
 
@@ -54,7 +57,7 @@ final GoRouter appRouter = GoRouter(
       return '/welcome';
     }
 
-    final isLoggedIn = AppService.instance.currentUser != null;
+    final isLoggedIn = AuthService().currentUser != null;
     final isAuthRoute = loc.startsWith('/auth');
     final isOnboardingRoute = loc == '/welcome' || loc == '/onboarding';
 
@@ -94,20 +97,12 @@ final GoRouter appRouter = GoRouter(
       path: '/auth/register',
       builder: (context, state) => const RegisterPage(),
     ),
-    GoRoute(
-      parentNavigatorKey: rootNavigatorKey,
-      path: '/auth/forgot-password',
-      builder: (context, state) => const ForgotPasswordPage(),
-    ),
 
     ShellRoute(
       navigatorKey: _customerShellKey,
       builder: (context, state, child) => MainShell(child: child),
       routes: [
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const HomeScreen(),
-        ),
+        GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
         GoRoute(
           path: '/bookings',
           builder: (context, state) => const BookingHistoryPage(),

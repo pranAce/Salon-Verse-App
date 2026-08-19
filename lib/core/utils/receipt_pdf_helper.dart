@@ -9,7 +9,10 @@ import 'package:open_filex/open_filex.dart';
 import 'package:salonverse/core/widgets/feedback_helper.dart';
 
 class ReceiptPdfHelper {
-  static Future<void> generateAndOpenReceipt(dynamic booking, [BuildContext? context]) async {
+  static Future<void> generateAndOpenReceipt(
+    dynamic booking, [
+    BuildContext? context,
+  ]) async {
     if (context != null) {
       await generateAndDownloadReceipt(context: context, booking: booking);
     }
@@ -25,9 +28,10 @@ class ReceiptPdfHelper {
           : "BK-${DateTime.now().millisecondsSinceEpoch}";
       final sanitizedId = bookingId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
       final outputDir = await getApplicationDocumentsDirectory();
-      final file = File("${outputDir.path}/SalonVerse_Receipt_$sanitizedId.pdf");
+      final file = File(
+        "${outputDir.path}/SalonVerse_Receipt_$sanitizedId.pdf",
+      );
 
-      // 1. If already generated and saved once, open immediately
       if (await file.exists()) {
         if (context.mounted) {
           AppFeedback.success(context, "Opening saved receipt...");
@@ -45,7 +49,6 @@ class ReceiptPdfHelper {
         }
       }
 
-      // 2. Otherwise, generate for the first time
       pw.MemoryImage? logoImage;
       try {
         final logoByteData = await rootBundle.load('assets/images/logo.png');
@@ -64,9 +67,12 @@ class ReceiptPdfHelper {
           .toUpperCase();
       final double price = (booking.servicePrice as num?)?.toDouble() ?? 500.0;
       final String status = (booking.status?.toString() ?? '').toLowerCase();
-      final String pStatus = (booking.paymentStatus?.toString() ?? '').toLowerCase();
-      final bool isCancelled = status.contains('cancel') || pStatus.contains('cancel');
-      final bool isPaid = (pStatus == 'completed' || pStatus == 'paid') && !isCancelled;
+      final String pStatus = (booking.paymentStatus?.toString() ?? '')
+          .toLowerCase();
+      final bool isCancelled =
+          status.contains('cancel') || pStatus.contains('cancel');
+      final bool isPaid =
+          (pStatus == 'completed' || pStatus == 'paid') && !isCancelled;
       final String txnId =
           "TXN-${bookingId.length >= 6 ? bookingId.substring(0, 6).toUpperCase() : bookingId.toUpperCase()}-$paymentMethod";
 
@@ -91,7 +97,9 @@ class ReceiptPdfHelper {
                             height: 36,
                             padding: const pw.EdgeInsets.all(5),
                             decoration: pw.BoxDecoration(
-                              color: isCancelled ? PdfColor.fromHex("#DC2626") : PdfColor.fromHex("#A060C0"),
+                              color: isCancelled
+                                  ? PdfColor.fromHex("#DC2626")
+                                  : PdfColor.fromHex("#A060C0"),
                               borderRadius: pw.BorderRadius.circular(8),
                             ),
                             child: pw.Image(logoImage, fit: pw.BoxFit.contain),
@@ -106,7 +114,9 @@ class ReceiptPdfHelper {
                               style: pw.TextStyle(
                                 fontSize: 20,
                                 fontWeight: pw.FontWeight.bold,
-                                color: isCancelled ? PdfColor.fromHex("#DC2626") : PdfColor.fromHex("#A060C0"),
+                                color: isCancelled
+                                    ? PdfColor.fromHex("#DC2626")
+                                    : PdfColor.fromHex("#A060C0"),
                               ),
                             ),
                             pw.SizedBox(height: 2),
@@ -131,7 +141,9 @@ class ReceiptPdfHelper {
                       decoration: pw.BoxDecoration(
                         color: isCancelled
                             ? PdfColor.fromHex("#FEE2E2")
-                            : (isPaid ? PdfColor.fromHex("#DEF7EC") : PdfColor.fromHex("#FEF08A")),
+                            : (isPaid
+                                  ? PdfColor.fromHex("#DEF7EC")
+                                  : PdfColor.fromHex("#FEF08A")),
                         borderRadius: pw.BorderRadius.circular(8),
                       ),
                       child: pw.Text(
@@ -141,7 +153,9 @@ class ReceiptPdfHelper {
                         style: pw.TextStyle(
                           color: isCancelled
                               ? PdfColor.fromHex("#991B1B")
-                              : (isPaid ? PdfColor.fromHex("#03543F") : PdfColor.fromHex("#713F12")),
+                              : (isPaid
+                                    ? PdfColor.fromHex("#03543F")
+                                    : PdfColor.fromHex("#713F12")),
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
@@ -219,7 +233,10 @@ class ReceiptPdfHelper {
                 if (isCancelled) ...[
                   pw.Container(
                     width: double.infinity,
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: pw.BoxDecoration(
                       color: PdfColor.fromHex("#FEF2F2"),
                       borderRadius: pw.BorderRadius.circular(8),

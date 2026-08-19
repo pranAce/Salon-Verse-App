@@ -29,9 +29,7 @@ class SmartRebookCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.pink.withAlpha(60),
-        ),
+        border: Border.all(color: Colors.pink.withAlpha(60)),
         boxShadow: [
           BoxShadow(
             color: Colors.pink.withAlpha(20),
@@ -81,10 +79,7 @@ class SmartRebookCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '${smart.serviceName} • ${smart.salonName}',
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
           const SizedBox(height: 14),
           SizedBox(

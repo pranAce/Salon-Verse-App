@@ -8,10 +8,10 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/features/auth/services/auth_provider.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class BookingStep1Services extends StatefulWidget {
   final SalonModel salon;
@@ -64,7 +64,9 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
@@ -75,7 +77,9 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
         final place = placemarks.first;
         final subLocality = place.subLocality ?? place.street ?? '';
         final locality = place.locality ?? 'Kathmandu';
-        final address = subLocality.isNotEmpty ? "$subLocality, $locality" : locality;
+        final address = subLocality.isNotEmpty
+            ? "$subLocality, $locality"
+            : locality;
 
         if (mounted) {
           _addressController.text = address;
@@ -96,14 +100,21 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
     final isDark = theme.brightness == Brightness.dark;
     final provider = context.watch<BookingProvider>();
 
-    final categories = ['All', ...widget.salon.services.map((s) => s.category).toSet()];
+    final categories = [
+      'All',
+      ...widget.salon.services.map((s) => s.category).toSet(),
+    ];
 
     final filteredServices = _selectedCategory == 'All'
         ? widget.salon.services
-        : widget.salon.services.where((s) => s.category == _selectedCategory).toList();
+        : widget.salon.services
+              .where((s) => s.category == _selectedCategory)
+              .toList();
 
     final selectedService = provider.selectedService;
-    final sourceStylists = provider.stylists.isNotEmpty ? provider.stylists : widget.salon.stylists;
+    final sourceStylists = provider.stylists.isNotEmpty
+        ? provider.stylists
+        : widget.salon.stylists;
 
     List<StylistModel> matchingStylists = sourceStylists;
     if (selectedService != null) {
@@ -113,7 +124,10 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
         if (st.specialties.isEmpty) return true;
         return st.specialties.any((spec) {
           final s = spec.toLowerCase();
-          return s.contains(catLower) || catLower.contains(s) || s.contains(nameLower) || nameLower.contains(s);
+          return s.contains(catLower) ||
+              catLower.contains(s) ||
+              s.contains(nameLower) ||
+              nameLower.contains(s);
         });
       }).toList();
       if (filtered.isNotEmpty) {
@@ -126,7 +140,6 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. In-Salon vs Home Service Toggle
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -165,13 +178,17 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  provider.isHomeService ? 'Home Service Delivery' : 'In-Salon Appointment',
+                                  provider.isHomeService
+                                      ? 'Home Service Delivery'
+                                      : 'In-Salon Appointment',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.outfit(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
                                 Text(
@@ -182,7 +199,9 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11.5,
-                                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                    color: isDark
+                                        ? AppColors.darkTextTertiary
+                                        : AppColors.lightTextTertiary,
                                   ),
                                 ),
                               ],
@@ -202,7 +221,6 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                   ],
                 ),
 
-                // If Home Service selected, show address entry and GPS
                 if (provider.isHomeService) ...[
                   const SizedBox(height: 14),
                   const Divider(),
@@ -242,7 +260,6 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
           ),
           const SizedBox(height: 20),
 
-          // 2. Stylist Selection
           SVSectionHeader(
             title: 'Select Specialist',
             subtitle: selectedService != null
@@ -274,16 +291,26 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isAnySel
-                                  ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
-                                  : (isDark ? AppColors.darkSurface : Colors.white),
-                              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                                  ? (isDark
+                                        ? AppColors.primaryTintDark
+                                        : AppColors.primaryTint)
+                                  : (isDark
+                                        ? AppColors.darkSurface
+                                        : Colors.white),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.cardRadius,
+                              ),
                               border: Border.all(
                                 color: isAnySel
                                     ? AppColors.primary
-                                    : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                    : (isDark
+                                          ? AppColors.darkBorder
+                                          : AppColors.lightBorder),
                                 width: isAnySel ? 1.5 : 1.0,
                               ),
-                              boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                              boxShadow: isDark
+                                  ? null
+                                  : AppSpacing.softShadow(context),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -292,11 +319,15 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                   radius: 26,
                                   backgroundColor: isAnySel
                                       ? AppColors.primary
-                                      : (isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint),
+                                      : (isDark
+                                            ? AppColors.darkSurfaceElevated
+                                            : AppColors.primaryTint),
                                   child: Icon(
                                     Icons.groups_rounded,
                                     size: 22,
-                                    color: isAnySel ? Colors.white : AppColors.primary,
+                                    color: isAnySel
+                                        ? Colors.white
+                                        : AppColors.primary,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -308,7 +339,9 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -319,7 +352,9 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10.5,
-                                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                    color: isDark
+                                        ? AppColors.darkTextTertiary
+                                        : AppColors.lightTextTertiary,
                                   ),
                                 ),
                               ],
@@ -340,14 +375,12 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
                 ),
           const SizedBox(height: 20),
 
-          // 3. Service Selection
           SVSectionHeader(
             title: 'Choose Service',
             subtitle: 'Select the treatment for your appointment',
           ),
           const SizedBox(height: 8),
 
-          // Category Chips
           SizedBox(
             height: 40,
             child: ListView.builder(

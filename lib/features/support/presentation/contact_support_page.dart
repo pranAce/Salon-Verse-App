@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
+import 'package:salonverse/features/support/services/support_service.dart';
+import 'package:salonverse/features/auth/services/auth_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class ContactSupportPage extends StatefulWidget {
   const ContactSupportPage({super.key});
@@ -31,7 +32,8 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
 
     setState(() => _isLoading = true);
 
-    final res = await AppService.instance.createSupportTicket(
+    final res = await SupportService().createSupportTicket(
+      AuthService().currentUser,
       _subjectController.text.trim(),
       _msgController.text.trim(),
     );
@@ -42,7 +44,9 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
       if (res is Success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Support ticket submitted! We will respond promptly.'),
+            content: Text(
+              'Support ticket submitted! We will respond promptly.',
+            ),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -82,7 +86,9 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                     hintText: 'e.g. Booking reschedule issue',
                     prefixIcon: Icon(Icons.topic_outlined),
                   ),
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter a subject' : null,
+                  validator: (val) => val == null || val.isEmpty
+                      ? 'Please enter a subject'
+                      : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -98,7 +104,9 @@ class _ContactSupportPageState extends State<ContactSupportPage> {
                       child: Icon(Icons.chat_outlined),
                     ),
                   ),
-                  validator: (val) => val == null || val.isEmpty ? 'Please describe your query' : null,
+                  validator: (val) => val == null || val.isEmpty
+                      ? 'Please describe your query'
+                      : null,
                 ),
                 const SizedBox(height: 32),
 

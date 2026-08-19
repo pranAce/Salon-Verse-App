@@ -1,4 +1,3 @@
-
 class LoyaltyProfileModel {
   final String id;
   final String user;
@@ -28,11 +27,15 @@ class LoyaltyProfileModel {
     final idStr = (json['_id'] ?? json['id'] ?? '').toString();
     final model = LoyaltyProfileModel(
       id: idStr,
-      user: json['user'] is Map ? (json['user']['_id'] ?? '').toString() : (json['user'] ?? '').toString(),
+      user: json['user'] is Map
+          ? (json['user']['_id'] ?? '').toString()
+          : (json['user'] ?? '').toString(),
       currentTier: (json['currentTier'] ?? 'glow').toString(),
       loyaltyCredits: (json['loyaltyCredits'] as num?)?.toInt() ?? 0,
-      lifetimeCreditsEarned: (json['lifetimeCreditsEarned'] as num?)?.toInt() ?? 0,
-      lifetimeCreditsRedeemed: (json['lifetimeCreditsRedeemed'] as num?)?.toInt() ?? 0,
+      lifetimeCreditsEarned:
+          (json['lifetimeCreditsEarned'] as num?)?.toInt() ?? 0,
+      lifetimeCreditsRedeemed:
+          (json['lifetimeCreditsRedeemed'] as num?)?.toInt() ?? 0,
       referralCode: (json['referralCode'] ?? '').toString(),
       referredBy: json['referredBy']?.toString(),
       isSuspended: json['isSuspended'] == true,
@@ -115,10 +118,16 @@ class LoyaltyTierModel {
       minCredits: (json['minCredits'] as num?)?.toInt() ?? 0,
       maxCredits: (json['maxCredits'] as num?)?.toInt(),
       earningMultiplier: (json['earningMultiplier'] as num?)?.toDouble() ?? 1.0,
-      benefits: (json['benefits'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      birthdayRewardType: (json['birthdayRewardType'] ?? 'discount_fixed').toString(),
+      benefits:
+          (json['benefits'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      birthdayRewardType: (json['birthdayRewardType'] ?? 'discount_fixed')
+          .toString(),
       birthdayRewardValue: (json['birthdayRewardValue'] as num?)?.toInt() ?? 0,
-      referralBonusCredits: (json['referralBonusCredits'] as num?)?.toInt() ?? 0,
+      referralBonusCredits:
+          (json['referralBonusCredits'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -186,7 +195,9 @@ class RewardRedemptionModel {
       claimedAt: (json['claimedAt'] ?? '').toString(),
       validUntil: (json['validUntil'] ?? '').toString(),
       reward: json['reward'] != null && json['reward'] is Map<String, dynamic>
-          ? LoyaltyRewardModel.fromJson(Map<String, dynamic>.from(json['reward']))
+          ? LoyaltyRewardModel.fromJson(
+              Map<String, dynamic>.from(json['reward']),
+            )
           : null,
     );
   }
@@ -254,7 +265,9 @@ class SmartRebookModel {
 
   factory SmartRebookModel.fromJson(Map<String, dynamic> json) {
     final rec = json['recommendation'];
-    if (json['hasRecommendation'] == true && rec != null && rec is Map<String, dynamic>) {
+    if (json['hasRecommendation'] == true &&
+        rec != null &&
+        rec is Map<String, dynamic>) {
       return SmartRebookModel(
         hasRecommendation: true,
         salonId: rec['salonId']?.toString(),

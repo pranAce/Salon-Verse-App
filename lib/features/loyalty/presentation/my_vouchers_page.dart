@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class MyVouchersPage extends StatefulWidget {
   const MyVouchersPage({super.key});
@@ -48,15 +48,19 @@ class _MyVouchersPageState extends State<MyVouchersPage> {
               ? const SVEmptyState(
                   icon: Icons.confirmation_number_outlined,
                   title: 'No Claimed Vouchers',
-                  description: 'Visit the Rewards Store to redeem vouchers using your SalonVerse points.',
+                  description:
+                      'Visit the Rewards Store to redeem vouchers using your SalonVerse points.',
                 )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
                   itemCount: vouchers.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final v = vouchers[index];
-                    final date = v.validUntil.contains('T') ? v.validUntil.split('T')[0] : v.validUntil;
+                    final date = v.validUntil.contains('T')
+                        ? v.validUntil.split('T')[0]
+                        : v.validUntil;
 
                     return Container(
                       padding: const EdgeInsets.all(16),
@@ -64,9 +68,13 @@ class _MyVouchersPageState extends State<MyVouchersPage> {
                         color: isDark ? AppColors.darkSurface : Colors.white,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
                         ),
-                        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                        boxShadow: isDark
+                            ? null
+                            : AppSpacing.softShadow(context),
                       ),
                       child: Row(
                         children: [
@@ -76,7 +84,11 @@ class _MyVouchersPageState extends State<MyVouchersPage> {
                               color: AppColors.primaryTint,
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: const Icon(Icons.confirmation_number_rounded, color: AppColors.primary, size: 24),
+                            child: const Icon(
+                              Icons.confirmation_number_rounded,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -88,7 +100,9 @@ class _MyVouchersPageState extends State<MyVouchersPage> {
                                   style: GoogleFonts.outfit(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -106,15 +120,25 @@ class _MyVouchersPageState extends State<MyVouchersPage> {
                                     const SizedBox(width: 6),
                                     GestureDetector(
                                       onTap: () {
-                                        Clipboard.setData(ClipboardData(text: v.claimCode));
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        Clipboard.setData(
+                                          ClipboardData(text: v.claimCode),
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
-                                            content: Text('Voucher code "${v.claimCode}" copied!'),
+                                            content: Text(
+                                              'Voucher code "${v.claimCode}" copied!',
+                                            ),
                                             backgroundColor: AppColors.primary,
                                           ),
                                         );
                                       },
-                                      child: const Icon(Icons.copy_rounded, size: 14, color: AppColors.primary),
+                                      child: const Icon(
+                                        Icons.copy_rounded,
+                                        size: 14,
+                                        color: AppColors.primary,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -123,7 +147,9 @@ class _MyVouchersPageState extends State<MyVouchersPage> {
                                   'Valid until: $date',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11.5,
-                                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                    color: isDark
+                                        ? AppColors.darkTextTertiary
+                                        : AppColors.lightTextTertiary,
                                   ),
                                 ),
                               ],

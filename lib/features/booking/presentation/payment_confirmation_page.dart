@@ -6,8 +6,8 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/booking/models/booking_model.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
 import 'package:salonverse/core/utils/receipt_pdf_helper.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class PaymentConfirmationPage extends StatelessWidget {
   const PaymentConfirmationPage({super.key});
@@ -26,7 +26,8 @@ class PaymentConfirmationPage extends StatelessWidget {
         body: SVEmptyState(
           icon: Icons.search_off_rounded,
           title: 'Booking Info Unavailable',
-          description: 'We could not locate confirmation details. Please check your booking history.',
+          description:
+              'We could not locate confirmation details. Please check your booking history.',
           actionLabel: 'Go to My Appointments',
           onAction: () => context.go('/bookings'),
         ),
@@ -41,7 +42,6 @@ class PaymentConfirmationPage extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
 
-              // Success Icon
               Container(
                 width: 64,
                 height: 64,
@@ -50,7 +50,11 @@ class PaymentConfirmationPage extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
-                  child: Icon(Icons.check_rounded, color: Colors.white, size: 36),
+                  child: Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 36,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -60,7 +64,9 @@ class PaymentConfirmationPage extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -70,30 +76,39 @@ class PaymentConfirmationPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Digital Ticket Container
               Container(
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                   border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                   boxShadow: isDark ? null : AppSpacing.softShadow(context),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Ticket Header
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.cardRadius)),
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.lightSurfaceSecondary,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(AppSpacing.cardRadius),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,7 +127,9 @@ class PaymentConfirmationPage extends StatelessWidget {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                         ],
@@ -129,7 +146,9 @@ class PaymentConfirmationPage extends StatelessWidget {
                             style: GoogleFonts.outfit(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -145,13 +164,29 @@ class PaymentConfirmationPage extends StatelessWidget {
                           const Divider(),
                           const SizedBox(height: 14),
 
-                          // Details grid
                           Row(
                             children: [
-                              Expanded(child: _buildMetaColumn('DATE', booking.date, isDark)),
-                              Expanded(child: _buildMetaColumn('TIME', booking.timeSlot, isDark)),
                               Expanded(
-                                child: _buildMetaColumn('STATUS', booking.status.toUpperCase(), isDark, isHighlight: true),
+                                child: _buildMetaColumn(
+                                  'DATE',
+                                  booking.date,
+                                  isDark,
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildMetaColumn(
+                                  'TIME',
+                                  booking.timeSlot,
+                                  isDark,
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildMetaColumn(
+                                  'STATUS',
+                                  booking.status.toUpperCase(),
+                                  isDark,
+                                  isHighlight: true,
+                                ),
                               ),
                             ],
                           ),
@@ -159,7 +194,6 @@ class PaymentConfirmationPage extends StatelessWidget {
                           const Divider(),
                           const SizedBox(height: 14),
 
-                          // Price Row
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -168,15 +202,21 @@ class PaymentConfirmationPage extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
                                 ),
                               ),
                               Text(
-                                CurrencyFormatter.formatNPR(booking.servicePrice),
+                                CurrencyFormatter.formatNPR(
+                                  booking.servicePrice,
+                                ),
                                 style: GoogleFonts.outfit(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
-                                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.lightTextPrimary,
                                 ),
                               ),
                             ],
@@ -189,7 +229,6 @@ class PaymentConfirmationPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Action Buttons
               SVButton(
                 text: 'Download Invoice / Receipt',
                 variant: SVButtonVariant.secondary,
@@ -216,7 +255,9 @@ class PaymentConfirmationPage extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                    color: isDark
+                        ? AppColors.darkTextTertiary
+                        : AppColors.lightTextTertiary,
                   ),
                 ),
               ),
@@ -227,7 +268,12 @@ class PaymentConfirmationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMetaColumn(String label, String value, bool isDark, {bool isHighlight = false}) {
+  Widget _buildMetaColumn(
+    String label,
+    String value,
+    bool isDark, {
+    bool isHighlight = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,7 +282,9 @@ class PaymentConfirmationPage extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+            color: isDark
+                ? AppColors.darkTextTertiary
+                : AppColors.lightTextTertiary,
             letterSpacing: 0.5,
           ),
         ),
@@ -250,7 +298,9 @@ class PaymentConfirmationPage extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: isHighlight
                 ? AppColors.primary
-                : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                : (isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary),
           ),
         ),
       ],

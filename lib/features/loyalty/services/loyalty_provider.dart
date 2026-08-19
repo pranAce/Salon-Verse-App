@@ -121,29 +121,41 @@ class LoyaltyProvider extends ChangeNotifier {
       if (profResult is Success<Map<String, dynamic>>) {
         final data = profResult.data;
         if (data['profile'] != null) {
-          _profile = LoyaltyProfileModel.fromJson(Map<String, dynamic>.from(data['profile']));
+          _profile = LoyaltyProfileModel.fromJson(
+            Map<String, dynamic>.from(data['profile']),
+          );
         }
         if (data['currentTierDetails'] != null) {
-          _currentTierDetails = LoyaltyTierModel.fromJson(Map<String, dynamic>.from(data['currentTierDetails']));
+          _currentTierDetails = LoyaltyTierModel.fromJson(
+            Map<String, dynamic>.from(data['currentTierDetails']),
+          );
         }
         if (data['nextTierDetails'] != null) {
-          _nextTierDetails = LoyaltyTierModel.fromJson(Map<String, dynamic>.from(data['nextTierDetails']));
+          _nextTierDetails = LoyaltyTierModel.fromJson(
+            Map<String, dynamic>.from(data['nextTierDetails']),
+          );
         } else {
           _nextTierDetails = null;
         }
-        _creditsNeededForNext = (data['creditsNeededForNext'] as num?)?.toInt() ?? 0;
+        _creditsNeededForNext =
+            (data['creditsNeededForNext'] as num?)?.toInt() ?? 0;
         _progressRatio = (data['progressRatio'] as num?)?.toDouble() ?? 0.0;
         if (data['rules'] != null && data['rules'] is List) {
           _rules = (data['rules'] as List)
-              .map((r) => LoyaltyRuleModel.fromJson(Map<String, dynamic>.from(r)))
+              .map(
+                (r) => LoyaltyRuleModel.fromJson(Map<String, dynamic>.from(r)),
+              )
               .toList();
         }
 
-        // Check for level-up milestone
         final newTier = _profile?.currentTier;
-        if (_hasLoadedData && previousTier != null && newTier != null && previousTier != newTier) {
+        if (_hasLoadedData &&
+            previousTier != null &&
+            newTier != null &&
+            previousTier != newTier) {
           _justLeveledUp = true;
-          _newlyAchievedTier = _currentTierDetails?.name ?? newTier.toUpperCase();
+          _newlyAchievedTier =
+              _currentTierDetails?.name ?? newTier.toUpperCase();
         }
       } else if (profResult is Failure<Map<String, dynamic>>) {
         _error = profResult.message;
@@ -163,7 +175,8 @@ class LoyaltyProvider extends ChangeNotifier {
 
       if (refResult is Success<Map<String, dynamic>>) {
         _referralCode = refResult.data['referralCode'] ?? '';
-        _completedReferrals = (refResult.data['completedCount'] as num?)?.toInt() ?? 0;
+        _completedReferrals =
+            (refResult.data['completedCount'] as num?)?.toInt() ?? 0;
       }
 
       if (rebResult is Success<SmartRebookModel>) {

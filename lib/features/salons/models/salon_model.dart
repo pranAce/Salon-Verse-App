@@ -94,7 +94,8 @@ class StylistModel {
 
     final id = (json['id'] ?? json['_id'])?.toString() ?? '';
     final name = json['name'] ?? '';
-    final String parsedStylistImg = (json['imageUrl'] ?? json['avatar'])?.toString().trim() ?? '';
+    final String parsedStylistImg =
+        (json['imageUrl'] ?? json['avatar'])?.toString().trim() ?? '';
 
     final model = StylistModel(
       id: id,
@@ -142,9 +143,7 @@ class SalonModel {
   double get lng => longitude;
   bool get isPremium => subscription == 'premium' || isFeatured;
 
-  SalonModel copyWith({
-    double? distanceKm,
-  }) {
+  SalonModel copyWith({double? distanceKm}) {
     return SalonModel(
       id: id,
       name: name,
@@ -238,28 +237,35 @@ class SalonModel {
     final subStr = (json['subscription'] is Map)
         ? (json['subscription']['plan'] ?? 'basic').toString()
         : (json['subscription'] ?? 'basic').toString();
-    final bool feat = (json['isFeatured'] as bool? ?? false) || subStr == 'premium';
+    final bool feat =
+        (json['isFeatured'] as bool? ?? false) || subStr == 'premium';
 
     String hours = '9:00 AM - 8:00 PM';
     if (json['openingHours'] is String) {
       hours = json['openingHours'];
-    } else if (json['openingHours'] is List && (json['openingHours'] as List).isNotEmpty) {
+    } else if (json['openingHours'] is List &&
+        (json['openingHours'] as List).isNotEmpty) {
       final openDay = (json['openingHours'] as List).firstWhere(
         (element) => element is Map && (element['isClosed'] == false),
         orElse: () => (json['openingHours'] as List).first,
       );
-      if (openDay is Map && openDay['open'] != null && openDay['close'] != null) {
+      if (openDay is Map &&
+          openDay['open'] != null &&
+          openDay['close'] != null) {
         hours = '${openDay['open']} - ${openDay['close']}';
       }
     }
 
-    final String parsedSalonImg = (json['coverImage'] != null && json['coverImage'].toString().trim().isNotEmpty)
+    final String parsedSalonImg =
+        (json['coverImage'] != null &&
+            json['coverImage'].toString().trim().isNotEmpty)
         ? json['coverImage'].toString().trim()
         : ((json['logo'] != null && json['logo'].toString().trim().isNotEmpty)
-            ? json['logo'].toString().trim()
-            : ((json['imageUrl'] != null && json['imageUrl'].toString().trim().isNotEmpty)
-                ? json['imageUrl'].toString().trim()
-                : ''));
+              ? json['logo'].toString().trim()
+              : ((json['imageUrl'] != null &&
+                        json['imageUrl'].toString().trim().isNotEmpty)
+                    ? json['imageUrl'].toString().trim()
+                    : ''));
 
     final model = SalonModel(
       id: id,

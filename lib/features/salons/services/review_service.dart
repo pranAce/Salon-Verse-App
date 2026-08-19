@@ -16,10 +16,10 @@ class ReviewService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
         return list
             .map((e) => ReviewModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();

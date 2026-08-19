@@ -48,7 +48,9 @@ void showServiceLocationModal(
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -62,7 +64,6 @@ void showServiceLocationModal(
               ),
               const SizedBox(height: 16),
 
-              // Option 1: At Salon
               GestureDetector(
                 onTap: () {
                   Navigator.pop(ctx);
@@ -75,10 +76,14 @@ void showServiceLocationModal(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary,
                     borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
                     ),
                   ),
                   child: Row(
@@ -90,7 +95,11 @@ void showServiceLocationModal(
                           color: AppColors.primaryTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.storefront_rounded, color: AppColors.primary, size: 20),
+                        child: const Icon(
+                          Icons.storefront_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -102,14 +111,18 @@ void showServiceLocationModal(
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             Text(
                               'Visit ${salon.name} venue',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                color: isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary,
                               ),
                             ),
                           ],
@@ -118,14 +131,15 @@ void showServiceLocationModal(
                       Icon(
                         Icons.chevron_right_rounded,
                         size: 20,
-                        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                        color: isDark
+                            ? AppColors.darkTextTertiary
+                            : AppColors.lightTextTertiary,
                       ),
                     ],
                   ),
                 ),
               ),
 
-              // Option 2: At Home
               GestureDetector(
                 onTap: () {
                   Navigator.pop(ctx);
@@ -137,10 +151,14 @@ void showServiceLocationModal(
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary,
                     borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
                     ),
                   ),
                   child: Row(
@@ -152,7 +170,11 @@ void showServiceLocationModal(
                           color: AppColors.primaryTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.home_repair_service_rounded, color: AppColors.primary, size: 20),
+                        child: const Icon(
+                          Icons.home_repair_service_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -164,14 +186,18 @@ void showServiceLocationModal(
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             Text(
                               'Verified stylist comes to your location',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                color: isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary,
                               ),
                             ),
                           ],
@@ -180,7 +206,9 @@ void showServiceLocationModal(
                       Icon(
                         Icons.chevron_right_rounded,
                         size: 20,
-                        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                        color: isDark
+                            ? AppColors.darkTextTertiary
+                            : AppColors.lightTextTertiary,
                       ),
                     ],
                   ),

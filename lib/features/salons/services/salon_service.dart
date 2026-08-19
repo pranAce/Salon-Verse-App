@@ -8,8 +8,6 @@ class SalonService {
   final BaseClient _client = BaseClient.instance;
   List<SalonModel>? _cachedSalons;
 
-  bool get isMockMode => false;
-
   void clearCache() {
     _cachedSalons = null;
   }
@@ -58,10 +56,10 @@ class SalonService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
         return list
             .map((e) => SalonModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
@@ -83,8 +81,8 @@ class SalonService {
         final map = data is Map<String, dynamic>
             ? data
             : (data is Map && data['data'] is Map
-                ? Map<String, dynamic>.from(data['data'] as Map)
-                : Map<String, dynamic>.from(data as Map));
+                  ? Map<String, dynamic>.from(data['data'] as Map)
+                  : Map<String, dynamic>.from(data as Map));
         return SalonModel.fromJson(map);
       },
     );
@@ -116,7 +114,9 @@ class SalonService {
       queryParams.add('sort=${Uri.encodeComponent(sort)}');
     }
 
-    final queryString = queryParams.isNotEmpty ? '?${queryParams.join('&')}' : '';
+    final queryString = queryParams.isNotEmpty
+        ? '?${queryParams.join('&')}'
+        : '';
 
     return _client.request<List<NearbyServiceModel>>(
       "GET",
@@ -125,7 +125,9 @@ class SalonService {
       onSuccess: (data) {
         final List list = data is List ? data : [];
         return list
-            .map((e) => NearbyServiceModel.fromJson(Map<String, dynamic>.from(e)))
+            .map(
+              (e) => NearbyServiceModel.fromJson(Map<String, dynamic>.from(e)),
+            )
             .toList();
       },
     );

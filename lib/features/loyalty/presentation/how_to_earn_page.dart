@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class HowToEarnPage extends StatefulWidget {
   const HowToEarnPage({super.key});
@@ -41,13 +41,19 @@ class _HowToEarnPageState extends State<HowToEarnPage> {
       ),
       body: SafeArea(
         child: loyalty.isLoading && loyalty.rules.isEmpty
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
             : RefreshIndicator(
-                onRefresh: () => context.read<LoyaltyProvider>().loadLoyaltyData(),
+                onRefresh: () =>
+                    context.read<LoyaltyProvider>().loadLoyaltyData(),
                 color: AppColors.primary,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -55,7 +61,9 @@ class _HowToEarnPageState extends State<HowToEarnPage> {
                         'Earn SalonVerse points with every booking and activity. Points can be redeemed for exclusive discounts and free vouchers.',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13.5,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                           height: 1.4,
                         ),
                       ),
@@ -86,12 +94,18 @@ class _HowToEarnPageState extends State<HowToEarnPage> {
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkSurface : Colors.white,
+                              color: isDark
+                                  ? AppColors.darkSurface
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.lightBorder,
                               ),
-                              boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                              boxShadow: isDark
+                                  ? null
+                                  : AppSpacing.softShadow(context),
                             ),
                             child: Row(
                               children: [
@@ -102,19 +116,26 @@ class _HowToEarnPageState extends State<HowToEarnPage> {
                                     color: AppColors.primaryTint,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(iconData, color: AppColors.primary, size: 22),
+                                  child: Icon(
+                                    iconData,
+                                    color: AppColors.primary,
+                                    size: 22,
+                                  ),
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         rule.name,
                                         style: GoogleFonts.outfit(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                          color: isDark
+                                              ? AppColors.darkTextPrimary
+                                              : AppColors.lightTextPrimary,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
@@ -122,14 +143,19 @@ class _HowToEarnPageState extends State<HowToEarnPage> {
                                         rule.description,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 12,
-                                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                          color: isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.lightTextSecondary,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: emeraldColor.withAlpha(20),
                                     borderRadius: BorderRadius.circular(10),

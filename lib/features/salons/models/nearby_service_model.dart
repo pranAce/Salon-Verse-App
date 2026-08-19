@@ -48,7 +48,8 @@ class NearbyServiceModel {
   });
 
   factory NearbyServiceModel.fromJson(Map<String, dynamic> json) {
-    final sId = (json['serviceId'] ?? json['id'] ?? json['_id'])?.toString() ?? '';
+    final sId =
+        (json['serviceId'] ?? json['id'] ?? json['_id'])?.toString() ?? '';
     final salId = (json['salonId'] ?? json['salon']?['_id'])?.toString() ?? '';
     final sName = json['serviceName'] ?? json['name'] ?? 'Service';
     final salName = json['salonName'] ?? json['salon']?['name'] ?? 'Salon';
@@ -57,9 +58,13 @@ class NearbyServiceModel {
 
     SalonModel parsedSalon;
     if (json['fullSalon'] is Map<String, dynamic>) {
-      parsedSalon = SalonModel.fromJson(Map<String, dynamic>.from(json['fullSalon']));
+      parsedSalon = SalonModel.fromJson(
+        Map<String, dynamic>.from(json['fullSalon']),
+      );
     } else if (json['salon'] is Map<String, dynamic>) {
-      parsedSalon = SalonModel.fromJson(Map<String, dynamic>.from(json['salon']));
+      parsedSalon = SalonModel.fromJson(
+        Map<String, dynamic>.from(json['salon']),
+      );
     } else {
       parsedSalon = SalonModel(
         id: salId,
@@ -79,14 +84,20 @@ class NearbyServiceModel {
       price: pPrice,
       durationMinutes: durMin,
       category: json['category']?.toString() ?? 'Hair',
-      description: json['serviceDescription']?.toString() ?? json['description']?.toString() ?? '',
+      description:
+          json['serviceDescription']?.toString() ??
+          json['description']?.toString() ??
+          '',
     );
 
     return NearbyServiceModel(
       id: sId,
       serviceId: sId,
       serviceName: sName,
-      serviceDescription: json['serviceDescription']?.toString() ?? json['description']?.toString() ?? '',
+      serviceDescription:
+          json['serviceDescription']?.toString() ??
+          json['description']?.toString() ??
+          '',
       category: json['category']?.toString() ?? 'Hair',
       price: pPrice,
       durationMinutes: durMin,
@@ -98,9 +109,13 @@ class NearbyServiceModel {
       address: json['address']?.toString() ?? parsedSalon.address,
       city: json['city']?.toString() ?? parsedSalon.city,
       rating: (json['rating'] as num?)?.toDouble() ?? parsedSalon.rating,
-      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? parsedSalon.reviewCount,
-      homeServiceAvailable: json['homeServiceAvailable'] == true || parsedSalon.homeServiceAvailable,
-      distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? parsedSalon.distanceKm,
+      reviewCount:
+          (json['reviewCount'] as num?)?.toInt() ?? parsedSalon.reviewCount,
+      homeServiceAvailable:
+          json['homeServiceAvailable'] == true ||
+          parsedSalon.homeServiceAvailable,
+      distanceKm:
+          (json['distanceKm'] as num?)?.toDouble() ?? parsedSalon.distanceKm,
       isCheapest: json['isCheapest'] == true,
       salon: parsedSalon,
       service: parsedService,

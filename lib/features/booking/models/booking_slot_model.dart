@@ -25,7 +25,8 @@ class BookingSlotModel {
     return BookingSlotModel(
       startTime: json['startTime']?.toString() ?? '',
       endTime: json['endTime']?.toString() ?? '',
-      timeSlot: json['timeSlot']?.toString() ?? json['timeRange']?.toString() ?? '',
+      timeSlot:
+          json['timeSlot']?.toString() ?? json['timeRange']?.toString() ?? '',
       startMinutes: (json['startMinutes'] as num?)?.toInt() ?? 0,
       endMinutes: (json['endMinutes'] as num?)?.toInt() ?? 0,
       period: json['period']?.toString() ?? 'morning',
@@ -35,15 +36,15 @@ class BookingSlotModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'startTime': startTime,
-        'endTime': endTime,
-        'timeSlot': timeSlot,
-        'startMinutes': startMinutes,
-        'endMinutes': endMinutes,
-        'period': period,
-        'available': available,
-        'assignedStylistId': assignedStylistId,
-      };
+    'startTime': startTime,
+    'endTime': endTime,
+    'timeSlot': timeSlot,
+    'startMinutes': startMinutes,
+    'endMinutes': endMinutes,
+    'period': period,
+    'available': available,
+    'assignedStylistId': assignedStylistId,
+  };
 }
 
 class AvailabilityResultModel {
@@ -82,8 +83,10 @@ class AvailabilityResultModel {
     final rawBooked = (json['bookedSlots'] as List? ?? []);
     final rawAll = (json['slots'] as List? ?? []);
 
-    // Parse slots: if elements are Maps, parse using fromJson; if Strings, convert
-    List<BookingSlotModel> parseSlotList(List list, {required bool forceAvailable}) {
+    List<BookingSlotModel> parseSlotList(
+      List list, {
+      required bool forceAvailable,
+    }) {
       return list.map((item) {
         if (item is Map<String, dynamic>) {
           return BookingSlotModel.fromJson(item);
@@ -119,11 +122,14 @@ class AvailabilityResultModel {
       timezone: json['timezone']?.toString() ?? 'Asia/Kathmandu',
       isClosed: json['isClosed'] == true,
       closureReason: json['closureReason']?.toString(),
-      serviceDurationMinutes: (json['serviceDurationMinutes'] as num?)?.toInt() ?? 30,
+      serviceDurationMinutes:
+          (json['serviceDurationMinutes'] as num?)?.toInt() ?? 30,
       availableSlots: availableParsed,
       bookedSlots: bookedParsed,
       allSlots: allParsed,
-      totalAvailableCount: (json['totalAvailableCount'] as num?)?.toInt() ?? availableParsed.length,
+      totalAvailableCount:
+          (json['totalAvailableCount'] as num?)?.toInt() ??
+          availableParsed.length,
     );
   }
 }

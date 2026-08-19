@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/core/storage/app_storage.dart';
 import 'package:salonverse/core/constants/app_constants.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class OnboardingSlide {
   final IconData icon;
@@ -53,7 +53,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   ];
 
   Future<void> _finishOnboarding() async {
-    await AppServices.prefs.setBool(KConstants.onboardingSeenKey, true);
+    await AppStorage.prefs.setBool(KConstants.onboardingSeenKey, true);
     if (mounted) {
       context.go('/auth/login');
     }
@@ -77,31 +77,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               children: [
-                // Top Bar
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: const BoxDecoration(
-                            gradient: AppGradients.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 18),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'SalonVerse',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'SalonVerse',
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary,
+                      ),
                     ),
                     if (_currentIndex < _slides.length - 1)
                       TextButton(
@@ -118,12 +103,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ],
                 ),
 
-                // Carousel Slides
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,
                     itemCount: _slides.length,
-                    onPageChanged: (index) => setState(() => _currentIndex = index),
+                    onPageChanged: (index) =>
+                        setState(() => _currentIndex = index),
                     itemBuilder: (context, index) {
                       final slide = _slides[index];
 
@@ -138,7 +123,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: AppColors.primaryTint,
-                                boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.2),
+                                boxShadow: AppSpacing.glowShadow(
+                                  AppColors.primary,
+                                  opacity: 0.2,
+                                ),
                               ),
                               child: Center(
                                 child: Container(
@@ -148,7 +136,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     gradient: AppGradients.primary,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(slide.icon, size: 44, color: Colors.white),
+                                  child: Icon(
+                                    slide.icon,
+                                    size: 44,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -159,7 +151,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               style: GoogleFonts.outfit(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 14),
@@ -168,7 +162,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
-                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
                                 height: 1.5,
                               ),
                             ),
@@ -179,7 +175,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                 ),
 
-                // Dots & CTA
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -194,7 +189,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           height: 8,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
-                            color: isActive ? AppColors.primary : AppColors.primary.withAlpha(50),
+                            color: isActive
+                                ? AppColors.primary
+                                : AppColors.primary.withAlpha(50),
                           ),
                         );
                       }),
@@ -202,7 +199,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     const SizedBox(height: 32),
 
                     SVButton(
-                      text: _currentIndex < _slides.length - 1 ? 'Next' : 'Get Started',
+                      text: _currentIndex < _slides.length - 1
+                          ? 'Next'
+                          : 'Get Started',
                       isFullWidth: true,
                       onPressed: () {
                         if (_currentIndex < _slides.length - 1) {

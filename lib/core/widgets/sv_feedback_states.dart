@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
-/// Modern Universal Status Badge
 class SVStatusBadge extends StatelessWidget {
   final String status;
   final bool isCompact;
@@ -68,7 +67,9 @@ class SVStatusBadge extends StatelessWidget {
         bg = Colors.grey.withAlpha(25);
         textColor = Colors.grey;
         icon = Icons.info_outline_rounded;
-        label = status.isNotEmpty ? '${status[0].toUpperCase()}${status.substring(1)}' : 'Unknown';
+        label = status.isNotEmpty
+            ? '${status[0].toUpperCase()}${status.substring(1)}'
+            : 'Unknown';
     }
 
     return Container(
@@ -100,7 +101,6 @@ class SVStatusBadge extends StatelessWidget {
   }
 }
 
-/// Polished Empty State with clear explanations and CTA
 class SVEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -136,10 +136,14 @@ class SVEmptyState extends StatelessWidget {
               width: iconSize * 1.5,
               height: iconSize * 1.5,
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.primaryTint,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isDark ? AppColors.darkBorder : AppColors.primary.withAlpha(40),
+                  color: isDark
+                      ? AppColors.darkBorder
+                      : AppColors.primary.withAlpha(40),
                   width: 1.5,
                 ),
               ),
@@ -158,7 +162,9 @@ class SVEmptyState extends StatelessWidget {
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 6),
@@ -168,7 +174,9 @@ class SVEmptyState extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
                 height: 1.35,
               ),
             ),
@@ -188,7 +196,6 @@ class SVEmptyState extends StatelessWidget {
   }
 }
 
-/// Polished Error State with friendly guidance & retry
 class SVErrorState extends StatelessWidget {
   final String title;
   final String message;
@@ -246,7 +253,9 @@ class SVErrorState extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 6),
@@ -255,7 +264,9 @@ class SVErrorState extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                 ),
               ),
               if (onRetry != null) ...[
@@ -276,7 +287,6 @@ class SVErrorState extends StatelessWidget {
   }
 }
 
-/// Shimmer Skeleton Loaders
 class SVSkeleton extends StatelessWidget {
   final double width;
   final double height;
@@ -291,19 +301,21 @@ class SVSkeleton extends StatelessWidget {
     this.shape,
   });
 
-  const SVSkeleton.circle({
-    super.key,
-    required double size,
-  })  : width = size,
-        height = size,
-        borderRadius = 999,
-        shape = const CircleBorder();
+  const SVSkeleton.circle({super.key, required double size})
+    : width = size,
+      height = size,
+      borderRadius = 999,
+      shape = const CircleBorder();
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF221F1C) : const Color(0xFFF5E6EC);
-    final highlightColor = isDark ? const Color(0xFF332F2A) : const Color(0xFFFFF0F5);
+    final baseColor = isDark
+        ? const Color(0xFF221F1C)
+        : const Color(0xFFF5E6EC);
+    final highlightColor = isDark
+        ? const Color(0xFF332F2A)
+        : const Color(0xFFFFF0F5);
 
     return Shimmer.fromColors(
       baseColor: baseColor,

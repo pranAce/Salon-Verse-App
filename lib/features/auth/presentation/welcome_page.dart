@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -13,7 +13,8 @@ class WelcomePage extends StatefulWidget {
   State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin {
+class _WelcomePageState extends State<WelcomePage>
+    with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _slideController;
   late final Animation<double> _fadeAnimation;
@@ -34,13 +35,17 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
     _logoScale = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOutBack),
     );
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
     _buttonsFade = CurvedAnimation(
       parent: _slideController,
       curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
@@ -70,7 +75,6 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
       child: Scaffold(
         body: Stack(
           children: [
-            // Background Glow Circles
             Positioned(
               top: -size.width * 0.2,
               right: -size.width * 0.2,
@@ -91,12 +95,14 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
 
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 24,
+                ),
                 child: Column(
                   children: [
                     const Spacer(flex: 2),
 
-                    // Logo & App Name
                     FadeTransition(
                       opacity: _fadeAnimation,
                       child: ScaleTransition(
@@ -109,19 +115,27 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                               height: 96,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.35),
+                                boxShadow: AppSpacing.glowShadow(
+                                  AppColors.primary,
+                                  opacity: 0.35,
+                                ),
                               ),
                               child: ClipOval(
                                 child: Image.asset(
                                   'assets/images/logo.png',
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(
-                                    decoration: const BoxDecoration(
-                                      gradient: AppGradients.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.content_cut_rounded, color: Colors.white, size: 48),
-                                  ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        decoration: const BoxDecoration(
+                                          gradient: AppGradients.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.content_cut_rounded,
+                                          color: Colors.white,
+                                          size: 48,
+                                        ),
+                                      ),
                                 ),
                               ),
                             ),
@@ -139,7 +153,9 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                             Text(
                               'DISCOVER  •  BOOK  •  GLOW',
                               style: GoogleFonts.plusJakartaSans(
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                color: isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary,
                                 letterSpacing: 3.5,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -152,7 +168,6 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
 
                     const Spacer(flex: 2),
 
-                    // Hero Description
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
@@ -167,7 +182,9 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
                                 height: 1.25,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -176,7 +193,9 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
                               textAlign: TextAlign.center,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
-                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
                                 height: 1.5,
                               ),
                             ),
@@ -187,7 +206,6 @@ class _WelcomePageState extends State<WelcomePage> with TickerProviderStateMixin
 
                     const Spacer(flex: 1),
 
-                    // CTA Button
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(

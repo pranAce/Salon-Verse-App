@@ -97,14 +97,15 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. User Identity Header (No bulky card, clean editorial profile)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 32,
-                      backgroundColor: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
+                      backgroundColor: isDark
+                          ? AppColors.darkSurfaceElevated
+                          : AppColors.primaryTint,
                       child: Text(
                         userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
                         style: GoogleFonts.outfit(
@@ -129,13 +130,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: GoogleFonts.outfit(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withAlpha(20),
                                   borderRadius: BorderRadius.circular(4),
@@ -159,7 +165,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12.5,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                         ],
@@ -175,32 +183,62 @@ class _ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 12),
 
-              // 2. Quick Metrics Row
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                   border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                   boxShadow: isDark ? null : AppSpacing.softShadow(context),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatItem('Appointments', '$bookingsCount', () => context.go('/bookings'), isDark),
-                    Container(height: 28, width: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
-                    _buildStatItem('Favorites', '$favoritesCount', () => context.push('/profile/favorites'), isDark),
-                    Container(height: 28, width: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
-                    _buildStatItem('Points', '$loyaltyPoints', () => context.push('/loyalty'), isDark),
+                    _buildStatItem(
+                      'Appointments',
+                      '$bookingsCount',
+                      () => context.go('/bookings'),
+                      isDark,
+                    ),
+                    Container(
+                      height: 28,
+                      width: 1,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
+                    ),
+                    _buildStatItem(
+                      'Favorites',
+                      '$favoritesCount',
+                      () => context.push('/profile/favorites'),
+                      isDark,
+                    ),
+                    Container(
+                      height: 28,
+                      width: 1,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
+                    ),
+                    _buildStatItem(
+                      'Points',
+                      '$loyaltyPoints',
+                      () => context.push('/loyalty'),
+                      isDark,
+                    ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              // 3. Grouped Settings Sections
               _buildSectionTitle('ACCOUNT', isDark),
               _buildSettingsGroup([
                 _buildTile(
@@ -267,19 +305,28 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildSectionTitle('PREFERENCES & SUPPORT', isDark),
               _buildSettingsGroup([
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.lightSurfaceSecondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
-                          isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                          isDark
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
                           size: 18,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -292,14 +339,20 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             Text(
-                              isDark ? 'Obsidian mode active' : 'Studio light mode active',
+                              isDark
+                                  ? 'Obsidian mode active'
+                                  : 'Studio light mode active',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11.5,
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                color: isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary,
                               ),
                             ),
                           ],
@@ -335,7 +388,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
               const SizedBox(height: 24),
 
-              // 4. Log Out
               GestureDetector(
                 onTap: () => _showLogoutDialog(context),
                 child: Container(
@@ -344,14 +396,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.darkSurface : Colors.white,
                     borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                    border: Border.all(
-                      color: AppColors.error.withAlpha(50),
-                    ),
+                    border: Border.all(color: AppColors.error.withAlpha(50)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
+                      const Icon(
+                        Icons.logout_rounded,
+                        color: AppColors.error,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Log Out of SalonVerse',
@@ -372,7 +426,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   'SalonVerse v2.0.0 • Production Build',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
-                    color: isDark ? AppColors.darkTextMuted : AppColors.lightTextTertiary,
+                    color: isDark
+                        ? AppColors.darkTextMuted
+                        : AppColors.lightTextTertiary,
                   ),
                 ),
               ),
@@ -383,7 +439,12 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, VoidCallback onTap, bool isDark) {
+  Widget _buildStatItem(
+    String label,
+    String value,
+    VoidCallback onTap,
+    bool isDark,
+  ) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -394,7 +455,9 @@ class _ProfilePageState extends State<ProfilePage> {
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 1),
@@ -402,7 +465,9 @@ class _ProfilePageState extends State<ProfilePage> {
             label,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.5,
-              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+              color: isDark
+                  ? AppColors.darkTextTertiary
+                  : AppColors.lightTextTertiary,
             ),
           ),
         ],
@@ -418,7 +483,9 @@ class _ProfilePageState extends State<ProfilePage> {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 11,
           fontWeight: FontWeight.w800,
-          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+          color: isDark
+              ? AppColors.darkTextTertiary
+              : AppColors.lightTextTertiary,
           letterSpacing: 0.6,
         ),
       ),
@@ -459,13 +526,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 Container(
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
                     size: 18,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -478,14 +549,18 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       Text(
                         subtitle,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11.5,
-                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                          color: isDark
+                              ? AppColors.darkTextTertiary
+                              : AppColors.lightTextTertiary,
                         ),
                       ),
                     ],
@@ -494,7 +569,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                  color: isDark
+                      ? AppColors.darkTextTertiary
+                      : AppColors.lightTextTertiary,
                 ),
               ],
             ),

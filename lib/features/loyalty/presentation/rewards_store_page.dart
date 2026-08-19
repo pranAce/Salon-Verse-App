@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/features/loyalty/models/loyalty_model.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class RewardsStorePage extends StatefulWidget {
   const RewardsStorePage({super.key});
@@ -40,7 +40,9 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkSurface : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.sheetRadius)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppSpacing.sheetRadius),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -62,7 +64,9 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                 style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -70,7 +74,9 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                 'Unlock "${reward.title}" with your points.',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                 ),
               ),
               const SizedBox(height: 18),
@@ -78,12 +84,18 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.lightSurfaceSecondary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
-                    _buildRow('Points Required', '${reward.creditsRequired} pts', isDark),
+                    _buildRow(
+                      'Points Required',
+                      '${reward.creditsRequired} pts',
+                      isDark,
+                    ),
                     const SizedBox(height: 8),
                     _buildRow('Your Balance', '$userCredits pts', isDark),
                     const Divider(height: 20),
@@ -119,14 +131,18 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Reward claimed! Voucher added to My Vouchers.'),
+                                content: Text(
+                                  'Reward claimed! Voucher added to My Vouchers.',
+                                ),
                                 backgroundColor: AppColors.primary,
                               ),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(loyalty.error ?? 'Redemption failed.'),
+                                content: Text(
+                                  loyalty.error ?? 'Redemption failed.',
+                                ),
                                 backgroundColor: AppColors.error,
                               ),
                             );
@@ -144,7 +160,12 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
     );
   }
 
-  Widget _buildRow(String label, String value, bool isDark, {bool isBold = false}) {
+  Widget _buildRow(
+    String label,
+    String value,
+    bool isDark, {
+    bool isBold = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -152,14 +173,23 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
           label,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
           ),
         ),
         Text(
           value,
           style: isBold
-              ? GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)
-              : GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
+              ? GoogleFonts.outfit(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                )
+              : GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
         ),
       ],
     );
@@ -190,15 +220,19 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Balance Banner
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.darkSurface : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
                     ),
                     boxShadow: isDark ? null : AppSpacing.softShadow(context),
                   ),
@@ -210,7 +244,9 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       Text(
@@ -230,7 +266,8 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                   const SVEmptyState(
                     icon: Icons.card_giftcard_rounded,
                     title: 'No Rewards Available',
-                    description: 'Rewards are currently being refreshed. Check back soon!',
+                    description:
+                        'Rewards are currently being refreshed. Check back soon!',
                   )
                 else
                   ...rewards.map((r) {
@@ -243,9 +280,13 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                         color: isDark ? AppColors.darkSurface : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
                         ),
-                        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                        boxShadow: isDark
+                            ? null
+                            : AppSpacing.softShadow(context),
                       ),
                       child: Row(
                         children: [
@@ -256,7 +297,11 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                               color: AppColors.primaryTint,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.card_giftcard_rounded, color: AppColors.primary, size: 22),
+                            child: const Icon(
+                              Icons.card_giftcard_rounded,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -268,7 +313,9 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                                   style: GoogleFonts.outfit(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -279,7 +326,9 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                                     fontWeight: FontWeight.w600,
                                     color: canAfford
                                         ? AppColors.primary
-                                        : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                                        : (isDark
+                                              ? AppColors.darkTextTertiary
+                                              : AppColors.lightTextTertiary),
                                   ),
                                 ),
                               ],
@@ -288,9 +337,15 @@ class _RewardsStorePageState extends State<RewardsStorePage> {
                           SVButton(
                             text: canAfford ? 'Redeem' : 'Need Pts',
                             size: SVButtonSize.sm,
-                            variant: canAfford ? SVButtonVariant.primary : SVButtonVariant.outline,
+                            variant: canAfford
+                                ? SVButtonVariant.primary
+                                : SVButtonVariant.outline,
                             onPressed: canAfford
-                                ? () => _showRedeemConfirmation(context, r, userCredits)
+                                ? () => _showRedeemConfirmation(
+                                    context,
+                                    r,
+                                    userCredits,
+                                  )
                                 : null,
                           ),
                         ],

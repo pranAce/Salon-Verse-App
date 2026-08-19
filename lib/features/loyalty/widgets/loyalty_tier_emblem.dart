@@ -14,7 +14,6 @@ enum SVTierLevel {
   }
 }
 
-/// Production-Grade Vector Tier Emblem for SalonVerse Loyalty Memberships
 class SVTierEmblem extends StatelessWidget {
   final String tierKey;
   final double size;
@@ -35,7 +34,6 @@ class SVTierEmblem extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final level = SVTierLevel.fromString(tierKey);
 
-    // Color tokens & Icon per Tier
     final List<Color> gradientColors;
     final Color accentColor;
     final IconData emblemIcon;
@@ -43,19 +41,31 @@ class SVTierEmblem extends StatelessWidget {
 
     switch (level) {
       case SVTierLevel.glow:
-        gradientColors = const [Color(0xFFFB7185), Color(0xFFE11D48), Color(0xFF9F1239)];
+        gradientColors = const [
+          Color(0xFFFB7185),
+          Color(0xFFE11D48),
+          Color(0xFF9F1239),
+        ];
         accentColor = const Color(0xFFE11D48);
         emblemIcon = Icons.workspace_premium_rounded;
         label = 'GLOW';
         break;
       case SVTierLevel.luxe:
-        gradientColors = const [Color(0xFFA78BFA), Color(0xFF8B5CF6), Color(0xFF6D28D9)];
+        gradientColors = const [
+          Color(0xFFA78BFA),
+          Color(0xFF8B5CF6),
+          Color(0xFF6D28D9),
+        ];
         accentColor = const Color(0xFF8B5CF6);
         emblemIcon = Icons.diamond_rounded;
         label = 'LUXE';
         break;
       case SVTierLevel.icon:
-        gradientColors = const [Color(0xFFFDE68A), Color(0xFFF59E0B), Color(0xFFD97706)];
+        gradientColors = const [
+          Color(0xFFFDE68A),
+          Color(0xFFF59E0B),
+          Color(0xFFD97706),
+        ];
         accentColor = const Color(0xFFF59E0B);
         emblemIcon = Icons.military_tech_rounded;
         label = 'ICON';
@@ -88,11 +98,7 @@ class SVTierEmblem extends StatelessWidget {
             : null,
       ),
       child: Center(
-        child: Icon(
-          emblemIcon,
-          size: size * 0.52,
-          color: Colors.white,
-        ),
+        child: Icon(emblemIcon, size: size * 0.52, color: Colors.white),
       ),
     );
 

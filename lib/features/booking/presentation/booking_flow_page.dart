@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 import 'package:salonverse/features/booking/presentation/booking_widgets/booking_step2_schedule_payment.dart';
 import 'package:salonverse/features/booking/presentation/booking_widgets/booking_bottom_bar.dart';
 
@@ -50,7 +50,9 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,
-            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -62,7 +64,9 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
               ),
             ),
             Text(
@@ -70,7 +74,9 @@ class _BookingFlowPageState extends State<BookingFlowPage> {
               style: GoogleFonts.outfit(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
           ],

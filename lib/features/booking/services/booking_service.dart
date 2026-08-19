@@ -7,8 +7,6 @@ import 'package:salonverse/features/auth/models/user_model.dart';
 class BookingService {
   final BaseClient _client = BaseClient.instance;
 
-  bool get isMockMode => false;
-
   Future<ApiResult<Map<String, dynamic>>> getAvailability({
     required String salonId,
     required String date,
@@ -39,18 +37,27 @@ class BookingService {
     );
   }
 
-  Future<ApiResult<List<StylistModel>>> getStylistsBySalon(String salonId, {String? serviceId}) async {
+  Future<ApiResult<List<StylistModel>>> getStylistsBySalon(
+    String salonId, {
+    String? serviceId,
+  }) async {
     final queryParams = <String, String>{};
     if (serviceId != null && serviceId.isNotEmpty) {
       queryParams['serviceId'] = serviceId;
     }
-    final queryString = queryParams.isNotEmpty ? "?${Uri(queryParameters: queryParams).query}" : "";
+    final queryString = queryParams.isNotEmpty
+        ? "?${Uri(queryParameters: queryParams).query}"
+        : "";
     return _client.request<List<StylistModel>>(
       "GET",
       "/api/v1/stylists/salon/$salonId$queryString",
       auth: false,
       onSuccess: (data) {
-        final list = data is List ? data : (data is Map && data['data'] is List) ? data['data'] : [];
+        final list = data is List
+            ? data
+            : (data is Map && data['data'] is List)
+            ? data['data']
+            : [];
         return (list as List)
             .map((e) => StylistModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
@@ -126,12 +133,15 @@ class BookingService {
     );
   }
 
-  Future<ApiResult<BookingModel>> getBookingByAttemptId(String attemptId) async {
+  Future<ApiResult<BookingModel>> getBookingByAttemptId(
+    String attemptId,
+  ) async {
     return _client.request<BookingModel>(
       "GET",
       "/api/v1/bookings/attempt/$attemptId",
       auth: true,
-      onSuccess: (data) => BookingModel.fromJson(Map<String, dynamic>.from(data)),
+      onSuccess: (data) =>
+          BookingModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 
@@ -148,10 +158,10 @@ class BookingService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
         return list
             .map((e) => BookingModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
@@ -210,16 +220,22 @@ class BookingService {
     );
   }
 
-  Future<ApiResult<Map<String, dynamic>>> getCancellationQuote(String bookingId) async {
+  Future<ApiResult<Map<String, dynamic>>> getCancellationQuote(
+    String bookingId,
+  ) async {
     return _client.request<Map<String, dynamic>>(
       "GET",
       "/api/v1/bookings/$bookingId/cancellation-quote",
       auth: true,
-      onSuccess: (data) => data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{},
+      onSuccess: (data) =>
+          data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{},
     );
   }
 
-  Future<ApiResult<BookingModel>> cancelBooking(String bookingId, {String? cancelReason}) async {
+  Future<ApiResult<BookingModel>> cancelBooking(
+    String bookingId, {
+    String? cancelReason,
+  }) async {
     return _client.request<BookingModel>(
       "POST",
       "/api/v1/bookings/$bookingId/cancel",

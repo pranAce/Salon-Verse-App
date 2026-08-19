@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:salonverse/features/auth/models/user_model.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
+import 'package:salonverse/features/auth/services/auth_service.dart';
+import 'package:salonverse/features/salons/services/salon_service.dart';
+import 'package:salonverse/features/notifications/services/socket_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final _service = AppService.instance;
+  final AuthService _service = AuthService();
+  final SocketService _socket = SocketService.instance;
 
   UserModel? get currentUser => _service.currentUser;
   bool get isLoggedIn => currentUser != null;
@@ -49,7 +52,7 @@ class AuthProvider extends ChangeNotifier {
 
     _isLoading = false;
     if (result is Success<UserModel>) {
-      _service.socket.connect();
+      _socket.connect();
       notifyListeners();
       return true;
     } else {
@@ -68,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
 
     _isLoading = false;
     if (result is Success<UserModel>) {
-      _service.socket.connect();
+      _socket.connect();
       notifyListeners();
       return true;
     } else {
@@ -82,7 +85,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final success = await _service.tryAutoLogin();
       if (success) {
-        _service.socket.connect();
+        _socket.connect();
         notifyListeners();
       }
     } finally {
@@ -95,27 +98,9 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _service.socket.disconnect();
+    _socket.disconnect();
     await _service.logout();
     notifyListeners();
-  }
-
-  Future<bool> forgotPassword(String email) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    final result = await _service.resetPassword(email);
-
-    _isLoading = false;
-    if (result is Success) {
-      notifyListeners();
-      return true;
-    } else {
-      _error = (result as Failure).message;
-      notifyListeners();
-      return false;
-    }
   }
 
   Future<bool> updateProfile({
@@ -147,7 +132,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> toggleFavorite(String salonId) async {
-    final result = await _service.toggleFavorite(salonId);
+    final result = await SalonService().toggleFavorite(
+      salonId,
+      currentUser,
+      (user) => _service.syncCurrentUser(user),
+    );
     if (result is Success) {
       notifyListeners();
     }

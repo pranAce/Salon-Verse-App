@@ -6,8 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/core/widgets/feedback_helper.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
 
 class ReferPage extends StatefulWidget {
   const ReferPage({super.key});
@@ -34,16 +34,21 @@ class _ReferPageState extends State<ReferPage> {
         ? loyalty.referralCode
         : (loyalty.profile?.referralCode ?? '');
 
-    final referralRule = loyalty.rules.where((r) => r.ruleKey == 'REFERRAL_QUALIFIED').firstOrNull;
-    final bonusCredits = (loyalty.currentTierDetails != null && loyalty.currentTierDetails!.referralBonusCredits > 0)
+    final referralRule = loyalty.rules
+        .where((r) => r.ruleKey == 'REFERRAL_QUALIFIED')
+        .firstOrNull;
+    final bonusCredits =
+        (loyalty.currentTierDetails != null &&
+            loyalty.currentTierDetails!.referralBonusCredits > 0)
         ? loyalty.currentTierDetails!.referralBonusCredits
         : (referralRule?.creditsToAward ?? 0);
 
     const Color emeraldColor = Color(0xFF10B981);
 
-    // Sum referral points earned from authoritative ledger
     final totalReferralCreditsEarned = loyalty.activity
-        .where((t) => t.type.contains('REFERRAL') || t.source.contains('referral'))
+        .where(
+          (t) => t.type.contains('REFERRAL') || t.source.contains('referral'),
+        )
         .fold<int>(0, (sum, t) => sum + (t.amount > 0 ? t.amount : 0));
 
     final displayEarned = totalReferralCreditsEarned > 0
@@ -63,17 +68,23 @@ class _ReferPageState extends State<ReferPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 1. Hero Gift Icon
               Container(
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
                   gradient: AppGradients.primary,
                   shape: BoxShape.circle,
-                  boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.35),
+                  boxShadow: AppSpacing.glowShadow(
+                    AppColors.primary,
+                    opacity: 0.35,
+                  ),
                 ),
                 child: const Center(
-                  child: Icon(Icons.card_giftcard_rounded, size: 40, color: Colors.white),
+                  child: Icon(
+                    Icons.card_giftcard_rounded,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -86,7 +97,9 @@ class _ReferPageState extends State<ReferPage> {
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 6),
@@ -95,20 +108,23 @@ class _ReferPageState extends State<ReferPage> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                   height: 1.4,
                 ),
               ),
               const SizedBox(height: 22),
 
-              // 2. Share Your Code Box
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                   border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                   boxShadow: isDark ? null : AppSpacing.softShadow(context),
                 ),
@@ -125,11 +141,18 @@ class _ReferPageState extends State<ReferPage> {
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.lightSurfaceSecondary,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.primary.withAlpha(50)),
+                        border: Border.all(
+                          color: AppColors.primary.withAlpha(50),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -140,7 +163,9 @@ class _ReferPageState extends State<ReferPage> {
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 2.0,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           SVButton(
@@ -148,8 +173,13 @@ class _ReferPageState extends State<ReferPage> {
                             size: SVButtonSize.sm,
                             icon: Icons.copy_rounded,
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(text: referralCode));
-                              AppFeedback.success(context, 'Referral code "$referralCode" copied to clipboard!');
+                              Clipboard.setData(
+                                ClipboardData(text: referralCode),
+                              );
+                              AppFeedback.success(
+                                context,
+                                'Referral code "$referralCode" copied to clipboard!',
+                              );
                             },
                           ),
                         ],
@@ -160,14 +190,18 @@ class _ReferPageState extends State<ReferPage> {
               ),
               const SizedBox(height: 18),
 
-              // 3. Referral Stats Tracker
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                   border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                 ),
                 child: Row(
@@ -179,7 +213,9 @@ class _ReferPageState extends State<ReferPage> {
                           'Successful Referrals',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
-                            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                            color: isDark
+                                ? AppColors.darkTextTertiary
+                                : AppColors.lightTextTertiary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -193,14 +229,22 @@ class _ReferPageState extends State<ReferPage> {
                         ),
                       ],
                     ),
-                    Container(height: 28, width: 1, color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    Container(
+                      height: 28,
+                      width: 1,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
+                    ),
                     Column(
                       children: [
                         Text(
                           'Points Earned',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
-                            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                            color: isDark
+                                ? AppColors.darkTextTertiary
+                                : AppColors.lightTextTertiary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -219,15 +263,29 @@ class _ReferPageState extends State<ReferPage> {
               ),
               const SizedBox(height: 24),
 
-              // 4. How It Works
               Align(
                 alignment: Alignment.centerLeft,
                 child: SVSectionHeader(title: 'How It Works'),
               ),
               const SizedBox(height: 8),
-              _buildStepItem('1', 'Share code', 'Share your referral code with friends & family.', isDark),
-              _buildStepItem('2', 'Friend registers with code', 'New friends enter your referral code when creating their account.', isDark),
-              _buildStepItem('3', 'Earn loyalty points', 'You receive authoritative loyalty points when they complete their first booking!', isDark),
+              _buildStepItem(
+                '1',
+                'Share code',
+                'Share your referral code with friends & family.',
+                isDark,
+              ),
+              _buildStepItem(
+                '2',
+                'Friend registers with code',
+                'New friends enter your referral code when creating their account.',
+                isDark,
+              ),
+              _buildStepItem(
+                '3',
+                'Earn loyalty points',
+                'You receive authoritative loyalty points when they complete their first booking!',
+                isDark,
+              ),
             ],
           ),
         ),
@@ -263,7 +321,9 @@ class _ReferPageState extends State<ReferPage> {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 1),
@@ -271,7 +331,9 @@ class _ReferPageState extends State<ReferPage> {
                   desc,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
               ],

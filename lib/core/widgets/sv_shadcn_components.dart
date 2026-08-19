@@ -3,9 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 
-/// ---------------------------------------------------------------------------
-/// SV SHADCN BADGE COMPONENT
-/// ---------------------------------------------------------------------------
 enum SvBadgeVariant {
   primary,
   purple,
@@ -68,13 +65,19 @@ class SvShadBadge extends StatelessWidget {
         border = Border.all(color: AppColors.error.withAlpha(60));
         break;
       case SvBadgeVariant.secondary:
-        bg = isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary;
+        bg = isDark
+            ? AppColors.darkSurfaceElevated
+            : AppColors.lightSurfaceSecondary;
         fg = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
         break;
       case SvBadgeVariant.outline:
         bg = Colors.transparent;
-        fg = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-        border = Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder);
+        fg = isDark
+            ? AppColors.darkTextSecondary
+            : AppColors.lightTextSecondary;
+        border = Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        );
         break;
     }
 
@@ -88,10 +91,7 @@ class SvShadBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            icon!,
-            const SizedBox(width: 4),
-          ],
+          if (icon != null) ...[icon!, const SizedBox(width: 4)],
           Text(
             label,
             style: GoogleFonts.plusJakartaSans(
@@ -107,9 +107,6 @@ class SvShadBadge extends StatelessWidget {
   }
 }
 
-/// ---------------------------------------------------------------------------
-/// SV SHADCN SKELETON LOADER
-/// ---------------------------------------------------------------------------
 class SvShadSkeleton extends StatelessWidget {
   final double width;
   final double height;
@@ -122,18 +119,20 @@ class SvShadSkeleton extends StatelessWidget {
     this.borderRadius = 8.0,
   });
 
-  const SvShadSkeleton.circular({
-    super.key,
-    required double size,
-  })  : width = size,
-        height = size,
-        borderRadius = 999;
+  const SvShadSkeleton.circular({super.key, required double size})
+    : width = size,
+      height = size,
+      borderRadius = 999;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade200;
-    final highlightColor = isDark ? AppColors.darkSurfaceTertiary : Colors.grey.shade50;
+    final baseColor = isDark
+        ? AppColors.darkSurfaceElevated
+        : Colors.grey.shade200;
+    final highlightColor = isDark
+        ? AppColors.darkSurfaceTertiary
+        : Colors.grey.shade50;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -150,9 +149,6 @@ class SvShadSkeleton extends StatelessWidget {
   }
 }
 
-/// ---------------------------------------------------------------------------
-/// SV SHADCN SEARCH BAR COMPONENT
-/// ---------------------------------------------------------------------------
 class SvShadSearchBar extends StatelessWidget {
   final String hintText;
   final TextEditingController? controller;
@@ -188,11 +184,7 @@ class SvShadSearchBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          const Icon(
-            Icons.search_rounded,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          const Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -201,13 +193,17 @@ class SvShadSearchBar extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 13.5,
-                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                  color: isDark
+                      ? AppColors.darkTextTertiary
+                      : AppColors.lightTextTertiary,
                 ),
                 border: InputBorder.none,
                 isDense: true,
@@ -227,7 +223,9 @@ class SvShadSearchBar extends StatelessWidget {
                 child: Icon(
                   Icons.cancel_rounded,
                   size: 18,
-                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                  color: isDark
+                      ? AppColors.darkTextTertiary
+                      : AppColors.lightTextTertiary,
                 ),
               ),
             ),

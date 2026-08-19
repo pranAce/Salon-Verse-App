@@ -97,11 +97,14 @@ void main() {
       expect(failure.statusCode, 404);
     });
 
-    test('AppCurrencyFormatter formats prices correctly without Bitcoin symbol', () {
-      expect(AppCurrencyFormatter.format(800), 'Rs. 800');
-      expect(AppCurrencyFormatter.format(1200.50), 'Rs. 1,200.50');
-      expect(AppCurrencyFormatter.format(null), 'Price unavailable');
-    });
+    test(
+      'AppCurrencyFormatter formats prices correctly without Bitcoin symbol',
+      () {
+        expect(AppCurrencyFormatter.format(800), 'Rs. 800');
+        expect(AppCurrencyFormatter.format(1200.50), 'Rs. 1,200.50');
+        expect(AppCurrencyFormatter.format(null), 'Price unavailable');
+      },
+    );
 
     test('NearbyServiceModel parsing and properties', () {
       final nearbySvc = NearbyServiceModel.fromJson({
@@ -129,7 +132,6 @@ void main() {
     test('KConstants default values', () {
       expect(KConstants.onboardingSeenKey, 'onboarding_seen');
       expect(KConstants.themeModeKey, 'theme_mode');
-      expect(KConstants.defaultMockMode, isFalse);
     });
   });
 }

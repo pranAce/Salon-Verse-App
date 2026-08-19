@@ -144,8 +144,11 @@ class OfferModel {
     }
 
     List<String> categories = [];
-    if (json['applicableCategories'] != null && json['applicableCategories'] is List) {
-      categories = (json['applicableCategories'] as List).map((c) => c.toString()).toList();
+    if (json['applicableCategories'] != null &&
+        json['applicableCategories'] is List) {
+      categories = (json['applicableCategories'] as List)
+          .map((c) => c.toString())
+          .toList();
     }
 
     return OfferModel(

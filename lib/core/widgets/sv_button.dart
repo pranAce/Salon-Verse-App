@@ -2,22 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 
-enum SVButtonVariant {
-  primary,
-  secondary,
-  tonal,
-  outline,
-  ghost,
-  danger,
-}
+enum SVButtonVariant { primary, secondary, tonal, outline, ghost, danger }
 
-enum SVButtonSize {
-  sm,
-  md,
-  lg,
-}
+enum SVButtonSize { sm, md, lg }
 
-/// Production-Grade Tactile SVButton with consistent padding, variant tokens, and zero overflow risk.
 class SVButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -47,7 +35,6 @@ class SVButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Dimensions according to size
     final double height;
     final double fontSize;
     final double iconSize;
@@ -74,7 +61,6 @@ class SVButton extends StatelessWidget {
         break;
     }
 
-    // Colors per variant
     Color bgColor;
     Color textColor;
     Border? border;
@@ -85,12 +71,18 @@ class SVButton extends StatelessWidget {
         textColor = Colors.white;
         break;
       case SVButtonVariant.secondary:
-        bgColor = isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint;
+        bgColor = isDark
+            ? AppColors.darkSurfaceElevated
+            : AppColors.primaryTint;
         textColor = AppColors.primary;
         break;
       case SVButtonVariant.tonal:
-        bgColor = isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary;
-        textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+        bgColor = isDark
+            ? AppColors.darkSurfaceElevated
+            : AppColors.lightSurfaceSecondary;
+        textColor = isDark
+            ? AppColors.darkTextPrimary
+            : AppColors.lightTextPrimary;
         border = Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
           width: 1,
@@ -98,7 +90,9 @@ class SVButton extends StatelessWidget {
         break;
       case SVButtonVariant.outline:
         bgColor = Colors.transparent;
-        textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+        textColor = isDark
+            ? AppColors.darkTextPrimary
+            : AppColors.lightTextPrimary;
         border = Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
           width: 1,
@@ -106,7 +100,9 @@ class SVButton extends StatelessWidget {
         break;
       case SVButtonVariant.ghost:
         bgColor = Colors.transparent;
-        textColor = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+        textColor = isDark
+            ? AppColors.darkTextSecondary
+            : AppColors.lightTextSecondary;
         break;
       case SVButtonVariant.danger:
         bgColor = AppColors.error;
@@ -190,7 +186,6 @@ class SVButton extends StatelessWidget {
   }
 }
 
-/// Compact Icon Button for toolbars, actions, and sheet dismissals
 class SVIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
@@ -216,8 +211,14 @@ class SVIconButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final defaultBg = backgroundColor ?? (isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary);
-    final defaultColor = color ?? (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary);
+    final defaultBg =
+        backgroundColor ??
+        (isDark
+            ? AppColors.darkSurfaceElevated
+            : AppColors.lightSurfaceSecondary);
+    final defaultColor =
+        color ??
+        (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary);
 
     Widget btn = GestureDetector(
       onTap: onPressed,
@@ -234,11 +235,7 @@ class SVIconButton extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: defaultColor,
-          ),
+          child: Icon(icon, size: iconSize, color: defaultColor),
         ),
       ),
     );

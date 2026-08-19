@@ -7,10 +7,10 @@ import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/features/booking/models/booking_model.dart';
 import 'package:salonverse/core/utils/receipt_pdf_helper.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
 import 'package:salonverse/features/salons/services/review_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
 
@@ -34,7 +34,6 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     final bookingProv = context.read<BookingProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Show clean loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -48,7 +47,10 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               const SizedBox(
                 width: 24,
                 height: 24,
-                child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2.5),
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                  strokeWidth: 2.5,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -57,7 +59,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
               ),
@@ -79,8 +83,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     }
 
     final isEligible = quote?['isEligibleForFullRefund'] as bool? ?? true;
-    final amountPaid = (quote?['amountPaid'] as num?)?.toDouble() ?? booking.amountPaid;
-    final refundAmount = (quote?['refundAmount'] as num?)?.toDouble() ?? (isEligible ? amountPaid : 0.0);
+    final amountPaid =
+        (quote?['amountPaid'] as num?)?.toDouble() ?? booking.amountPaid;
+    final refundAmount =
+        (quote?['refundAmount'] as num?)?.toDouble() ??
+        (isEligible ? amountPaid : 0.0);
 
     if (!context.mounted) return;
 
@@ -94,7 +101,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           style: GoogleFonts.outfit(
             fontWeight: FontWeight.w800,
             fontSize: 18,
-            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
           ),
         ),
         content: Column(
@@ -112,7 +121,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 20),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AppColors.error,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -132,14 +145,18 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
               ),
             ),
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.lightSurfaceSecondary,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -151,7 +168,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         'Amount Paid',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12.5,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       Text(
@@ -159,7 +178,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                     ],
@@ -173,7 +194,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12.5,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       Text(
@@ -181,7 +204,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         style: GoogleFonts.outfit(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: refundAmount > 0 ? AppColors.success : AppColors.error,
+                          color: refundAmount > 0
+                              ? AppColors.success
+                              : AppColors.error,
                         ),
                       ),
                     ],
@@ -196,7 +221,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   : 'According to policy, late cancellations after the 24-hour cutoff are non-refundable.',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11.5,
-                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                color: isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.lightTextTertiary,
               ),
             ),
           ],
@@ -211,7 +238,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isEligible ? AppColors.error : Colors.grey.shade700,
+              backgroundColor: isEligible
+                  ? AppColors.error
+                  : Colors.grey.shade700,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -221,16 +250,22 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(isEligible
-                          ? 'Booking cancelled. Refund of ${CurrencyFormatter.formatNPR(refundAmount)} initiated.'
-                          : 'Booking cancelled. No refund available for late cancellation.'),
-                      backgroundColor: isEligible ? AppColors.success : AppColors.error,
+                      content: Text(
+                        isEligible
+                            ? 'Booking cancelled. Refund of ${CurrencyFormatter.formatNPR(refundAmount)} initiated.'
+                            : 'Booking cancelled. No refund available for late cancellation.',
+                      ),
+                      backgroundColor: isEligible
+                          ? AppColors.success
+                          : AppColors.error,
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(bookingProv.error ?? 'Failed to cancel appointment.'),
+                      content: Text(
+                        bookingProv.error ?? 'Failed to cancel appointment.',
+                      ),
                       backgroundColor: AppColors.error,
                     ),
                   );
@@ -268,7 +303,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -278,11 +315,15 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      booking.status.toLowerCase().contains('cancel') ? 'Cancelled Invoice' : 'Official Invoice',
+                      booking.status.toLowerCase().contains('cancel')
+                          ? 'Cancelled Invoice'
+                          : 'Official Invoice',
                       style: GoogleFonts.outfit(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     SVStatusBadge(status: booking.status, isCompact: true),
@@ -290,14 +331,17 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Receipt Breakdown Container
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
                     ),
                   ),
                   child: Column(
@@ -306,19 +350,31 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                       const SizedBox(height: 10),
                       _buildReceiptRow('Salon', booking.salonName, isDark),
                       const SizedBox(height: 10),
-                      _buildReceiptRow('Treatment', booking.serviceName, isDark),
-                      const SizedBox(height: 10),
                       _buildReceiptRow(
-                        'Specialist',
-                        booking.stylistName.isNotEmpty ? booking.stylistName : 'Any Specialist',
+                        'Treatment',
+                        booking.serviceName,
                         isDark,
                       ),
                       const SizedBox(height: 10),
-                      _buildReceiptRow('Date & Time', '${booking.date} at ${booking.timeSlot}', isDark),
+                      _buildReceiptRow(
+                        'Specialist',
+                        booking.stylistName.isNotEmpty
+                            ? booking.stylistName
+                            : 'Any Specialist',
+                        isDark,
+                      ),
+                      const SizedBox(height: 10),
+                      _buildReceiptRow(
+                        'Date & Time',
+                        '${booking.date} at ${booking.timeSlot}',
+                        isDark,
+                      ),
                       const SizedBox(height: 10),
                       _buildReceiptRow(
                         'Payment Method',
-                        booking.paymentMethod.isNotEmpty ? booking.paymentMethod : 'Pay at Salon',
+                        booking.paymentMethod.isNotEmpty
+                            ? booking.paymentMethod
+                            : 'Pay at Salon',
                         isDark,
                       ),
                       const SizedBox(height: 12),
@@ -332,7 +388,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           Text(
@@ -378,7 +436,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           label,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12.5,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
           ),
         ),
         Flexible(
@@ -390,7 +450,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
         ),
@@ -421,7 +483,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               ),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurface : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -432,7 +496,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -450,7 +516,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                     '${booking.serviceName} at ${booking.salonName}',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -483,42 +551,57 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: [
-                      '10:00 AM',
-                      '11:00 AM',
-                      '01:00 PM',
-                      '02:30 PM',
-                      '04:00 PM',
-                      '05:30 PM',
-                    ].map((slot) {
-                      final isSel = selectedSlot == slot;
-                      return GestureDetector(
-                        onTap: () => setModalState(() => selectedSlot = slot),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSel
-                                ? AppColors.primary
-                                : (isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSel
-                                  ? AppColors.primary
-                                  : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    children:
+                        [
+                          '10:00 AM',
+                          '11:00 AM',
+                          '01:00 PM',
+                          '02:30 PM',
+                          '04:00 PM',
+                          '05:30 PM',
+                        ].map((slot) {
+                          final isSel = selectedSlot == slot;
+                          return GestureDetector(
+                            onTap: () =>
+                                setModalState(() => selectedSlot = slot),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSel
+                                    ? AppColors.primary
+                                    : (isDark
+                                          ? AppColors.darkSurfaceElevated
+                                          : AppColors.lightSurfaceSecondary),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSel
+                                      ? AppColors.primary
+                                      : (isDark
+                                            ? AppColors.darkBorder
+                                            : AppColors.lightBorder),
+                                ),
+                              ),
+                              child: Text(
+                                slot,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: isSel
+                                      ? Colors.white
+                                      : (isDark
+                                            ? AppColors.darkTextPrimary
+                                            : AppColors.lightTextPrimary),
+                                  fontWeight: isSel
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  fontSize: 12.5,
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            slot,
-                            style: GoogleFonts.plusJakartaSans(
-                              color: isSel ? Colors.white : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
-                              fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                              fontSize: 12.5,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   ),
                   const SizedBox(height: 22),
                   SVButton(
@@ -540,7 +623,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                               if (ok) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Appointment rescheduled successfully!'),
+                                    content: Text(
+                                      'Appointment rescheduled successfully!',
+                                    ),
                                     backgroundColor: AppColors.primary,
                                   ),
                                 );
@@ -580,7 +665,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               ),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurface : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -591,7 +678,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -602,7 +691,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -610,12 +701,13 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                     '${booking.serviceName} at ${booking.salonName}',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // 1-5 Star Rating Selector
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (index) {
@@ -624,8 +716,14 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                       return IconButton(
                         iconSize: 36,
                         icon: Icon(
-                          isFilled ? Icons.star_rounded : Icons.star_border_rounded,
-                          color: isFilled ? const Color(0xFFF59E0B) : (isDark ? AppColors.darkTextTertiary : Colors.grey.shade400),
+                          isFilled
+                              ? Icons.star_rounded
+                              : Icons.star_border_rounded,
+                          color: isFilled
+                              ? const Color(0xFFF59E0B)
+                              : (isDark
+                                    ? AppColors.darkTextTertiary
+                                    : Colors.grey.shade400),
                         ),
                         onPressed: () {
                           setModalState(() => selectedRating = starVal);
@@ -635,18 +733,17 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Comment Input
                   TextField(
                     controller: commentController,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Share your feedback about the salon & specialist (optional)...',
+                      hintText:
+                          'Share your feedback about the salon & specialist (optional)...',
                       hintStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // Submit Button
                   SVButton(
                     text: 'Submit Review',
                     icon: Icons.check_circle_rounded,
@@ -668,7 +765,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         if (result is Success) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Thank you! Your review has been submitted.'),
+                              content: Text(
+                                'Thank you! Your review has been submitted.',
+                              ),
                               backgroundColor: AppColors.success,
                             ),
                           );
@@ -702,11 +801,18 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
 
     final upcoming = bookings.where((b) {
       final st = b.status.toLowerCase();
-      return st == 'confirmed' || st == 'pending' || st == 'in_queue' || st == 'serving';
+      return st == 'confirmed' ||
+          st == 'pending' ||
+          st == 'in_queue' ||
+          st == 'serving';
     }).toList();
 
-    final completed = bookings.where((b) => b.status.toLowerCase() == 'completed').toList();
-    final cancelled = bookings.where((b) => b.status.toLowerCase() == 'cancelled').toList();
+    final completed = bookings
+        .where((b) => b.status.toLowerCase() == 'completed')
+        .toList();
+    final cancelled = bookings
+        .where((b) => b.status.toLowerCase() == 'cancelled')
+        .toList();
 
     return DefaultTabController(
       length: 3,
@@ -722,12 +828,20 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           ),
           bottom: TabBar(
             labelColor: AppColors.primary,
-            unselectedLabelColor: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+            unselectedLabelColor: isDark
+                ? AppColors.darkTextTertiary
+                : AppColors.lightTextTertiary,
             indicatorColor: AppColors.primary,
             indicatorWeight: 2.5,
             indicatorSize: TabBarIndicatorSize.tab,
-            labelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
-            unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500),
+            labelStyle: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
             tabs: [
               Tab(text: 'Upcoming (${upcoming.length})'),
               Tab(text: 'History (${completed.length})'),
@@ -741,9 +855,24 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
             color: AppColors.primary,
             child: TabBarView(
               children: [
-                _buildBookingList(upcoming, 'No Upcoming Appointments', 'Schedule your next beauty treatment today.', isDark),
-                _buildBookingList(completed, 'No Completed Bookings', 'Past completed appointments will appear here.', isDark),
-                _buildBookingList(cancelled, 'No Cancelled Bookings', 'Cancelled appointments will appear here.', isDark),
+                _buildBookingList(
+                  upcoming,
+                  'No Upcoming Appointments',
+                  'Schedule your next beauty treatment today.',
+                  isDark,
+                ),
+                _buildBookingList(
+                  completed,
+                  'No Completed Bookings',
+                  'Past completed appointments will appear here.',
+                  isDark,
+                ),
+                _buildBookingList(
+                  cancelled,
+                  'No Cancelled Bookings',
+                  'Cancelled appointments will appear here.',
+                  isDark,
+                ),
               ],
             ),
           ),
@@ -771,15 +900,19 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
       itemCount: list.length,
       itemBuilder: (context, index) {
         final booking = list[index];
-        final isActive = booking.status.toLowerCase() != 'completed' &&
+        final isActive =
+            booking.status.toLowerCase() != 'completed' &&
             booking.status.toLowerCase() != 'cancelled';
 
         return SVBookingCard(
           booking: booking,
           onTap: () => _showReceiptModal(context, booking),
           onCancel: isActive ? () => _showCancelDialog(context, booking) : null,
-          onReschedule: isActive ? () => _showRescheduleModal(context, booking) : null,
-          onLeaveReview: booking.status.toLowerCase() == 'completed' && !booking.reviewed
+          onReschedule: isActive
+              ? () => _showRescheduleModal(context, booking)
+              : null,
+          onLeaveReview:
+              booking.status.toLowerCase() == 'completed' && !booking.reviewed
               ? () => _showReviewModal(context, booking)
               : null,
           onDownloadPdf: () async {

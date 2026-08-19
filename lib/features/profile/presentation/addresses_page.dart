@@ -6,9 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/features/auth/services/auth_provider.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
 
 class SavedAddress {
   final String id;
@@ -89,8 +89,12 @@ class _AddressesPageState extends State<AddressesPage> {
         SavedAddress(
           id: 'addr_home',
           label: 'Home',
-          address: (homeAddr != null && homeAddr.isNotEmpty) ? homeAddr : 'Thamel, Kathmandu',
-          city: (homeCity != null && homeCity.isNotEmpty) ? homeCity : 'Kathmandu',
+          address: (homeAddr != null && homeAddr.isNotEmpty)
+              ? homeAddr
+              : 'Thamel, Kathmandu',
+          city: (homeCity != null && homeCity.isNotEmpty)
+              ? homeCity
+              : 'Kathmandu',
           latitude: user?.homeLocationLat ?? 27.7172,
           longitude: user?.homeLocationLng ?? 85.3240,
           isDefault: true,
@@ -150,8 +154,12 @@ class _AddressesPageState extends State<AddressesPage> {
     final isDark = theme.brightness == Brightness.dark;
 
     String selectedLabel = editAddress?.label ?? 'Home';
-    final addressController = TextEditingController(text: editAddress?.address ?? '');
-    final cityController = TextEditingController(text: editAddress?.city ?? 'Kathmandu');
+    final addressController = TextEditingController(
+      text: editAddress?.address ?? '',
+    );
+    final cityController = TextEditingController(
+      text: editAddress?.city ?? 'Kathmandu',
+    );
     double lat = editAddress?.latitude ?? 27.7172;
     double lng = editAddress?.longitude ?? 85.3240;
 
@@ -169,7 +177,9 @@ class _AddressesPageState extends State<AddressesPage> {
           ),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkSurface : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.sheetRadius)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppSpacing.sheetRadius),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -191,7 +201,9 @@ class _AddressesPageState extends State<AddressesPage> {
                 style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -204,7 +216,8 @@ class _AddressesPageState extends State<AddressesPage> {
                     child: SVCFilterChip(
                       label: label,
                       isSelected: isSel,
-                      onSelected: () => setModalState(() => selectedLabel = label),
+                      onSelected: () =>
+                          setModalState(() => selectedLabel = label),
                     ),
                   );
                 }).toList(),
@@ -235,10 +248,14 @@ class _AddressesPageState extends State<AddressesPage> {
                 onPressed: () {
                   if (addressController.text.trim().isEmpty) return;
                   final newAddr = SavedAddress(
-                    id: editAddress?.id ?? 'addr_${DateTime.now().millisecondsSinceEpoch}',
+                    id:
+                        editAddress?.id ??
+                        'addr_${DateTime.now().millisecondsSinceEpoch}',
                     label: selectedLabel,
                     address: addressController.text.trim(),
-                    city: cityController.text.trim().isNotEmpty ? cityController.text.trim() : 'Kathmandu',
+                    city: cityController.text.trim().isNotEmpty
+                        ? cityController.text.trim()
+                        : 'Kathmandu',
                     latitude: lat,
                     longitude: lng,
                     isDefault: editAddress?.isDefault ?? (_addresses.isEmpty),
@@ -246,7 +263,9 @@ class _AddressesPageState extends State<AddressesPage> {
 
                   setState(() {
                     if (editAddress != null) {
-                      final idx = _addresses.indexWhere((a) => a.id == editAddress.id);
+                      final idx = _addresses.indexWhere(
+                        (a) => a.id == editAddress.id,
+                      );
                       if (idx != -1) _addresses[idx] = newAddr;
                     } else {
                       _addresses.add(newAddr);
@@ -283,116 +302,140 @@ class _AddressesPageState extends State<AddressesPage> {
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
             : _addresses.isEmpty
-                ? SVEmptyState(
-                    icon: Icons.location_off_rounded,
-                    title: 'No Saved Addresses',
-                    description: 'Add your home or office address for seamless doorstep delivery.',
-                    actionLabel: 'Add Address',
-                    onAction: () => _showAddAddressDialog(),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
-                    itemCount: _addresses.length,
-                    itemBuilder: (context, index) {
-                      final addr = _addresses[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurface : Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: addr.isDefault
-                                ? AppColors.primary
-                                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
-                            width: addr.isDefault ? 1.5 : 1,
+            ? SVEmptyState(
+                icon: Icons.location_off_rounded,
+                title: 'No Saved Addresses',
+                description:
+                    'Add your home or office address for seamless doorstep delivery.',
+                actionLabel: 'Add Address',
+                onAction: () => _showAddAddressDialog(),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
+                itemCount: _addresses.length,
+                itemBuilder: (context, index) {
+                  final addr = _addresses[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkSurface : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: addr.isDefault
+                            ? AppColors.primary
+                            : (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.lightBorder),
+                        width: addr.isDefault ? 1.5 : 1,
+                      ),
+                      boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryTint,
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                          child: Icon(
+                            addr.label.toLowerCase() == 'home'
+                                ? Icons.home_rounded
+                                : (addr.label.toLowerCase() == 'work'
+                                      ? Icons.work_rounded
+                                      : Icons.location_on_rounded),
+                            color: AppColors.primary,
+                            size: 22,
+                          ),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryTint,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                addr.label.toLowerCase() == 'home'
-                                    ? Icons.home_rounded
-                                    : (addr.label.toLowerCase() == 'work'
-                                        ? Icons.work_rounded
-                                        : Icons.location_on_rounded),
-                                color: AppColors.primary,
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        addr.label,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                                        ),
-                                      ),
-                                      if (addr.isDefault) ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary.withAlpha(20),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: const Text(
-                                            'DEFAULT',
-                                            style: TextStyle(
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.w900,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
                                   Text(
-                                    '${addr.address}, ${addr.city}',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12.5,
-                                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                    addr.label,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark
+                                          ? AppColors.darkTextPrimary
+                                          : AppColors.lightTextPrimary,
                                     ),
                                   ),
+                                  if (addr.isDefault) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withAlpha(20),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Text(
+                                        'DEFAULT',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${addr.address}, ${addr.city}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12.5,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuButton<String>(
+                          onSelected: (val) {
+                            if (val == 'default') _setDefaultAddress(addr.id);
+                            if (val == 'edit') _showAddAddressDialog(addr);
+                            if (val == 'delete') _deleteAddress(addr.id);
+                          },
+                          itemBuilder: (ctx) => [
+                            if (!addr.isDefault)
+                              const PopupMenuItem(
+                                value: 'default',
+                                child: Text('Set Default'),
+                              ),
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Edit'),
                             ),
-                            PopupMenuButton<String>(
-                              onSelected: (val) {
-                                if (val == 'default') _setDefaultAddress(addr.id);
-                                if (val == 'edit') _showAddAddressDialog(addr);
-                                if (val == 'delete') _deleteAddress(addr.id);
-                              },
-                              itemBuilder: (ctx) => [
-                                if (!addr.isDefault)
-                                  const PopupMenuItem(value: 'default', child: Text('Set Default')),
-                                const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: AppColors.error))),
-                              ],
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: AppColors.error),
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
+                      ],
+                    ),
+                  );
+                },
+              ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(

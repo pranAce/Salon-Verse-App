@@ -33,7 +33,7 @@ class _OfflineBannerState extends State<OfflineBanner>
   }
 
   void _startMonitoring() {
-    _subscription = AppServices.connectionChecker.onStatusChange.listen((
+    _subscription = AppStorage.connectionChecker.onStatusChange.listen((
       status,
     ) {
       final isOffline = status.toString().contains('disconnected');

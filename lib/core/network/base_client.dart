@@ -39,9 +39,10 @@ class BaseClient {
     required T Function(dynamic data) onSuccess,
     int maxAttempts = 2,
   }) async {
-    // Strict Read-Only Guard
     if (readOnlyMode && method != "GET") {
-      return const Failure("Read-only mode active: Data mutations are disabled on mobile client.");
+      return const Failure(
+        "Read-only mode active: Data mutations are disabled on mobile client.",
+      );
     }
 
     final headers = <String, String>{
@@ -111,7 +112,9 @@ class BaseClient {
             errText.contains('Connection closed') ||
             errText.contains('ClientException') ||
             errText.contains('SocketException')) {
-          return const Failure("Request timed out or network connection unavailable. Please check backend connection.");
+          return const Failure(
+            "Request timed out or network connection unavailable. Please check backend connection.",
+          );
         }
         return Failure(errText);
       }

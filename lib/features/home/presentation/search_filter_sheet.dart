@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/salons/services/salon_provider.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class SearchFilterSheet extends StatefulWidget {
   const SearchFilterSheet({super.key});
@@ -30,7 +30,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   ];
 
   final List<Map<String, dynamic>> _sortOptions = const [
-    {'id': 'recommended', 'label': 'Recommended', 'icon': Icons.auto_awesome_rounded},
+    {
+      'id': 'recommended',
+      'label': 'Recommended',
+      'icon': Icons.auto_awesome_rounded,
+    },
     {'id': 'rating', 'label': 'Top Rated', 'icon': Icons.star_rounded},
     {'id': 'nearest', 'label': 'Nearest', 'icon': Icons.near_me_rounded},
     {'id': 'price_asc', 'label': 'Best Price', 'icon': Icons.sell_rounded},
@@ -47,8 +51,12 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
   void initState() {
     super.initState();
     final prov = context.read<SalonProvider>();
-    _selectedCategory = prov.selectedCategory.isEmpty ? 'All' : prov.selectedCategory;
-    _selectedSort = prov.selectedSort.isEmpty ? 'recommended' : prov.selectedSort;
+    _selectedCategory = prov.selectedCategory.isEmpty
+        ? 'All'
+        : prov.selectedCategory;
+    _selectedSort = prov.selectedSort.isEmpty
+        ? 'recommended'
+        : prov.selectedSort;
     _minRating = prov.minRating;
     _priceRange = RangeValues(
       prov.minPrice > 0 ? prov.minPrice : 200,
@@ -103,7 +111,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle Bar
             Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 4),
               child: Center(
@@ -111,14 +118,15 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF383535) : Colors.grey.shade300,
+                    color: isDark
+                        ? const Color(0xFF383535)
+                        : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
             ),
 
-            // Header Section
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 10, 22, 14),
               child: Row(
@@ -131,13 +139,18 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                         style: GoogleFonts.outfit(
                           fontSize: 21,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       if (activeCount > 0) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             borderRadius: BorderRadius.circular(12),
@@ -158,9 +171,14 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                     GestureDetector(
                       onTap: _resetFilters,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF361421) : AppColors.primaryTint,
+                          color: isDark
+                              ? const Color(0xFF361421)
+                              : AppColors.primaryTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -179,13 +197,17 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : Colors.grey.shade100,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.close_rounded,
                           size: 18,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                     ),
@@ -195,13 +217,14 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
             const Divider(height: 1),
 
-            // Scrollable Filter Content
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 16,
+                ),
                 children: [
-                  // 1. Service Category Section
                   _buildSectionHeader('Specialty Category', isDark),
                   const SizedBox(height: 10),
                   SizedBox(
@@ -224,16 +247,23 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: isSel
                                     ? AppColors.primary
-                                    : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade100),
+                                    : (isDark
+                                          ? AppColors.darkSurfaceElevated
+                                          : Colors.grey.shade100),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: isSel
                                       ? AppColors.primary
-                                      : (isDark ? AppColors.darkBorder : Colors.transparent),
+                                      : (isDark
+                                            ? AppColors.darkBorder
+                                            : Colors.transparent),
                                 ),
                               ),
                               child: Row(
@@ -242,7 +272,11 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                                   Icon(
                                     icon,
                                     size: 14,
-                                    color: isSel ? Colors.white : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                                    color: isSel
+                                        ? Colors.white
+                                        : (isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.lightTextSecondary),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
@@ -252,7 +286,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                                       fontWeight: FontWeight.w700,
                                       color: isSel
                                           ? Colors.white
-                                          : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                                          : (isDark
+                                                ? AppColors.darkTextPrimary
+                                                : AppColors.lightTextPrimary),
                                     ),
                                   ),
                                 ],
@@ -266,7 +302,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
                   const SizedBox(height: 20),
 
-                  // 2. Sort Order Section
                   _buildSectionHeader('Sort By', isDark),
                   const SizedBox(height: 10),
                   GridView.count(
@@ -288,16 +323,25 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: isSel
-                                ? (isDark ? const Color(0xFF361421) : AppColors.primaryTint)
-                                : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade50),
+                                ? (isDark
+                                      ? const Color(0xFF361421)
+                                      : AppColors.primaryTint)
+                                : (isDark
+                                      ? AppColors.darkSurfaceElevated
+                                      : Colors.grey.shade50),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: isSel
                                   ? AppColors.primary
-                                  : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                  : (isDark
+                                        ? AppColors.darkBorder
+                                        : AppColors.lightBorder),
                               width: isSel ? 1.5 : 1,
                             ),
                           ),
@@ -308,13 +352,17 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                                 decoration: BoxDecoration(
                                   color: isSel
                                       ? AppColors.primary
-                                      : (isDark ? AppColors.darkSurface : Colors.white),
+                                      : (isDark
+                                            ? AppColors.darkSurface
+                                            : Colors.white),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   icon,
                                   size: 13,
-                                  color: isSel ? Colors.white : AppColors.primary,
+                                  color: isSel
+                                      ? Colors.white
+                                      : AppColors.primary,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -325,10 +373,14 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
-                                    fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                                    fontWeight: isSel
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
                                     color: isSel
                                         ? AppColors.primary
-                                        : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                                        : (isDark
+                                              ? AppColors.darkTextPrimary
+                                              : AppColors.lightTextPrimary),
                                   ),
                                 ),
                               ),
@@ -341,15 +393,19 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
                   const SizedBox(height: 20),
 
-                  // 3. Budget Range Slider Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildSectionHeader('Price Budget', isDark),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF361421) : AppColors.primaryTint,
+                          color: isDark
+                              ? const Color(0xFF361421)
+                              : AppColors.primaryTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -367,7 +423,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       activeTrackColor: AppColors.primary,
-                      inactiveTrackColor: isDark ? AppColors.darkBorder : Colors.grey.shade200,
+                      inactiveTrackColor: isDark
+                          ? AppColors.darkBorder
+                          : Colors.grey.shade200,
                       thumbColor: AppColors.primary,
                       overlayColor: AppColors.primary.withAlpha(40),
                       trackHeight: 4,
@@ -387,7 +445,6 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
 
                   const SizedBox(height: 16),
 
-                  // 5. Minimum Rating Section
                   _buildSectionHeader('Rating Score', isDark),
                   const SizedBox(height: 10),
                   Row(
@@ -410,12 +467,16 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                               decoration: BoxDecoration(
                                 color: isSel
                                     ? AppColors.primary
-                                    : (isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade50),
+                                    : (isDark
+                                          ? AppColors.darkSurfaceElevated
+                                          : Colors.grey.shade50),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: isSel
                                       ? AppColors.primary
-                                      : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                      : (isDark
+                                            ? AppColors.darkBorder
+                                            : AppColors.lightBorder),
                                   width: isSel ? 1.5 : 1,
                                 ),
                               ),
@@ -426,7 +487,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                                     Icon(
                                       Icons.star_rounded,
                                       size: 14,
-                                      color: isSel ? Colors.white : const Color(0xFFF59E0B),
+                                      color: isSel
+                                          ? Colors.white
+                                          : const Color(0xFFF59E0B),
                                     ),
                                     const SizedBox(width: 3),
                                   ],
@@ -437,7 +500,9 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
                                       fontWeight: FontWeight.w700,
                                       color: isSel
                                           ? Colors.white
-                                          : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                                          : (isDark
+                                                ? AppColors.darkTextPrimary
+                                                : AppColors.lightTextPrimary),
                                     ),
                                   ),
                                 ],
@@ -453,14 +518,15 @@ class _SearchFilterSheetState extends State<SearchFilterSheet> {
               ),
             ),
 
-            // Bottom Sticky Apply Button
             Container(
               padding: const EdgeInsets.fromLTRB(22, 12, 22, 16),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurface : Colors.white,
                 border: Border(
                   top: BorderSide(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                 ),
               ),

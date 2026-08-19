@@ -23,5 +23,3 @@ class AppStorage {
     }
   }
 }
-
-typedef AppServices = AppStorage;

@@ -6,8 +6,6 @@ import 'package:salonverse/features/auth/models/user_model.dart';
 class SupportService {
   final BaseClient _client = BaseClient.instance;
 
-  bool get isMockMode => false;
-
   Future<ApiResult<SupportTicketModel>> createSupportTicket(
     UserModel? currentUser,
     String subject,

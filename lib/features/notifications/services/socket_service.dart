@@ -22,18 +22,26 @@ class SocketService {
       StreamController<Map<String, dynamic>>.broadcast();
   final StreamController<Map<String, dynamic>> _loyaltyTierUpdatedController =
       StreamController<Map<String, dynamic>>.broadcast();
-  final StreamController<Map<String, dynamic>> _loyaltyBalanceUpdatedController =
+  final StreamController<Map<String, dynamic>>
+  _loyaltyBalanceUpdatedController =
       StreamController<Map<String, dynamic>>.broadcast();
   final StreamController<Map<String, dynamic>> _settlementUpdatedController =
       StreamController<Map<String, dynamic>>.broadcast();
 
-  Stream<Map<String, dynamic>> get onSubscriptionUpdated => _subscriptionUpdateController.stream;
-  Stream<Map<String, dynamic>> get onBookingCreated => _bookingCreatedController.stream;
-  Stream<Map<String, dynamic>> get onBookingUpdated => _bookingUpdatedController.stream;
-  Stream<Map<String, dynamic>> get onAvailabilityUpdated => _availabilityUpdatedController.stream;
-  Stream<Map<String, dynamic>> get onLoyaltyTierUpdated => _loyaltyTierUpdatedController.stream;
-  Stream<Map<String, dynamic>> get onLoyaltyBalanceUpdated => _loyaltyBalanceUpdatedController.stream;
-  Stream<Map<String, dynamic>> get onSettlementUpdated => _settlementUpdatedController.stream;
+  Stream<Map<String, dynamic>> get onSubscriptionUpdated =>
+      _subscriptionUpdateController.stream;
+  Stream<Map<String, dynamic>> get onBookingCreated =>
+      _bookingCreatedController.stream;
+  Stream<Map<String, dynamic>> get onBookingUpdated =>
+      _bookingUpdatedController.stream;
+  Stream<Map<String, dynamic>> get onAvailabilityUpdated =>
+      _availabilityUpdatedController.stream;
+  Stream<Map<String, dynamic>> get onLoyaltyTierUpdated =>
+      _loyaltyTierUpdatedController.stream;
+  Stream<Map<String, dynamic>> get onLoyaltyBalanceUpdated =>
+      _loyaltyBalanceUpdatedController.stream;
+  Stream<Map<String, dynamic>> get onSettlementUpdated =>
+      _settlementUpdatedController.stream;
 
   Future<void> connect([String? explicitToken]) async {
     String? token = explicitToken;
@@ -84,7 +92,6 @@ class SocketService {
         _isConnected = false;
       });
 
-      // Server event listeners
       _socket!.on('subscription:updated', (data) {
         if (data is Map) {
           _subscriptionUpdateController.add(Map<String, dynamic>.from(data));
@@ -126,7 +133,6 @@ class SocketService {
           _settlementUpdatedController.add(Map<String, dynamic>.from(data));
         }
       });
-
     } catch (_) {}
   }
 

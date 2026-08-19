@@ -6,9 +6,9 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
 import 'package:salonverse/core/utils/receipt_pdf_helper.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class PaymentsPage extends StatefulWidget {
   const PaymentsPage({super.key});
@@ -40,7 +40,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.sheetRadius)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.sheetRadius),
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -62,7 +64,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
               style: GoogleFonts.outfit(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 4),
@@ -70,7 +74,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
               'Booking Ref: #${booking.id.substring(0, booking.id.length > 8 ? 8 : booking.id.length).toUpperCase()}',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
-                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                color: isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.lightTextTertiary,
               ),
             ),
             const SizedBox(height: 16),
@@ -78,7 +84,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.lightSurfaceSecondary,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -87,7 +95,11 @@ class _PaymentsPageState extends State<PaymentsPage> {
                   const SizedBox(height: 8),
                   _buildReceiptRow('Treatment', booking.serviceName, isDark),
                   const SizedBox(height: 8),
-                  _buildReceiptRow('Date & Time', '${booking.date} at ${booking.timeSlot}', isDark),
+                  _buildReceiptRow(
+                    'Date & Time',
+                    '${booking.date} at ${booking.timeSlot}',
+                    isDark,
+                  ),
                   const SizedBox(height: 8),
                   _buildReceiptRow('Mode', booking.paymentMethod, isDark),
                   const Divider(height: 20),
@@ -117,7 +129,12 @@ class _PaymentsPageState extends State<PaymentsPage> {
     );
   }
 
-  Widget _buildReceiptRow(String label, String value, bool isDark, {bool isBold = false}) {
+  Widget _buildReceiptRow(
+    String label,
+    String value,
+    bool isDark, {
+    bool isBold = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -125,14 +142,23 @@ class _PaymentsPageState extends State<PaymentsPage> {
           label,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
           ),
         ),
         Text(
           value,
           style: isBold
-              ? GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)
-              : GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700),
+              ? GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                )
+              : GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
         ),
       ],
     );
@@ -172,7 +198,6 @@ class _PaymentsPageState extends State<PaymentsPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Total Spent Hero Card
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: Container(
@@ -181,7 +206,10 @@ class _PaymentsPageState extends State<PaymentsPage> {
                 decoration: BoxDecoration(
                   gradient: AppGradients.primary,
                   borderRadius: BorderRadius.circular(22),
-                  boxShadow: AppSpacing.glowShadow(AppColors.primary, opacity: 0.3),
+                  boxShadow: AppSpacing.glowShadow(
+                    AppColors.primary,
+                    opacity: 0.3,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +237,6 @@ class _PaymentsPageState extends State<PaymentsPage> {
               ),
             ),
 
-            // Filter Chips
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -233,25 +260,33 @@ class _PaymentsPageState extends State<PaymentsPage> {
                   ? const SVEmptyState(
                       icon: Icons.receipt_long_rounded,
                       title: 'No Payment Records',
-                      description: 'Your payment history and invoices will be listed here.',
+                      description:
+                          'Your payment history and invoices will be listed here.',
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final b = filtered[index];
-                        final isPaid = b.paymentStatus.toLowerCase() == 'completed';
+                        final isPaid =
+                            b.paymentStatus.toLowerCase() == 'completed';
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.darkSurface : Colors.white,
+                            color: isDark
+                                ? AppColors.darkSurface
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.lightBorder,
                             ),
-                            boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                            boxShadow: isDark
+                                ? null
+                                : AppSpacing.softShadow(context),
                           ),
                           child: Row(
                             children: [
@@ -262,7 +297,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
                                     : const Color(0xFFF59E0B).withAlpha(20),
                                 child: Icon(
                                   Icons.receipt_rounded,
-                                  color: isPaid ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                                  color: isPaid
+                                      ? const Color(0xFF10B981)
+                                      : const Color(0xFFF59E0B),
                                   size: 20,
                                 ),
                               ),
@@ -276,7 +313,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
                                       style: GoogleFonts.outfit(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w700,
-                                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                        color: isDark
+                                            ? AppColors.darkTextPrimary
+                                            : AppColors.lightTextPrimary,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -284,7 +323,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
                                       '${b.salonName} • ${b.paymentMethod}',
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 12,
-                                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                        color: isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.lightTextSecondary,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -292,7 +333,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
                                       '${b.date} • ${b.timeSlot}',
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
-                                        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                        color: isDark
+                                            ? AppColors.darkTextTertiary
+                                            : AppColors.lightTextTertiary,
                                       ),
                                     ),
                                   ],
@@ -312,7 +355,10 @@ class _PaymentsPageState extends State<PaymentsPage> {
                                   const SizedBox(height: 4),
                                   GestureDetector(
                                     onTap: () => _showReceiptModal(b),
-                                    child: SVStatusBadge(status: b.paymentStatus, isCompact: true),
+                                    child: SVStatusBadge(
+                                      status: b.paymentStatus,
+                                      isCompact: true,
+                                    ),
                                   ),
                                 ],
                               ),

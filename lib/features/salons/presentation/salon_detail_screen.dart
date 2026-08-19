@@ -15,10 +15,10 @@ import 'package:salonverse/features/salons/models/review_model.dart';
 import 'package:salonverse/features/salons/services/review_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class SalonDetailScreen extends StatefulWidget {
   final String salonId;
@@ -58,7 +58,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     if (_salon == null || _salon!.services.isEmpty) {
       setState(() => _isLoadingSalon = true);
     }
-    final fullSalon = await context.read<SalonProvider>().fetchSalonDetails(widget.salonId);
+    final fullSalon = await context.read<SalonProvider>().fetchSalonDetails(
+      widget.salonId,
+    );
     if (mounted) {
       setState(() {
         _isLoadingSalon = false;
@@ -108,7 +110,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
   }
 
   Future<void> _openMapDirections(double lat, double lng, String name) async {
-    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+    );
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -124,7 +128,10 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     if (_isLoadingSalon && _salon == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Salon Details', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+          title: Text(
+            'Salon Details',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+          ),
         ),
         body: const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
@@ -135,7 +142,10 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     if (_salon == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Salon Details', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+          title: Text(
+            'Salon Details',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+          ),
         ),
         body: SVEmptyState(
           icon: Icons.storefront_outlined,
@@ -150,17 +160,21 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     final isFav = user?.favoriteSalons.contains(_salon!.id) ?? false;
     final resolvedImageUrl = ApiConfig.resolveImageUrl(_salon!.imageUrl);
 
-    final categories = ['All', ..._salon!.services.map((s) => s.category).toSet()];
+    final categories = [
+      'All',
+      ..._salon!.services.map((s) => s.category).toSet(),
+    ];
 
     final filteredServices = _selectedCategory == 'All'
         ? _salon!.services
-        : _salon!.services.where((s) => s.category == _selectedCategory).toList();
+        : _salon!.services
+              .where((s) => s.category == _selectedCategory)
+              .toList();
 
     return Scaffold(
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // 1. Hero Image Header
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
@@ -176,7 +190,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SVIconButton(
-                  icon: isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  icon: isFav
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   color: isFav ? AppColors.primary : null,
                   size: 38,
                   onPressed: () {
@@ -184,7 +200,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          isFav ? 'Removed from favorites' : 'Added to favorites!',
+                          isFav
+                              ? 'Removed from favorites'
+                              : 'Added to favorites!',
                         ),
                         duration: const Duration(seconds: 2),
                         backgroundColor: AppColors.primary,
@@ -202,7 +220,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                     imageUrl: resolvedImageUrl,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
-                      color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                      color: isDark
+                          ? AppColors.darkSurfaceElevated
+                          : AppColors.lightSurfaceSecondary,
                     ),
                     errorWidget: (context, url, err) => const SVFallbackLogo(
                       width: double.infinity,
@@ -232,11 +252,18 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       children: [
                         if (_salon!.isPremium)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4.5,
+                            ),
                             margin: const EdgeInsets.only(bottom: 6),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFF59E0B), Color(0xFFD97706), Color(0xFF92400E)],
+                                colors: [
+                                  Color(0xFFF59E0B),
+                                  Color(0xFFD97706),
+                                  Color(0xFF92400E),
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -252,7 +279,10 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text('👑', style: TextStyle(fontSize: 12)),
+                                const Text(
+                                  '👑',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'VERIFIED PRO SALON',
@@ -266,10 +296,12 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                               ],
                             ),
                           )
-
                         else if (_salon!.isFeatured)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             margin: const EdgeInsets.only(bottom: 4),
                             decoration: BoxDecoration(
                               color: AppColors.primary,
@@ -303,7 +335,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ),
 
-          // 2. Salon Metadata & Quick Actions
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -311,7 +342,9 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 color: isDark ? AppColors.darkSurface : Colors.white,
                 border: Border(
                   bottom: BorderSide(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
                   ),
                 ),
               ),
@@ -324,17 +357,26 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF59E0B).withAlpha(25),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF59E0B)),
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 15,
+                                  color: Color(0xFFF59E0B),
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  _salon!.rating > 0 ? _salon!.rating.toStringAsFixed(1) : '4.8',
+                                  _salon!.rating > 0
+                                      ? _salon!.rating.toStringAsFixed(1)
+                                      : '4.8',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w800,
@@ -349,13 +391,17 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             '(${_salon!.reviewsCount > 0 ? _salon!.reviewsCount : 12} reviews)',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                         ],
                       ),
                       Text(
-                        _salon!.priceRange.isNotEmpty ? _salon!.priceRange : 'Moderate',
+                        _salon!.priceRange.isNotEmpty
+                            ? _salon!.priceRange
+                            : 'Moderate',
                         style: GoogleFonts.outfit(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w700,
@@ -367,14 +413,20 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined, size: 15, color: AppColors.primary),
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 15,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           '${_salon!.address}, ${_salon!.city}',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12.5,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.lightTextSecondary,
                           ),
                         ),
                       ),
@@ -382,7 +434,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Quick Action Buttons
                   Row(
                     children: [
                       if (_salon!.phone.isNotEmpty)
@@ -390,24 +441,66 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                           padding: const EdgeInsets.only(right: 8),
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              side: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              side: BorderSide(
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.lightBorder,
+                              ),
                             ),
-                            icon: const Icon(Icons.phone_outlined, size: 15, color: AppColors.primary),
-                            label: Text('Call', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600)),
+                            icon: const Icon(
+                              Icons.phone_outlined,
+                              size: 15,
+                              color: AppColors.primary,
+                            ),
+                            label: Text(
+                              'Call',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             onPressed: () => _makePhoneCall(_salon!.phone),
                           ),
                         ),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          side: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          side: BorderSide(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
+                          ),
                         ),
-                        icon: const Icon(Icons.directions_outlined, size: 15, color: AppColors.primary),
-                        label: Text('Directions', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600)),
-                        onPressed: () => _openMapDirections(_salon!.lat, _salon!.lng, _salon!.name),
+                        icon: const Icon(
+                          Icons.directions_outlined,
+                          size: 15,
+                          color: AppColors.primary,
+                        ),
+                        label: Text(
+                          'Directions',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onPressed: () => _openMapDirections(
+                          _salon!.lat,
+                          _salon!.lng,
+                          _salon!.name,
+                        ),
                       ),
                     ],
                   ),
@@ -416,7 +509,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ),
 
-          // 3. Category Filter Chips
           if (categories.length > 1)
             SliverToBoxAdapter(
               child: Container(
@@ -434,7 +526,8 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       child: SVCFilterChip(
                         label: cat,
                         isSelected: isSel,
-                        onSelected: () => setState(() => _selectedCategory = cat),
+                        onSelected: () =>
+                            setState(() => _selectedCategory = cat),
                       ),
                     );
                   },
@@ -442,7 +535,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
               ),
             ),
 
-          // 4. Services Header
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
@@ -453,7 +545,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ),
 
-          // 5. Services List
           if (filteredServices.isEmpty)
             const SliverToBoxAdapter(
               child: Padding(
@@ -461,7 +552,8 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 child: SVEmptyState(
                   icon: Icons.content_cut_rounded,
                   title: 'No Services Available',
-                  description: 'Services for this category will be updated shortly.',
+                  description:
+                      'Services for this category will be updated shortly.',
                 ),
               ),
             )
@@ -469,114 +561,137 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final service = filteredServices[index];
-                    final isSel = _selectedService?.id == service.id;
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final service = filteredServices[index];
+                  final isSel = _selectedService?.id == service.id;
 
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() => _selectedService = service);
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: isSel
-                              ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
-                              : (isDark ? AppColors.darkSurface : Colors.white),
-                          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                          border: Border.all(
-                            color: isSel
-                                ? AppColors.primary
-                                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
-                            width: isSel ? 1.5 : 1.0,
-                          ),
-                          boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _selectedService = service);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: isSel
+                            ? (isDark
+                                  ? AppColors.primaryTintDark
+                                  : AppColors.primaryTint)
+                            : (isDark ? AppColors.darkSurface : Colors.white),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.cardRadius,
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    service.name,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    '${service.durationMinutes} mins • ${service.category}',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
-                                    ),
-                                  ),
-                                  if (service.description.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      service.description,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 11.5,
-                                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                        border: Border.all(
+                          color: isSel
+                              ? AppColors.primary
+                              : (isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.lightBorder),
+                          width: isSel ? 1.5 : 1.0,
+                        ),
+                        boxShadow: isDark
+                            ? null
+                            : AppSpacing.softShadow(context),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  CurrencyFormatter.formatNPR(service.price),
+                                  service.name,
                                   style: GoogleFonts.outfit(
                                     fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-                                SizedBox(
-                                  height: 32,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isSel ? AppColors.primary : (isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint),
-                                      foregroundColor: isSel ? Colors.white : AppColors.primary,
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
-                                    onPressed: () {
-                                      setState(() => _selectedService = service);
-                                      _startBooking(service);
-                                    },
-                                    child: Text(
-                                      isSel ? 'Selected' : 'Book',
-                                      style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700),
-                                    ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  '${service.durationMinutes} mins • ${service.category}',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? AppColors.darkTextTertiary
+                                        : AppColors.lightTextTertiary,
                                   ),
                                 ),
+                                if (service.description.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    service.description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.lightTextSecondary,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                CurrencyFormatter.formatNPR(service.price),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                height: 32,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isSel
+                                        ? AppColors.primary
+                                        : (isDark
+                                              ? AppColors.darkSurfaceElevated
+                                              : AppColors.primaryTint),
+                                    foregroundColor: isSel
+                                        ? Colors.white
+                                        : AppColors.primary,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    setState(() => _selectedService = service);
+                                    _startBooking(service);
+                                  },
+                                  child: Text(
+                                    isSel ? 'Selected' : 'Book',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                  childCount: filteredServices.length,
-                ),
+                    ),
+                  );
+                }, childCount: filteredServices.length),
               ),
             ),
 
-          // 6. Specialists Section
           if (_salon!.stylists.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: Padding(
@@ -602,8 +717,14 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.darkSurface : Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.cardRadius,
+                        ),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
+                        ),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -615,17 +736,22 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                               height: 40,
                               child: stylist.imageUrl.isNotEmpty
                                   ? CachedNetworkImage(
-                                      imageUrl: ApiConfig.resolveImageUrl(stylist.imageUrl),
+                                      imageUrl: ApiConfig.resolveImageUrl(
+                                        stylist.imageUrl,
+                                      ),
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) => Container(
-                                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
+                                        color: isDark
+                                            ? AppColors.darkSurfaceElevated
+                                            : AppColors.primaryTint,
                                       ),
-                                      errorWidget: (context, url, err) => const SVFallbackLogo(
-                                        width: 40,
-                                        height: 40,
-                                        logoSize: 18,
-                                        padding: 6,
-                                      ),
+                                      errorWidget: (context, url, err) =>
+                                          const SVFallbackLogo(
+                                            width: 40,
+                                            height: 40,
+                                            logoSize: 18,
+                                            padding: 6,
+                                          ),
                                     )
                                   : const SVFallbackLogo(
                                       width: 40,
@@ -641,14 +767,24 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w700),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           Text(
-                            stylist.specialty.isNotEmpty ? stylist.specialty : 'Specialist',
+                            stylist.specialty.isNotEmpty
+                                ? stylist.specialty
+                                : 'Specialist',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.plusJakartaSans(fontSize: 10, color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
+                            ),
                           ),
                         ],
                       ),
@@ -659,7 +795,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ],
 
-          // 7. About & Hours Section
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
@@ -677,7 +812,11 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                  border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.lightBorder,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -689,15 +828,26 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12.5,
                         height: 1.45,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 12),
                     const Divider(),
                     const SizedBox(height: 8),
-                    _buildHoursRow('Monday - Friday', '09:00 AM - 08:00 PM', isDark),
+                    _buildHoursRow(
+                      'Monday - Friday',
+                      '09:00 AM - 08:00 PM',
+                      isDark,
+                    ),
                     const Divider(height: 12),
-                    _buildHoursRow('Saturday', '08:00 AM - 09:00 PM', isDark, isHighlighted: true),
+                    _buildHoursRow(
+                      'Saturday',
+                      '08:00 AM - 09:00 PM',
+                      isDark,
+                      isHighlighted: true,
+                    ),
                     const Divider(height: 12),
                     _buildHoursRow('Sunday', '09:00 AM - 07:00 PM', isDark),
                   ],
@@ -706,7 +856,6 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             ),
           ),
 
-          // 8. Reviews Section
           if (_reviews.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: Padding(
@@ -720,64 +869,79 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final r = _reviews[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurface : Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final r = _reviews[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkSurface : Colors.white,
+                      borderRadius: BorderRadius.circular(
+                        AppSpacing.cardRadius,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                r.userName,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700),
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF59E0B)),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    r.rating.toStringAsFixed(1),
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFFF59E0B)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          if (r.comment.isNotEmpty) ...[
-                            const SizedBox(height: 4),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : AppColors.lightBorder,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
                             Text(
-                              r.comment,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                              r.userName,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 14,
+                                  color: Color(0xFFF59E0B),
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  r.rating.toStringAsFixed(1),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFFF59E0B),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
+                        ),
+                        if (r.comment.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            r.comment,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11.5,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                            ),
+                          ),
                         ],
-                      ),
-                    );
-                  },
-                  childCount: _reviews.take(5).length,
-                ),
+                      ],
+                    ),
+                  );
+                }, childCount: _reviews.take(5).length),
               ),
             ),
           ],
 
-          // Bottom spacing for sticky bar
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 90),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 90)),
         ],
       ),
 
-      // Compact, Sleek Sticky Bottom Booking Bar
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : Colors.white,
@@ -800,26 +964,31 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             child: Row(
               children: [
-                // Left: Selected service name + price
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _selectedService != null ? _selectedService!.name : 'Select a Treatment',
+                        _selectedService != null
+                            ? _selectedService!.name
+                            : 'Select a Treatment',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         _selectedService != null
-                            ? CurrencyFormatter.formatNPR(_selectedService!.price)
+                            ? CurrencyFormatter.formatNPR(
+                                _selectedService!.price,
+                              )
                             : 'From Rs. 200',
                         style: GoogleFonts.outfit(
                           fontSize: 16,
@@ -832,13 +1001,15 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                 ),
                 const SizedBox(width: 14),
 
-                // Right: Sleek, compact Book Appointment Button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -861,7 +1032,12 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
     );
   }
 
-  Widget _buildHoursRow(String days, String hours, bool isDark, {bool isHighlighted = false}) {
+  Widget _buildHoursRow(
+    String days,
+    String hours,
+    bool isDark, {
+    bool isHighlighted = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -870,7 +1046,11 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 12,
             fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.w500,
-            color: isHighlighted ? AppColors.primary : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+            color: isHighlighted
+                ? AppColors.primary
+                : (isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary),
           ),
         ),
         Text(
@@ -878,7 +1058,11 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 11.5,
             fontWeight: isHighlighted ? FontWeight.w700 : FontWeight.w400,
-            color: isHighlighted ? AppColors.primary : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+            color: isHighlighted
+                ? AppColors.primary
+                : (isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary),
           ),
         ),
       ],

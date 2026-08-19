@@ -23,11 +23,13 @@ class LoyaltyService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
-        return list.map((e) => LoyaltyRuleModel.fromJson(Map<String, dynamic>.from(e))).toList();
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
+        return list
+            .map((e) => LoyaltyRuleModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       },
     );
   }
@@ -41,11 +43,13 @@ class LoyaltyService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
-        return list.map((e) => LoyaltyTierModel.fromJson(Map<String, dynamic>.from(e))).toList();
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
+        return list
+            .map((e) => LoyaltyTierModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
       },
     );
   }
@@ -59,11 +63,15 @@ class LoyaltyService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
-        return list.map((e) => LoyaltyRewardModel.fromJson(Map<String, dynamic>.from(e))).toList();
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
+        return list
+            .map(
+              (e) => LoyaltyRewardModel.fromJson(Map<String, dynamic>.from(e)),
+            )
+            .toList();
       },
     );
   }
@@ -77,11 +85,16 @@ class LoyaltyService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
-        return list.map((e) => RewardRedemptionModel.fromJson(Map<String, dynamic>.from(e))).toList();
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
+        return list
+            .map(
+              (e) =>
+                  RewardRedemptionModel.fromJson(Map<String, dynamic>.from(e)),
+            )
+            .toList();
       },
     );
   }
@@ -91,7 +104,8 @@ class LoyaltyService {
       "POST",
       "/api/v1/loyalty/rewards/$rewardId/claim",
       auth: true,
-      onSuccess: (data) => RewardRedemptionModel.fromJson(Map<String, dynamic>.from(data)),
+      onSuccess: (data) =>
+          RewardRedemptionModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 
@@ -104,11 +118,17 @@ class LoyaltyService {
         final List list = data is List
             ? data
             : (data is Map && data['data'] is List
-                ? data['data'] as List
-                : (data is Map && data['items'] is List
-                    ? data['items'] as List
-                    : []));
-        return list.map((e) => LoyaltyTransactionModel.fromJson(Map<String, dynamic>.from(e))).toList();
+                  ? data['data'] as List
+                  : (data is Map && data['items'] is List
+                        ? data['items'] as List
+                        : []));
+        return list
+            .map(
+              (e) => LoyaltyTransactionModel.fromJson(
+                Map<String, dynamic>.from(e),
+              ),
+            )
+            .toList();
       },
     );
   }
@@ -132,13 +152,13 @@ class LoyaltyService {
     );
   }
 
-
   Future<ApiResult<SmartRebookModel>> getSmartRebook() async {
     return _client.request<SmartRebookModel>(
       "GET",
       "/api/v1/loyalty/smart-rebook",
       auth: true,
-      onSuccess: (data) => SmartRebookModel.fromJson(Map<String, dynamic>.from(data)),
+      onSuccess: (data) =>
+          SmartRebookModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 }

@@ -12,7 +12,6 @@ import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/core/widgets/offline_banner.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -25,7 +24,7 @@ Future<void> main() async {
   };
 
   try {
-    await AppServices.init();
+    await AppStorage.init();
   } catch (_) {}
 
   final authProvider = AuthProvider();
@@ -45,7 +44,6 @@ Future<void> main() async {
       child: const SalonVerseApp(),
     ),
   );
-
 }
 
 class SalonVerseApp extends StatelessWidget {

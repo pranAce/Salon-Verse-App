@@ -5,11 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/models/offer_model.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
+import 'package:salonverse/features/loyalty/services/offer_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
-import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_selection_widgets.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class OffersPage extends StatefulWidget {
   const OffersPage({super.key});
@@ -46,7 +46,7 @@ class _OffersPageState extends State<OffersPage> {
       _errorMessage = null;
     });
 
-    final result = await AppService.instance.getOffers();
+    final result = await OfferService().getOffers();
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -63,7 +63,12 @@ class _OffersPageState extends State<OffersPage> {
   Widget build(BuildContext context) {
     final filteredOffers = _selectedCategory == 'All'
         ? _offers
-        : _offers.where((o) => o.category.toLowerCase() == _selectedCategory.toLowerCase()).toList();
+        : _offers
+              .where(
+                (o) =>
+                    o.category.toLowerCase() == _selectedCategory.toLowerCase(),
+              )
+              .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -75,7 +80,6 @@ class _OffersPageState extends State<OffersPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Category Filter Strip
             SizedBox(
               height: 48,
               child: ListView.separated(
@@ -96,7 +100,6 @@ class _OffersPageState extends State<OffersPage> {
             ),
             const SizedBox(height: 12),
 
-            // Offers List
             Expanded(
               child: _isLoading
                   ? ListView.builder(
@@ -104,51 +107,58 @@ class _OffersPageState extends State<OffersPage> {
                       itemCount: 3,
                       itemBuilder: (context, index) => const Padding(
                         padding: EdgeInsets.only(bottom: 14),
-                        child: SVSkeleton(width: double.infinity, height: 140, borderRadius: 20),
+                        child: SVSkeleton(
+                          width: double.infinity,
+                          height: 140,
+                          borderRadius: 20,
+                        ),
                       ),
                     )
                   : _errorMessage != null
-                      ? SVErrorState(
-                          message: _errorMessage!,
-                          onRetry: _loadOffers,
-                        )
-                      : filteredOffers.isEmpty
-                          ? const SVEmptyState(
-                              icon: Icons.local_offer_outlined,
-                              title: 'No Offers Available',
-                              description: 'Check back later for seasonal promotions and discounts.',
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
-                              itemCount: filteredOffers.length,
-                              itemBuilder: (context, index) {
-                                final offer = filteredOffers[index];
-                                return SVOfferCard(
-                                  offer: offer,
-                                  onApply: () {
-                                    Clipboard.setData(ClipboardData(text: offer.code));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Offer "${offer.code}" applied & copied!'),
-                                        backgroundColor: AppColors.primary,
-                                        duration: const Duration(seconds: 3),
-                                        action: SnackBarAction(
-                                          label: 'Book Now',
-                                          textColor: Colors.white,
-                                          onPressed: () {
-                                            if (offer.primarySalonId != null && offer.primarySalonId!.isNotEmpty) {
-                                              context.push('/salon/${offer.primarySalonId}');
-                                            } else {
-                                              context.push('/salon-tab');
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    );
+                  ? SVErrorState(message: _errorMessage!, onRetry: _loadOffers)
+                  : filteredOffers.isEmpty
+                  ? const SVEmptyState(
+                      icon: Icons.local_offer_outlined,
+                      title: 'No Offers Available',
+                      description:
+                          'Check back later for seasonal promotions and discounts.',
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
+                      itemCount: filteredOffers.length,
+                      itemBuilder: (context, index) {
+                        final offer = filteredOffers[index];
+                        return SVOfferCard(
+                          offer: offer,
+                          onApply: () {
+                            Clipboard.setData(ClipboardData(text: offer.code));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Offer "${offer.code}" applied & copied!',
+                                ),
+                                backgroundColor: AppColors.primary,
+                                duration: const Duration(seconds: 3),
+                                action: SnackBarAction(
+                                  label: 'Book Now',
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    if (offer.primarySalonId != null &&
+                                        offer.primarySalonId!.isNotEmpty) {
+                                      context.push(
+                                        '/salon/${offer.primarySalonId}',
+                                      );
+                                    } else {
+                                      context.push('/salon-tab');
+                                    }
                                   },
-                                );
-                              },
-                            ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),

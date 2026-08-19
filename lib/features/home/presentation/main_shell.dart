@@ -42,7 +42,6 @@ class MainShell extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final selectedIndex = _calculateSelectedIndex(context);
 
-    // Watch bookings for active indicator
     final bookingProv = context.watch<BookingProvider>();
     final activeBookingsCount = bookingProv.bookings.where((b) {
       final st = b.status.toLowerCase();
@@ -155,7 +154,9 @@ class MainShell extends StatelessWidget {
                   size: 21,
                   color: isSelected
                       ? AppColors.primary
-                      : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
+                      : (isDark
+                            ? AppColors.darkTextTertiary
+                            : AppColors.lightTextTertiary),
                 ),
                 if (badgeCount > 0)
                   Positioned(
@@ -167,7 +168,10 @@ class MainShell extends StatelessWidget {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                      constraints: const BoxConstraints(
+                        minWidth: 14,
+                        minHeight: 14,
+                      ),
                       child: Text(
                         '$badgeCount',
                         textAlign: TextAlign.center,

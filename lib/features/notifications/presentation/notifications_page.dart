@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/notifications/models/notification_model.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
+import 'package:salonverse/features/notifications/services/notification_service.dart';
 import 'package:salonverse/core/network/api_result.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -17,6 +17,7 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   List<NotificationModel> _notifications = [];
   bool _isLoading = true;
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Future<void> _fetchNotifications() async {
     setState(() => _isLoading = true);
-    final result = await AppService.instance.getNotifications();
+    final result = await _notificationService.getNotifications();
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -40,7 +41,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> _markAsRead(String id) async {
-    await AppService.instance.markNotificationAsRead(id);
+    await _notificationService.markAsRead(id);
     if (mounted) {
       setState(() {
         _notifications = _notifications.map((n) {
@@ -56,12 +57,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Future<void> _markAllAsRead() async {
     for (var n in _notifications) {
       if (!n.isRead) {
-        await AppService.instance.markNotificationAsRead(n.id);
+        await _notificationService.markAsRead(n.id);
       }
     }
     if (mounted) {
       setState(() {
-        _notifications = _notifications.map((n) => n.copyWith(isRead: true)).toList();
+        _notifications = _notifications
+            .map((n) => n.copyWith(isRead: true))
+            .toList();
       });
     }
   }
@@ -99,27 +102,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
           color: AppColors.primary,
           child: _isLoading
               ? ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   itemCount: 4,
                   itemBuilder: (context, index) => const Padding(
                     padding: EdgeInsets.only(bottom: 12),
-                    child: SVSkeleton(width: double.infinity, height: 76, borderRadius: 16),
+                    child: SVSkeleton(
+                      width: double.infinity,
+                      height: 76,
+                      borderRadius: 16,
+                    ),
                   ),
                 )
               : _notifications.isEmpty
-                  ? const SVEmptyState(
-                      icon: Icons.notifications_none_rounded,
-                      title: 'No Notifications',
-                      description: 'You are all caught up! Booking updates and alerts will appear here.',
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-                      itemCount: _notifications.length,
-                      itemBuilder: (context, index) {
-                        final item = _notifications[index];
-                        return _buildNotificationCard(isDark, item);
-                      },
-                    ),
+              ? const SVEmptyState(
+                  icon: Icons.notifications_none_rounded,
+                  title: 'No Notifications',
+                  description:
+                      'You are all caught up! Booking updates and alerts will appear here.',
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                  itemCount: _notifications.length,
+                  itemBuilder: (context, index) {
+                    final item = _notifications[index];
+                    return _buildNotificationCard(isDark, item);
+                  },
+                ),
         ),
       ),
     );
@@ -191,7 +202,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           style: GoogleFonts.outfit(
                             fontSize: 14.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary,
                           ),
                         ),
                       ),
@@ -211,7 +224,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     item.message,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.5,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -220,7 +235,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     _formatTimeAgo(item.createdAt),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
-                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                      color: isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.lightTextTertiary,
                     ),
                   ),
                 ],

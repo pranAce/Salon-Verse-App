@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/auth/services/auth_provider.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -58,11 +58,16 @@ class _AccountPageState extends State<AccountPage> {
 
     try {
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
       _lat = pos.latitude;
       _lng = pos.longitude;
-      final placemarks = await placemarkFromCoordinates(pos.latitude, pos.longitude);
+      final placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
         final city = p.locality ?? 'Kathmandu';
@@ -94,8 +99,12 @@ class _AccountPageState extends State<AccountPage> {
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.updateProfile(
       name: _nameController.text.trim(),
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-      dateOfBirth: _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
+      phone: _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
+      dateOfBirth: _dobController.text.trim().isEmpty
+          ? null
+          : _dobController.text.trim(),
       homeLocation: {
         'address': _locationAddressController.text.trim(),
         'city': _locationCityController.text.trim(),
@@ -150,7 +159,9 @@ class _AccountPageState extends State<AccountPage> {
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -161,7 +172,9 @@ class _AccountPageState extends State<AccountPage> {
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outline_rounded),
                   ),
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
+                  validator: (val) => val == null || val.isEmpty
+                      ? 'Please enter your name'
+                      : null,
                 ),
                 const SizedBox(height: 14),
 
@@ -209,14 +222,24 @@ class _AccountPageState extends State<AccountPage> {
                       style: GoogleFonts.outfit(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     TextButton.icon(
                       onPressed: _isFetchingGps ? null : _fetchGpsLocation,
                       icon: _isFetchingGps
-                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.my_location_rounded, size: 16, color: AppColors.primary),
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(
+                              Icons.my_location_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
                       label: Text(
                         'Fetch GPS',
                         style: GoogleFonts.plusJakartaSans(

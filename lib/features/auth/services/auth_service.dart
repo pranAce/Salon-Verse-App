@@ -17,7 +17,6 @@ class AuthService {
   String? _token;
 
   String? get token => _token;
-  bool get isMockMode => false;
 
   String formatError(dynamic e) {
     return e.toString().replaceAll('Exception: ', '');
@@ -130,13 +129,6 @@ class AuthService {
     await prefs.remove(_tokenKey);
   }
 
-  Future<ApiResult<void>> resetPassword(String email) => _client.request(
-    "POST",
-    "/api/v1/users/forgot-password",
-    body: {"email": email},
-    onSuccess: (_) {},
-  );
-
   Future<ApiResult<UserModel>> updateProfile({
     String? name,
     String? phone,
@@ -144,10 +136,18 @@ class AuthService {
     Map<String, dynamic>? homeLocation,
   }) async {
     final body = <String, dynamic>{};
-    if (name != null && name.isNotEmpty) body['name'] = name;
-    if (phone != null && phone.isNotEmpty) body['phone'] = phone;
-    if (dateOfBirth != null && dateOfBirth.isNotEmpty) body['dateOfBirth'] = dateOfBirth;
-    if (homeLocation != null) body['homeLocation'] = homeLocation;
+    if (name != null && name.isNotEmpty) {
+      body['name'] = name;
+    }
+    if (phone != null && phone.isNotEmpty) {
+      body['phone'] = phone;
+    }
+    if (dateOfBirth != null && dateOfBirth.isNotEmpty) {
+      body['dateOfBirth'] = dateOfBirth;
+    }
+    if (homeLocation != null) {
+      body['homeLocation'] = homeLocation;
+    }
 
     final result = await _client.request(
       "PUT",

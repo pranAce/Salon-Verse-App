@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:salonverse/features/salons/models/nearby_service_model.dart';
 import 'package:salonverse/features/booking/services/booking_provider.dart';
 import 'package:salonverse/core/utils/currency_formatter.dart';
-import 'package:salonverse/shared/design_system/sv_cards.dart';
+import 'package:salonverse/core/widgets/sv_cards.dart';
 
 class NearbyServiceCard extends StatelessWidget {
   final NearbyServiceModel item;
@@ -26,7 +26,9 @@ class NearbyServiceCard extends StatelessWidget {
 
     final primaryTextColor = isDark ? Colors.white : const Color(0xFF111827);
     final cardBgColor = isDark ? const Color(0xFF181716) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF2A2726) : const Color(0xFFF3F4F6);
+    final borderColor = isDark
+        ? const Color(0xFF2A2726)
+        : const Color(0xFFF3F4F6);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -45,7 +47,6 @@ class NearbyServiceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Service Name, Category Badge & Prominent Price
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
@@ -62,7 +63,10 @@ class NearbyServiceCard extends StatelessWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFEC4899).withAlpha(20),
                               borderRadius: BorderRadius.circular(6),
@@ -79,7 +83,10 @@ class NearbyServiceCard extends StatelessWidget {
                           ),
                           if (item.isCheapest)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF10B981).withAlpha(25),
                                 borderRadius: BorderRadius.circular(6),
@@ -112,7 +119,9 @@ class NearbyServiceCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.white60 : Colors.grey.shade600,
+                            color: isDark
+                                ? Colors.white60
+                                : Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -124,7 +133,10 @@ class NearbyServiceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      AppCurrencyFormatter.format(item.price, currency: item.currency),
+                      AppCurrencyFormatter.format(
+                        item.price,
+                        currency: item.currency,
+                      ),
                       style: const TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.w900,
@@ -136,11 +148,18 @@ class NearbyServiceCard extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.schedule_rounded, size: 12, color: Colors.grey),
+                        const Icon(
+                          Icons.schedule_rounded,
+                          size: 12,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           '${item.durationMinutes} min',
-                          style: const TextStyle(fontSize: 11.5, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
@@ -152,7 +171,6 @@ class NearbyServiceCard extends StatelessWidget {
 
           const Divider(height: 1, indent: 16, endIndent: 16),
 
-          // Associated Salon Info: Salon Thumbnail, Name, Rating & Distance
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
             child: Row(
@@ -167,17 +185,14 @@ class NearbyServiceCard extends StatelessWidget {
                             imageUrl: item.salonLogo,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: isDark ? const Color(0xFF242220) : Colors.grey.shade200,
+                              color: isDark
+                                  ? const Color(0xFF242220)
+                                  : Colors.grey.shade200,
                             ),
-                            errorWidget: (context, url, error) => const SVFallbackLogo(
-                              logoSize: 20,
-                              padding: 6,
-                            ),
+                            errorWidget: (context, url, error) =>
+                                const SVFallbackLogo(logoSize: 20, padding: 6),
                           )
-                        : const SVFallbackLogo(
-                            logoSize: 20,
-                            padding: 6,
-                          ),
+                        : const SVFallbackLogo(logoSize: 20, padding: 6),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -198,7 +213,11 @@ class NearbyServiceCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 13),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 13,
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             item.rating.toStringAsFixed(1),
@@ -210,7 +229,10 @@ class NearbyServiceCard extends StatelessWidget {
                           ),
                           Text(
                             ' (${item.reviewCount})',
-                            style: const TextStyle(color: Colors.grey, fontSize: 11),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 11,
+                            ),
                           ),
                           if (item.distanceKm != null) ...[
                             const SizedBox(width: 4),
@@ -234,18 +256,22 @@ class NearbyServiceCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
 
-                // Action Buttons: View & Book Now
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: primaryTextColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         side: BorderSide(
-                          color: theme.colorScheme.outline.withAlpha(isDark ? 40 : 80),
+                          color: theme.colorScheme.outline.withAlpha(
+                            isDark ? 40 : 80,
+                          ),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -255,17 +281,29 @@ class NearbyServiceCard extends StatelessWidget {
                         if (onViewSalon != null) {
                           onViewSalon!();
                         } else {
-                          context.push('/salon/${item.salonId}', extra: {'salon': item.salon});
+                          context.push(
+                            '/salon/${item.salonId}',
+                            extra: {'salon': item.salon},
+                          );
                         }
                       },
-                      child: const Text('View', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'View',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 6),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEC4899),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         elevation: 0,
@@ -282,7 +320,13 @@ class NearbyServiceCard extends StatelessWidget {
                           context.push('/booking-flow');
                         }
                       },
-                      child: const Text('Book Now', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Book Now',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

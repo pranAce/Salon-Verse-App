@@ -6,12 +6,8 @@ import 'package:salonverse/app/theme/app_theme.dart';
 import 'package:salonverse/features/loyalty/services/loyalty_provider.dart';
 import 'package:salonverse/features/loyalty/widgets/loyalty_tier_emblem.dart';
 
-enum LoyaltyBannerVariant {
-  compact, // For Home Page under search
-  full,    // For Profile
-}
+enum LoyaltyBannerVariant { compact, full }
 
-/// Compact, Authoritative Loyalty Membership Status Banner for Home & Profile
 class LoyaltyMembershipBanner extends StatelessWidget {
   final LoyaltyBannerVariant variant;
   final VoidCallback? onTap;
@@ -33,10 +29,10 @@ class LoyaltyMembershipBanner extends StatelessWidget {
     }
 
     final tierKey = loyalty.profile?.currentTier ?? 'glow';
-    final tierName = (loyalty.currentTierDetails?.name ?? tierKey).toUpperCase();
+    final tierName = (loyalty.currentTierDetails?.name ?? tierKey)
+        .toUpperCase();
     final points = loyalty.profile?.loyaltyCredits ?? 0;
 
-    // Accent color based on tier
     final Color tierColor;
     if (tierKey == 'icon') {
       tierColor = const Color(0xFFF59E0B);
@@ -67,14 +63,12 @@ class LoyaltyMembershipBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // 1. Scalable Vector Tier Emblem
             SVTierEmblem(
               tierKey: tierKey,
               size: variant == LoyaltyBannerVariant.compact ? 42 : 48,
             ),
             const SizedBox(width: 12),
 
-            // 2. Member Status & Points Count
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +77,10 @@ class LoyaltyMembershipBanner extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1.5,
+                        ),
                         decoration: BoxDecoration(
                           color: tierColor.withAlpha(25),
                           borderRadius: BorderRadius.circular(4),
@@ -98,7 +95,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (loyalty.currentTierDetails != null && loyalty.currentTierDetails!.earningMultiplier > 1.0) ...[
+                      if (loyalty.currentTierDetails != null &&
+                          loyalty.currentTierDetails!.earningMultiplier >
+                              1.0) ...[
                         const SizedBox(width: 6),
                         Text(
                           '${loyalty.currentTierDetails!.earningMultiplier}x Points',
@@ -121,7 +120,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
                         style: GoogleFonts.outfit(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -130,7 +131,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                     ],
@@ -139,7 +142,6 @@ class LoyaltyMembershipBanner extends StatelessWidget {
               ),
             ),
 
-            // 3. Quick Action
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -172,7 +174,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
       ),
       child: Row(
         children: [
@@ -180,7 +184,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.lightSurfaceSecondary,
               shape: BoxShape.circle,
             ),
           ),
@@ -194,7 +200,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
                   width: 80,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -203,7 +211,9 @@ class LoyaltyMembershipBanner extends StatelessWidget {
                   width: 110,
                   height: 14,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.lightSurfaceSecondary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

@@ -11,6 +11,4 @@ class KConstants {
   static const String favoriteSalonsKey = 'favorite_salons';
   static const String userProfileKey = 'user_profile';
   static const String backendAccessTokenKey = 'backend_access_token';
-
-  static const bool defaultMockMode = false;
 }

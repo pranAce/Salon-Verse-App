@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'package:salonverse/app/theme/app_theme.dart';
-import 'package:salonverse/features/home/services/app_service.dart';
-import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/features/support/services/support_service.dart';
+import 'package:salonverse/features/auth/services/auth_service.dart';
 import 'package:salonverse/features/support/models/support_ticket_model.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
-import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
+import 'package:salonverse/core/network/api_result.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_feedback_states.dart';
 
 class SupportPage extends StatefulWidget {
   const SupportPage({super.key});
@@ -24,19 +24,23 @@ class _SupportPageState extends State<SupportPage> {
   final List<Map<String, String>> _faqs = const [
     {
       'q': 'How do I cancel or reschedule my appointment?',
-      'a': 'Go to the "Bookings" tab from the bottom navigation bar. Select your upcoming appointment and tap "Reschedule" or "Cancel". Free cancellations are allowed up to 2 hours before the scheduled time slot.'
+      'a':
+          'Go to the "Bookings" tab from the bottom navigation bar. Select your upcoming appointment and tap "Reschedule" or "Cancel". Free cancellations are allowed up to 2 hours before the scheduled time slot.',
     },
     {
       'q': 'How are SalonVerse loyalty points calculated?',
-      'a': 'You earn 10 points for every Rs. 100 spent on completed salon bookings. Points can be redeemed in the Rewards Store for discount vouchers and exclusive service upgrades.'
+      'a':
+          'You earn 10 points for every Rs. 100 spent on completed salon bookings. Points can be redeemed in the Rewards Store for discount vouchers and exclusive service upgrades.',
     },
     {
       'q': 'What payment methods are supported?',
-      'a': 'We support cash / pay-at-salon on arrival, digital wallets (eSewa, Khalti), and major Credit / Debit cards (Visa, Mastercard).'
+      'a':
+          'We support cash / pay-at-salon on arrival, digital wallets (eSewa, Khalti), and major Credit / Debit cards (Visa, Mastercard).',
     },
     {
       'q': 'How does doorstep / home service work?',
-      'a': 'When booking, toggle the "Home Service" option. Enter your exact street address. A verified beauty specialist from the salon will bring professional equipment to your location at your selected time.'
+      'a':
+          'When booking, toggle the "Home Service" option. Enter your exact street address. A verified beauty specialist from the salon will bring professional equipment to your location at your selected time.',
     },
   ];
 
@@ -50,7 +54,9 @@ class _SupportPageState extends State<SupportPage> {
 
   Future<void> _loadTickets() async {
     setState(() => _isLoading = true);
-    final res = await AppService.instance.getSupportTickets();
+    final res = await SupportService().getSupportTickets(
+      AuthService().currentUser,
+    );
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -87,11 +93,18 @@ class _SupportPageState extends State<SupportPage> {
       body: SafeArea(
         child: _isLoading
             ? ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 16,
+                ),
                 itemCount: 3,
                 itemBuilder: (context, index) => const Padding(
                   padding: EdgeInsets.only(bottom: 12),
-                  child: SVSkeleton(width: double.infinity, height: 80, borderRadius: 16),
+                  child: SVSkeleton(
+                    width: double.infinity,
+                    height: 80,
+                    borderRadius: 16,
+                  ),
                 ),
               )
             : SingleChildScrollView(
@@ -99,16 +112,21 @@ class _SupportPageState extends State<SupportPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. Direct Contact Channels Row
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.darkSurface : Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                        border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.cardRadius,
                         ),
-                        boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
+                        ),
+                        boxShadow: isDark
+                            ? null
+                            : AppSpacing.softShadow(context),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +136,9 @@ class _SupportPageState extends State<SupportPage> {
                             style: GoogleFonts.outfit(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -126,7 +146,9 @@ class _SupportPageState extends State<SupportPage> {
                             'Our support desk is active daily from 8:00 AM to 9:00 PM.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -138,7 +160,8 @@ class _SupportPageState extends State<SupportPage> {
                                   size: SVButtonSize.sm,
                                   variant: SVButtonVariant.secondary,
                                   icon: Icons.phone_outlined,
-                                  onPressed: () => _launchUrl('tel:+9779800000000'),
+                                  onPressed: () =>
+                                      _launchUrl('tel:+9779800000000'),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -148,7 +171,9 @@ class _SupportPageState extends State<SupportPage> {
                                   size: SVButtonSize.sm,
                                   variant: SVButtonVariant.outline,
                                   icon: Icons.email_outlined,
-                                  onPressed: () => _launchUrl('mailto:support@salonverse.com'),
+                                  onPressed: () => _launchUrl(
+                                    'mailto:support@salonverse.com',
+                                  ),
                                 ),
                               ),
                             ],
@@ -158,7 +183,6 @@ class _SupportPageState extends State<SupportPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    // 2. Active Support Tickets
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -167,11 +191,15 @@ class _SupportPageState extends State<SupportPage> {
                           style: GoogleFonts.outfit(
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary,
                           ),
                         ),
                         TextButton.icon(
-                          onPressed: () => context.push('/support/contact').then((_) => _loadTickets()),
+                          onPressed: () => context
+                              .push('/support/contact')
+                              .then((_) => _loadTickets()),
                           icon: const Icon(Icons.add_rounded, size: 16),
                           label: const Text('New Ticket'),
                           style: TextButton.styleFrom(
@@ -186,12 +214,19 @@ class _SupportPageState extends State<SupportPage> {
                     if (_tickets.isEmpty)
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.darkSurface : Colors.white,
-                          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.cardRadius,
+                          ),
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
                           ),
                         ),
                         child: Column(
@@ -199,7 +234,9 @@ class _SupportPageState extends State<SupportPage> {
                             Icon(
                               Icons.mark_chat_read_outlined,
                               size: 32,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -207,7 +244,9 @@ class _SupportPageState extends State<SupportPage> {
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
                               ),
                             ),
                           ],
@@ -224,16 +263,25 @@ class _SupportPageState extends State<SupportPage> {
                             margin: const EdgeInsets.only(bottom: 10),
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkSurface : Colors.white,
-                              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                              color: isDark
+                                  ? AppColors.darkSurface
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.cardRadius,
+                              ),
                               border: Border.all(
-                                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.lightBorder,
                               ),
                             ),
                             child: Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: t.status.toLowerCase() == 'open'
                                         ? AppColors.primary.withAlpha(25)
@@ -247,14 +295,17 @@ class _SupportPageState extends State<SupportPage> {
                                       fontWeight: FontWeight.w800,
                                       color: t.status.toLowerCase() == 'open'
                                           ? AppColors.primary
-                                          : (isDark ? Colors.white70 : Colors.black87),
+                                          : (isDark
+                                                ? Colors.white70
+                                                : Colors.black87),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         t.subject,
@@ -263,14 +314,18 @@ class _SupportPageState extends State<SupportPage> {
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                          color: isDark
+                                              ? AppColors.darkTextPrimary
+                                              : AppColors.lightTextPrimary,
                                         ),
                                       ),
                                       Text(
                                         'Ticket #${t.id.substring(0, 6).toUpperCase()}',
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 11,
-                                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                          color: isDark
+                                              ? AppColors.darkTextTertiary
+                                              : AppColors.lightTextTertiary,
                                         ),
                                       ),
                                     ],
@@ -279,7 +334,9 @@ class _SupportPageState extends State<SupportPage> {
                                 Icon(
                                   Icons.chevron_right_rounded,
                                   size: 18,
-                                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                  color: isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
                                 ),
                               ],
                             ),
@@ -289,13 +346,14 @@ class _SupportPageState extends State<SupportPage> {
 
                     const SizedBox(height: 24),
 
-                    // 3. Frequently Asked Questions (Accordion)
                     Text(
                       'Frequently Asked Questions',
                       style: GoogleFonts.outfit(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -305,22 +363,38 @@ class _SupportPageState extends State<SupportPage> {
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.darkSurface : Colors.white,
-                          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.cardRadius,
+                          ),
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
                           ),
                         ),
                         child: Theme(
-                          data: theme.copyWith(dividerColor: Colors.transparent),
+                          data: theme.copyWith(
+                            dividerColor: Colors.transparent,
+                          ),
                           child: ExpansionTile(
-                            tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-                            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                            tilePadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 2,
+                            ),
+                            childrenPadding: const EdgeInsets.fromLTRB(
+                              14,
+                              0,
+                              14,
+                              14,
+                            ),
                             title: Text(
                               faq['q']!,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             children: [
@@ -329,7 +403,9 @@ class _SupportPageState extends State<SupportPage> {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 12.5,
                                   height: 1.45,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
                                 ),
                               ),
                             ],

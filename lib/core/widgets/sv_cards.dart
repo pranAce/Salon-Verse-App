@@ -8,9 +8,8 @@ import 'package:salonverse/core/utils/currency_formatter.dart';
 import 'package:salonverse/features/booking/models/booking_model.dart';
 import 'package:salonverse/features/loyalty/models/offer_model.dart';
 import 'package:salonverse/features/salons/models/salon_model.dart';
-import 'package:salonverse/shared/design_system/sv_button.dart';
+import 'package:salonverse/core/widgets/sv_button.dart';
 
-/// High-contrast brand logo fallback with gradient background for clean visibility
 class SVFallbackLogo extends StatelessWidget {
   final double? width;
   final double? height;
@@ -53,7 +52,6 @@ class SVFallbackLogo extends StatelessWidget {
   }
 }
 
-/// Editorial Salon Card for Marketplace Discovery & Carousels
 class SVSalonCard extends StatelessWidget {
   final SalonModel salon;
   final bool isFavorite;
@@ -82,8 +80,8 @@ class SVSalonCard extends StatelessWidget {
 
     final formattedDistance = salon.distanceKm != null
         ? (salon.distanceKm! < 1.0
-            ? '${(salon.distanceKm! * 1000).round()} m'
-            : '${salon.distanceKm!.toStringAsFixed(1)} km')
+              ? '${(salon.distanceKm! * 1000).round()} m'
+              : '${salon.distanceKm!.toStringAsFixed(1)} km')
         : null;
 
     if (isCompact) {
@@ -105,7 +103,6 @@ class SVSalonCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Photo Header
               Stack(
                 children: [
                   resolvedImageUrl.isNotEmpty
@@ -116,13 +113,16 @@ class SVSalonCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             height: 130,
-                            color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                            color: isDark
+                                ? AppColors.darkSurfaceElevated
+                                : AppColors.lightSurfaceSecondary,
                           ),
-                          errorWidget: (context, url, err) => const SVFallbackLogo(
-                            height: 130,
-                            width: double.infinity,
-                            logoSize: 42,
-                          ),
+                          errorWidget: (context, url, err) =>
+                              const SVFallbackLogo(
+                                height: 130,
+                                width: double.infinity,
+                                logoSize: 42,
+                              ),
                         )
                       : const SVFallbackLogo(
                           height: 130,
@@ -134,10 +134,17 @@ class SVSalonCard extends StatelessWidget {
                       top: 10,
                       left: 10,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3.5,
+                        ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFF59E0B), Color(0xFFD97706), Color(0xFF92400E)],
+                            colors: [
+                              Color(0xFFF59E0B),
+                              Color(0xFFD97706),
+                              Color(0xFF92400E),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -173,7 +180,10 @@ class SVSalonCard extends StatelessWidget {
                       top: 10,
                       left: 10,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3.5,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(6),
@@ -202,7 +212,9 @@ class SVSalonCard extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
                           size: 16,
                           color: isFavorite ? AppColors.primary : Colors.white,
                         ),
@@ -213,7 +225,10 @@ class SVSalonCard extends StatelessWidget {
                     bottom: 8,
                     left: 10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2.5,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withAlpha(160),
                         borderRadius: BorderRadius.circular(6),
@@ -221,7 +236,11 @@ class SVSalonCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star_rounded, size: 13, color: Color(0xFFF59E0B)),
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 13,
+                            color: Color(0xFFF59E0B),
+                          ),
                           const SizedBox(width: 3),
                           Text(
                             salon.rating.toStringAsFixed(1),
@@ -238,7 +257,6 @@ class SVSalonCard extends StatelessWidget {
                 ],
               ),
 
-              // Salon Info
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
@@ -251,13 +269,19 @@ class SVSalonCard extends StatelessWidget {
                       style: GoogleFonts.outfit(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined, size: 13, color: AppColors.primary),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 13,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 3),
                         Expanded(
                           child: Text(
@@ -268,7 +292,9 @@ class SVSalonCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11.5,
-                              color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                              color: isDark
+                                  ? AppColors.darkTextTertiary
+                                  : AppColors.lightTextTertiary,
                             ),
                           ),
                         ),
@@ -297,7 +323,9 @@ class SVSalonCard extends StatelessWidget {
                           '${salon.reviewsCount} reviews',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11,
-                            color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                            color: isDark
+                                ? AppColors.darkTextTertiary
+                                : AppColors.lightTextTertiary,
                           ),
                         ),
                       ],
@@ -311,7 +339,6 @@ class SVSalonCard extends StatelessWidget {
       );
     }
 
-    // Full-Width Marketplace Listing Card
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -329,7 +356,6 @@ class SVSalonCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Wide Photo
             Stack(
               children: [
                 resolvedImageUrl.isNotEmpty
@@ -340,13 +366,16 @@ class SVSalonCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           height: 160,
-                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.lightSurfaceSecondary,
                         ),
-                        errorWidget: (context, url, err) => const SVFallbackLogo(
-                          height: 160,
-                          width: double.infinity,
-                          logoSize: 52,
-                        ),
+                        errorWidget: (context, url, err) =>
+                            const SVFallbackLogo(
+                              height: 160,
+                              width: double.infinity,
+                              logoSize: 52,
+                            ),
                       )
                     : const SVFallbackLogo(
                         height: 160,
@@ -358,10 +387,17 @@ class SVSalonCard extends StatelessWidget {
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4.5,
+                      ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFF59E0B), Color(0xFFD97706), Color(0xFF92400E)],
+                          colors: [
+                            Color(0xFFF59E0B),
+                            Color(0xFFD97706),
+                            Color(0xFF92400E),
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -392,13 +428,15 @@ class SVSalonCard extends StatelessWidget {
                       ),
                     ),
                   )
-
                 else if (salon.isFeatured)
                   Positioned(
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(6),
@@ -426,7 +464,9 @@ class SVSalonCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                         size: 18,
                         color: isFavorite ? AppColors.primary : Colors.white,
                       ),
@@ -436,7 +476,6 @@ class SVSalonCard extends StatelessWidget {
               ],
             ),
 
-            // Content
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -455,13 +494,19 @@ class SVSalonCard extends StatelessWidget {
                               style: GoogleFonts.outfit(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 3),
                             Row(
                               children: [
-                                const Icon(Icons.location_on_outlined, size: 14, color: AppColors.primary),
+                                const Icon(
+                                  Icons.location_on_outlined,
+                                  size: 14,
+                                  color: AppColors.primary,
+                                ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
@@ -470,22 +515,33 @@ class SVSalonCard extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 12.5,
-                                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.lightTextSecondary,
                                     ),
                                   ),
                                 ),
                                 if (formattedDistance != null) ...[
                                   const SizedBox(width: 6),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF361421) : AppColors.primaryTint,
+                                      color: isDark
+                                          ? const Color(0xFF361421)
+                                          : AppColors.primaryTint,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.near_me_rounded, size: 10.5, color: AppColors.primary),
+                                        const Icon(
+                                          Icons.near_me_rounded,
+                                          size: 10.5,
+                                          color: AppColors.primary,
+                                        ),
                                         const SizedBox(width: 3),
                                         Text(
                                           formattedDistance,
@@ -505,25 +561,38 @@ class SVSalonCard extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.lightSurfaceSecondary,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF59E0B)),
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 15,
+                              color: Color(0xFFF59E0B),
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               salon.rating.toStringAsFixed(1),
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(width: 2),
@@ -531,7 +600,9 @@ class SVSalonCard extends StatelessWidget {
                               '(${salon.reviewsCount})',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 11,
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                color: isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary,
                               ),
                             ),
                           ],
@@ -543,7 +614,6 @@ class SVSalonCard extends StatelessWidget {
                   const Divider(),
                   const SizedBox(height: 10),
 
-                  // Services preview tags & price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -553,16 +623,23 @@ class SVSalonCard extends StatelessWidget {
                           runSpacing: 4,
                           children: salon.services.take(3).map((s) {
                             return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
-                                color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                                color: isDark
+                                    ? AppColors.darkSurfaceElevated
+                                    : AppColors.lightSurfaceSecondary,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 s.name,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
                                 ),
                               ),
                             );
@@ -571,7 +648,9 @@ class SVSalonCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        minPrice != null ? 'From ${CurrencyFormatter.formatNPR(minPrice)}' : salon.priceRange,
+                        minPrice != null
+                            ? 'From ${CurrencyFormatter.formatNPR(minPrice)}'
+                            : salon.priceRange,
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -590,7 +669,6 @@ class SVSalonCard extends StatelessWidget {
   }
 }
 
-/// Stylist Card for Specialist Carousel & Booking Steps
 class SVStylistCard extends StatelessWidget {
   final StylistModel stylist;
   final bool isSelected;
@@ -641,14 +719,17 @@ class SVStylistCard extends StatelessWidget {
                         imageUrl: ApiConfig.resolveImageUrl(stylist.imageUrl),
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.primaryTint,
                         ),
-                        errorWidget: (context, url, err) => const SVFallbackLogo(
-                          width: 52,
-                          height: 52,
-                          logoSize: 24,
-                          padding: 8,
-                        ),
+                        errorWidget: (context, url, err) =>
+                            const SVFallbackLogo(
+                              width: 52,
+                              height: 52,
+                              logoSize: 24,
+                              padding: 8,
+                            ),
                       )
                     : const SVFallbackLogo(
                         width: 52,
@@ -667,7 +748,9 @@ class SVStylistCard extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 2),
@@ -678,7 +761,9 @@ class SVStylistCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10.5,
-                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                color: isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.lightTextTertiary,
               ),
             ),
           ],
@@ -688,7 +773,6 @@ class SVStylistCard extends StatelessWidget {
   }
 }
 
-/// Service Card for Selection in Booking
 class SVServiceCard extends StatelessWidget {
   final ServiceModel service;
   final bool isSelected;
@@ -711,7 +795,6 @@ class SVServiceCard extends StatelessWidget {
   }
 }
 
-/// Purpose-built Service List Row (Used in Salon Details & Booking Step 1)
 class SVServiceRow extends StatelessWidget {
   final ServiceModel service;
   final bool isSelected;
@@ -759,7 +842,9 @@ class SVServiceRow extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 if (service.description.isNotEmpty) ...[
@@ -770,7 +855,9 @@ class SVServiceRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
-                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                      color: isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.lightTextTertiary,
                     ),
                   ),
                 ],
@@ -780,14 +867,18 @@ class SVServiceRow extends StatelessWidget {
                     Icon(
                       Icons.schedule_rounded,
                       size: 13,
-                      color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                      color: isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.lightTextTertiary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${service.durationMinutes} mins',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
-                        color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                        color: isDark
+                            ? AppColors.darkTextTertiary
+                            : AppColors.lightTextTertiary,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -816,28 +907,29 @@ class SVServiceRow extends StatelessWidget {
                   color: isSelected ? AppColors.primary : Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey.shade400,
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.shade400,
                     width: 1.5,
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                    ? const Icon(
+                        Icons.check_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      )
                     : null,
               ),
             )
           else if (onAdd != null)
-            SVButton(
-              text: 'Book',
-              size: SVButtonSize.sm,
-              onPressed: onAdd,
-            ),
+            SVButton(text: 'Book', size: SVButtonSize.sm, onPressed: onAdd),
         ],
       ),
     );
   }
 }
 
-/// Authentic Editorial Promotional Offer Voucher Card
 class SVOfferCard extends StatelessWidget {
   final OfferModel offer;
   final EdgeInsets? margin;
@@ -870,19 +962,26 @@ class SVOfferCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header strip
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.primaryTint,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(13),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.local_offer_rounded, size: 12, color: AppColors.primary),
+                    const Icon(
+                      Icons.local_offer_rounded,
+                      size: 12,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       offer.code,
@@ -908,7 +1007,11 @@ class SVOfferCard extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      const Icon(Icons.copy_rounded, size: 10.5, color: AppColors.primary),
+                      const Icon(
+                        Icons.copy_rounded,
+                        size: 10.5,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 3),
                       Text(
                         'Copy',
@@ -925,7 +1028,6 @@ class SVOfferCard extends StatelessWidget {
             ),
           ),
 
-          // Body
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
             child: Column(
@@ -939,7 +1041,9 @@ class SVOfferCard extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -949,7 +1053,9 @@ class SVOfferCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -964,7 +1070,9 @@ class SVOfferCard extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                          color: isDark
+                              ? AppColors.darkTextTertiary
+                              : AppColors.lightTextTertiary,
                         ),
                       ),
                     ),
@@ -973,7 +1081,10 @@ class SVOfferCard extends StatelessWidget {
                       GestureDetector(
                         onTap: onApply,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             gradient: AppGradients.primary,
                             borderRadius: BorderRadius.circular(8),
@@ -999,7 +1110,6 @@ class SVOfferCard extends StatelessWidget {
   }
 }
 
-/// Purpose-built Appointment Card with Date Badge & Action Triggers
 class SVBookingCard extends StatelessWidget {
   final BookingModel booking;
   final VoidCallback onTap;
@@ -1059,18 +1169,24 @@ class SVBookingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Status + Amount
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSpacing.cardRadius)),
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.lightSurfaceSecondary,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppSpacing.cardRadius),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3.5,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withAlpha(25),
                       borderRadius: BorderRadius.circular(6),
@@ -1090,14 +1206,15 @@ class SVBookingCard extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Content Body
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -1108,7 +1225,9 @@ class SVBookingCard extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -1122,26 +1241,36 @@ class SVBookingCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  // Date and Time schedule pills
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.lightSurfaceSecondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.primary),
+                            const Icon(
+                              Icons.calendar_today_outlined,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               booking.date,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                           ],
@@ -1149,22 +1278,33 @@ class SVBookingCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.lightSurfaceSecondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.schedule_rounded, size: 13, color: AppColors.primary),
+                            const Icon(
+                              Icons.schedule_rounded,
+                              size: 13,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               booking.timeSlot,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
                               ),
                             ),
                           ],
@@ -1173,7 +1313,6 @@ class SVBookingCard extends StatelessWidget {
                     ],
                   ),
 
-                  // Actions row if active or receipt if completed
                   if (!isCancelled) ...[
                     const SizedBox(height: 12),
                     const Divider(height: 1),
@@ -1189,7 +1328,10 @@ class SVBookingCard extends StatelessWidget {
                           if (booking.status.toLowerCase() == 'completed') ...[
                             if (booking.reviewed)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.success.withAlpha(25),
                                   borderRadius: BorderRadius.circular(6),
@@ -1197,7 +1339,11 @@ class SVBookingCard extends StatelessWidget {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.check_circle_rounded, size: 13, color: AppColors.success),
+                                    const Icon(
+                                      Icons.check_circle_rounded,
+                                      size: 13,
+                                      color: AppColors.success,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       'Reviewed ✓',
@@ -1219,7 +1365,10 @@ class SVBookingCard extends StatelessWidget {
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
                                   visualDensity: VisualDensity.compact,
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   textStyle: GoogleFonts.plusJakartaSans(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
@@ -1230,23 +1379,37 @@ class SVBookingCard extends StatelessWidget {
                           if (onDownloadPdf != null)
                             TextButton.icon(
                               onPressed: onDownloadPdf,
-                              icon: const Icon(Icons.receipt_long_rounded, size: 14),
+                              icon: const Icon(
+                                Icons.receipt_long_rounded,
+                                size: 14,
+                              ),
                               label: const Text('Receipt'),
                               style: TextButton.styleFrom(
-                                foregroundColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                foregroundColor: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
                                 visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                               ),
                             ),
                           if (onReschedule != null)
                             TextButton.icon(
                               onPressed: onReschedule,
-                              icon: const Icon(Icons.event_repeat_rounded, size: 14),
+                              icon: const Icon(
+                                Icons.event_repeat_rounded,
+                                size: 14,
+                              ),
                               label: const Text('Reschedule'),
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.primary,
                                 visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                               ),
                             ),
                           if (onCancel != null)
@@ -1257,7 +1420,10 @@ class SVBookingCard extends StatelessWidget {
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.error,
                                 visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                               ),
                             ),
                         ],
