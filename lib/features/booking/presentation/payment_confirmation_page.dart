@@ -20,14 +20,14 @@ class PaymentConfirmationPage extends StatelessWidget {
     final extra = GoRouterState.of(context).extra as Map<String, dynamic>?;
     final booking = extra?['booking'] as BookingModel?;
 
-    if (booking == null) {
+    if (booking == null || booking.id.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Confirmation')),
+        appBar: AppBar(title: const Text('Booking Status')),
         body: SVEmptyState(
-          icon: Icons.check_circle_outline_rounded,
-          title: 'Booking Confirmed',
-          description: 'Your appointment has been scheduled successfully.',
-          actionLabel: 'Go to Bookings',
+          icon: Icons.search_off_rounded,
+          title: 'Booking Info Unavailable',
+          description: 'We could not locate confirmation details. Please check your booking history.',
+          actionLabel: 'Go to My Appointments',
           onAction: () => context.go('/bookings'),
         ),
       );
@@ -147,11 +147,12 @@ class PaymentConfirmationPage extends StatelessWidget {
 
                           // Details grid
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _buildMetaColumn('DATE', booking.date, isDark),
-                              _buildMetaColumn('TIME', booking.timeSlot, isDark),
-                              _buildMetaColumn('STATUS', booking.status.toUpperCase(), isDark, isHighlight: true),
+                              Expanded(child: _buildMetaColumn('DATE', booking.date, isDark)),
+                              Expanded(child: _buildMetaColumn('TIME', booking.timeSlot, isDark)),
+                              Expanded(
+                                child: _buildMetaColumn('STATUS', booking.status.toUpperCase(), isDark, isHighlight: true),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -242,6 +243,8 @@ class PaymentConfirmationPage extends StatelessWidget {
         const SizedBox(height: 3),
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             fontWeight: FontWeight.w700,

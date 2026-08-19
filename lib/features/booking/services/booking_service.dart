@@ -72,6 +72,7 @@ class BookingService {
     double? latitude,
     double? longitude,
     String? promoCode,
+    String? bookingAttemptId,
   }) async {
     if (currentUser == null) return const Failure("Session required.");
 
@@ -90,6 +91,10 @@ class BookingService {
       'homeAddress': homeAddress,
       'contactNumber': contactNumber,
     };
+
+    if (bookingAttemptId != null && bookingAttemptId.isNotEmpty) {
+      bodyMap['bookingAttemptId'] = bookingAttemptId;
+    }
 
     if (promoCode != null && promoCode.isNotEmpty) {
       bodyMap['promoCode'] = promoCode;
@@ -116,6 +121,15 @@ class BookingService {
       body: bodyMap,
       onSuccess: (data) =>
           BookingModel.fromJson(Map<String, dynamic>.from(data)),
+    );
+  }
+
+  Future<ApiResult<BookingModel>> getBookingByAttemptId(String attemptId) async {
+    return _client.request<BookingModel>(
+      "GET",
+      "/api/v1/bookings/attempt/$attemptId",
+      auth: true,
+      onSuccess: (data) => BookingModel.fromJson(Map<String, dynamic>.from(data)),
     );
   }
 
@@ -199,7 +213,7 @@ class BookingService {
       "GET",
       "/api/v1/bookings/$bookingId/cancellation-quote",
       auth: true,
-      onSuccess: (data) => Map<String, dynamic>.from(data),
+      onSuccess: (data) => data is Map ? Map<String, dynamic>.from(data) : <String, dynamic>{},
     );
   }
 

@@ -25,6 +25,7 @@ class BookingBottomBar extends StatelessWidget {
   });
 
   Future<void> _handleConfirmBooking(BuildContext context) async {
+    if (provider.isLoading) return;
     if (provider.selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -37,12 +38,12 @@ class BookingBottomBar extends StatelessWidget {
 
     final booking = await provider.confirmBooking();
     if (context.mounted) {
-      if (booking != null) {
+      if (booking != null && booking.id.isNotEmpty) {
         context.pushReplacement('/payment-confirmation', extra: {'booking': booking});
-      } else if (provider.error != null) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.error!),
+            content: Text(provider.error ?? 'Failed to create booking. Please select another slot or retry.'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -107,7 +108,7 @@ class BookingBottomBar extends StatelessWidget {
             SVButton(
               text: 'Confirm Booking',
               isLoading: provider.isLoading,
-              onPressed: () => _handleConfirmBooking(context),
+              onPressed: provider.isLoading ? null : () => _handleConfirmBooking(context),
               icon: Icons.check_circle_rounded,
               size: SVButtonSize.md,
             ),

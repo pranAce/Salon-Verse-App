@@ -178,6 +178,7 @@ class AppService {
     double? latitude,
     double? longitude,
     String? promoCode,
+    String? bookingAttemptId,
   }) {
     return booking.createBooking(
       currentUser: auth.currentUser,
@@ -193,7 +194,12 @@ class AppService {
       latitude: latitude,
       longitude: longitude,
       promoCode: promoCode,
+      bookingAttemptId: bookingAttemptId,
     );
+  }
+
+  Future<ApiResult<BookingModel>> getBookingByAttemptId(String attemptId) {
+    return booking.getBookingByAttemptId(attemptId);
   }
 
   Future<ApiResult<List<BookingModel>>> getBookings() {

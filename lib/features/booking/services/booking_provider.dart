@@ -34,6 +34,13 @@ class BookingProvider extends ChangeNotifier {
   double? _homeLat;
   double? _homeLng;
 
+  String? _currentBookingAttemptId;
+  String? get currentBookingAttemptId => _currentBookingAttemptId;
+
+  String _generateAttemptId() {
+    return "ATT-${DateTime.now().millisecondsSinceEpoch}-${(1000 + (DateTime.now().microsecondsSinceEpoch % 9000))}";
+  }
+
   SalonModel? get selectedSalon => _selectedSalon;
   ServiceModel? get selectedService => _selectedService;
   StylistModel? get selectedStylist => _selectedStylist;
@@ -134,6 +141,7 @@ class BookingProvider extends ChangeNotifier {
     _appliedPromoCode = null;
     _discountAmount = 0.0;
     _error = null;
+    _currentBookingAttemptId = _generateAttemptId();
     SocketService.instance.joinSalon(salon.id);
     notifyListeners();
     fetchStylistsForSalon(salon.id, serviceId: service.id);
@@ -154,6 +162,7 @@ class BookingProvider extends ChangeNotifier {
     _appliedPromoCode = null;
     _discountAmount = 0.0;
     _error = null;
+    _currentBookingAttemptId = _generateAttemptId();
     SocketService.instance.joinSalon(salon.id);
     notifyListeners();
     fetchStylistsForSalon(salon.id, serviceId: _selectedService?.id);
@@ -258,6 +267,8 @@ class BookingProvider extends ChangeNotifier {
     final dateStr =
         "${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}";
 
+    _currentBookingAttemptId ??= _generateAttemptId();
+
     final result = await _service.createBooking(
       salon: _selectedSalon!,
       service: _selectedService!,
@@ -271,6 +282,7 @@ class BookingProvider extends ChangeNotifier {
       latitude: _homeLat,
       longitude: _homeLng,
       promoCode: _appliedPromoCode,
+      bookingAttemptId: _currentBookingAttemptId,
     );
 
     _isLoading = false;
@@ -278,40 +290,27 @@ class BookingProvider extends ChangeNotifier {
       if (!_bookings.any((b) => b.id == result.data.id)) {
         _bookings.insert(0, result.data);
       }
+      _currentBookingAttemptId = null;
+      _error = null;
       notifyListeners();
       return result.data;
     } else {
-      final user = _service.currentUser;
-      final localBooking = BookingModel(
-        id: "BK-${DateTime.now().millisecondsSinceEpoch}",
-        userId: user?.id ?? 'usr_demo',
-        userName: user?.name ?? 'Valued Customer',
-        salonId: _selectedSalon!.id,
-        salonName: _selectedSalon!.name,
-        salonAddress: _selectedSalon!.address,
-        salonImageUrl: _selectedSalon!.imageUrl,
-        serviceId: _selectedService!.id,
-        serviceName: _selectedService!.name,
-        servicePrice: (_selectedService!.price - _discountAmount).clamp(0, double.infinity),
-        stylistId: _selectedStylist?.id ?? 'salon_staff',
-        stylistName: _selectedStylist?.name ?? 'Any Specialist',
-        date: dateStr,
-        timeSlot: _selectedTime!,
-        paymentMethod: _paymentMethod,
-        paymentStatus: _paymentMethod == 'Cash' ? 'Pending' : 'Completed',
-        status: 'confirmed',
-        queuePosition: 1,
-        createdAt: DateTime.now().toIso8601String(),
-        isHomeService: _isHomeService,
-        homeAddress: _homeAddress,
-        contactNumber: _contactNumber,
-      );
-
-      _bookings.insert(0, localBooking);
-      _error = null;
+      _error = (result as Failure).message;
       notifyListeners();
-      return localBooking;
+      return null;
     }
+  }
+
+  Future<BookingModel?> recoverBookingByAttemptId(String attemptId) async {
+    final res = await _service.getBookingByAttemptId(attemptId);
+    if (res is Success<BookingModel>) {
+      if (!_bookings.any((b) => b.id == res.data.id)) {
+        _bookings.insert(0, res.data);
+        notifyListeners();
+      }
+      return res.data;
+    }
+    return null;
   }
 
   String? _appliedPromoCode;
@@ -447,16 +446,14 @@ class BookingProvider extends ChangeNotifier {
       if (idx != -1) {
         _bookings[idx] = result.data;
       }
-    } else if (idx != -1) {
-      _bookings[idx] = _bookings[idx].copyWith(
-        date: dateStr,
-        timeSlot: newTimeSlot,
-        status: 'confirmed',
-      );
+      _error = null;
+      notifyListeners();
+      return true;
+    } else {
+      _error = (result as Failure).message;
+      notifyListeners();
+      return false;
     }
-    _error = null;
-    notifyListeners();
-    return true;
   }
 
   Future<Map<String, dynamic>?> getCancellationQuote(String bookingId) async {
@@ -483,18 +480,14 @@ class BookingProvider extends ChangeNotifier {
       if (idx != -1) {
         _bookings[idx] = result.data;
       }
+      _error = null;
       notifyListeners();
       return true;
-    } else if (result is Failure<BookingModel>) {
+    } else {
       _error = (result as Failure).message;
       notifyListeners();
       return false;
-    } else if (idx != -1) {
-      _bookings[idx] = _bookings[idx].copyWith(status: 'cancelled');
     }
-    _error = null;
-    notifyListeners();
-    return true;
   }
 
   Future<bool> recordPayment(

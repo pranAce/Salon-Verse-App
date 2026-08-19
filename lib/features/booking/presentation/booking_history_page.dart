@@ -34,14 +34,49 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     final bookingProv = context.read<BookingProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Show clean loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2.5),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Calculating refund details...',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
 
-    final quote = await bookingProv.getCancellationQuote(booking.id);
-    if (context.mounted) Navigator.pop(context);
+    Map<String, dynamic>? quote;
+    try {
+      quote = await bookingProv.getCancellationQuote(booking.id);
+    } catch (_) {
+      quote = null;
+    } finally {
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
 
     final isEligible = quote?['isEligibleForFullRefund'] as bool? ?? true;
     final amountPaid = (quote?['amountPaid'] as num?)?.toDouble() ?? booking.amountPaid;

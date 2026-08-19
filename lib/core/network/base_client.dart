@@ -106,10 +106,12 @@ class BaseClient {
           continue;
         }
         final errText = e.toString();
-        if (errText.contains('Connection closed') ||
+        if (e is TimeoutException ||
+            errText.contains('TimeoutException') ||
+            errText.contains('Connection closed') ||
             errText.contains('ClientException') ||
             errText.contains('SocketException')) {
-          return const Failure("Network connection unavailable. Please check backend connection.");
+          return const Failure("Request timed out or network connection unavailable. Please check backend connection.");
         }
         return Failure(errText);
       }
