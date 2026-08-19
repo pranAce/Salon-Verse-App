@@ -617,7 +617,7 @@ class SVStylistCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? const Color(0xFF2E121E) : AppColors.primaryTint)
+              ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
               : (isDark ? AppColors.darkSurface : Colors.white),
           borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           border: Border.all(
@@ -736,7 +736,7 @@ class SVServiceRow extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isSelected
-            ? (isDark ? const Color(0xFF2E121E) : AppColors.primaryTint)
+            ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
             : (isDark ? AppColors.darkSurface : Colors.white),
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
         border: Border.all(
@@ -1006,6 +1006,7 @@ class SVBookingCard extends StatelessWidget {
   final VoidCallback? onCancel;
   final VoidCallback? onReschedule;
   final VoidCallback? onDownloadPdf;
+  final VoidCallback? onLeaveReview;
 
   const SVBookingCard({
     super.key,
@@ -1014,6 +1015,7 @@ class SVBookingCard extends StatelessWidget {
     this.onCancel,
     this.onReschedule,
     this.onDownloadPdf,
+    this.onLeaveReview,
   });
 
   Color _getStatusColor(String status) {
@@ -1184,6 +1186,47 @@ class SVBookingCard extends StatelessWidget {
                         spacing: 2,
                         runSpacing: 4,
                         children: [
+                          if (booking.status.toLowerCase() == 'completed') ...[
+                            if (booking.reviewed)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.check_circle_rounded, size: 13, color: AppColors.success),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Reviewed ✓',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.success,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else if (onLeaveReview != null)
+                              ElevatedButton.icon(
+                                onPressed: onLeaveReview,
+                                icon: const Icon(Icons.star_rounded, size: 14),
+                                label: const Text('Leave a Review'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  visualDensity: VisualDensity.compact,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  textStyle: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                          ],
                           if (onDownloadPdf != null)
                             TextButton.icon(
                               onPressed: onDownloadPdf,

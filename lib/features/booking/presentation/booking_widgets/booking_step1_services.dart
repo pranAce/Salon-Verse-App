@@ -102,6 +102,25 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
         ? widget.salon.services
         : widget.salon.services.where((s) => s.category == _selectedCategory).toList();
 
+    final selectedService = provider.selectedService;
+    final sourceStylists = provider.stylists.isNotEmpty ? provider.stylists : widget.salon.stylists;
+
+    List<StylistModel> matchingStylists = sourceStylists;
+    if (selectedService != null) {
+      final catLower = selectedService.category.toLowerCase().trim();
+      final nameLower = selectedService.name.toLowerCase().trim();
+      final filtered = sourceStylists.where((st) {
+        if (st.specialties.isEmpty) return true;
+        return st.specialties.any((spec) {
+          final s = spec.toLowerCase();
+          return s.contains(catLower) || catLower.contains(s) || s.contains(nameLower) || nameLower.contains(s);
+        });
+      }).toList();
+      if (filtered.isNotEmpty) {
+        matchingStylists = filtered;
+      }
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
@@ -224,95 +243,102 @@ class _BookingStep1ServicesState extends State<BookingStep1Services> {
           const SizedBox(height: 20),
 
           // 2. Stylist Selection
-          if (widget.salon.stylists.isNotEmpty) ...[
-            SVSectionHeader(
-              title: 'Select Specialist',
-              subtitle: 'Choose a dedicated stylist or any available',
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 144,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.salon.stylists.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    final isAnySel = provider.selectedStylist == null;
-                    return GestureDetector(
-                      onTap: () => provider.selectStylist(null),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        width: 110,
-                        margin: const EdgeInsets.only(right: 10),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isAnySel
-                              ? (isDark ? const Color(0xFF2E121E) : AppColors.primaryTint)
-                              : (isDark ? AppColors.darkSurface : Colors.white),
-                          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                          border: Border.all(
-                            color: isAnySel
-                                ? AppColors.primary
-                                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
-                            width: isAnySel ? 1.5 : 1.0,
+          SVSectionHeader(
+            title: 'Select Specialist',
+            subtitle: selectedService != null
+                ? 'Specialists qualified for ${selectedService.name}'
+                : 'Choose a dedicated stylist or any available',
+          ),
+          const SizedBox(height: 8),
+          provider.isLoadingStylists
+              ? const SizedBox(
+                  height: 144,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : SizedBox(
+                  height: 144,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: matchingStylists.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        final isAnySel = provider.selectedStylist == null;
+                        return GestureDetector(
+                          onTap: () => provider.selectStylist(null),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            width: 110,
+                            margin: const EdgeInsets.only(right: 10),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isAnySel
+                                  ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
+                                  : (isDark ? AppColors.darkSurface : Colors.white),
+                              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                              border: Border.all(
+                                color: isAnySel
+                                    ? AppColors.primary
+                                    : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                width: isAnySel ? 1.5 : 1.0,
+                              ),
+                              boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 26,
+                                  backgroundColor: isAnySel
+                                      ? AppColors.primary
+                                      : (isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint),
+                                  child: Icon(
+                                    Icons.groups_rounded,
+                                    size: 22,
+                                    color: isAnySel ? Colors.white : AppColors.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Any Specialist',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Auto-assigned',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10.5,
+                                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          boxShadow: isDark ? null : AppSpacing.softShadow(context),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 26,
-                              backgroundColor: isAnySel
-                                  ? AppColors.primary
-                                  : (isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint),
-                              child: Icon(
-                                Icons.groups_rounded,
-                                size: 22,
-                                color: isAnySel ? Colors.white : AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Any Specialist',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Auto-assigned',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 10.5,
-                                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
+                        );
+                      }
 
-                  final stylist = widget.salon.stylists[index - 1];
-                  final isSel = provider.selectedStylist?.id == stylist.id;
-                  return SVStylistCard(
-                    stylist: stylist,
-                    isSelected: isSel,
-                    onTap: () => provider.selectStylist(stylist),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+                      final stylist = matchingStylists[index - 1];
+                      final isSel = provider.selectedStylist?.id == stylist.id;
+                      return SVStylistCard(
+                        stylist: stylist,
+                        isSelected: isSel,
+                        onTap: () => provider.selectStylist(stylist),
+                      );
+                    },
+                  ),
+                ),
+          const SizedBox(height: 20),
 
           // 3. Service Selection
           SVSectionHeader(

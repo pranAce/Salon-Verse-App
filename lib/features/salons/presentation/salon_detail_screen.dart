@@ -483,7 +483,7 @@ class _SalonDetailScreenState extends State<SalonDetailScreen> {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: isSel
-                              ? (isDark ? const Color(0xFF2E121E) : AppColors.primaryTint)
+                              ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
                               : (isDark ? AppColors.darkSurface : Colors.white),
                           borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
                           border: Border.all(

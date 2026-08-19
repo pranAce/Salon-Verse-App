@@ -39,6 +39,25 @@ class BookingService {
     );
   }
 
+  Future<ApiResult<List<StylistModel>>> getStylistsBySalon(String salonId, {String? serviceId}) async {
+    final queryParams = <String, String>{};
+    if (serviceId != null && serviceId.isNotEmpty) {
+      queryParams['serviceId'] = serviceId;
+    }
+    final queryString = queryParams.isNotEmpty ? "?${Uri(queryParameters: queryParams).query}" : "";
+    return _client.request<List<StylistModel>>(
+      "GET",
+      "/api/v1/stylists/salon/$salonId$queryString",
+      auth: false,
+      onSuccess: (data) {
+        final list = data is List ? data : (data is Map && data['data'] is List) ? data['data'] : [];
+        return (list as List)
+            .map((e) => StylistModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      },
+    );
+  }
+
   Future<ApiResult<BookingModel>> createBooking({
     required UserModel? currentUser,
     required SalonModel salon,

@@ -193,7 +193,129 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
           ),
           const SizedBox(height: 20),
 
-          // 4. Promo Code Entry
+          // 4. Stylist Selection (Above Promo Code)
+          () {
+            final sourceStylists = provider.stylists.isNotEmpty ? provider.stylists : widget.salon.stylists;
+            List<StylistModel> matchingStylists = sourceStylists;
+            if (widget.service != null) {
+              final catLower = widget.service!.category.toLowerCase().trim();
+              final nameLower = widget.service!.name.toLowerCase().trim();
+              final filtered = sourceStylists.where((st) {
+                if (st.specialties.isEmpty) return true;
+                return st.specialties.any((spec) {
+                  final s = spec.toLowerCase();
+                  return s.contains(catLower) || catLower.contains(s) || s.contains(nameLower) || nameLower.contains(s);
+                });
+              }).toList();
+              if (filtered.isNotEmpty) {
+                matchingStylists = filtered;
+              }
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SVSectionHeader(
+                  title: 'Select Specialist',
+                  subtitle: widget.service != null
+                      ? 'Specialists qualified for ${widget.service!.name}'
+                      : 'Choose a dedicated stylist or any available',
+                ),
+                const SizedBox(height: 8),
+                provider.isLoadingStylists
+                    ? const SizedBox(
+                        height: 144,
+                        child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : SizedBox(
+                        height: 144,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: matchingStylists.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              final isAnySel = provider.selectedStylist == null;
+                              return GestureDetector(
+                                onTap: () => provider.selectStylist(null),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  width: 110,
+                                  margin: const EdgeInsets.only(right: 10),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: isAnySel
+                                        ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
+                                        : (isDark ? AppColors.darkSurface : Colors.white),
+                                    borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                                    border: Border.all(
+                                      color: isAnySel
+                                          ? AppColors.primary
+                                          : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                                      width: isAnySel ? 1.5 : 1.0,
+                                    ),
+                                    boxShadow: isDark ? null : AppSpacing.softShadow(context),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 26,
+                                        backgroundColor: isAnySel
+                                            ? AppColors.primary
+                                            : (isDark ? AppColors.darkSurfaceElevated : AppColors.primaryTint),
+                                        child: Icon(
+                                          Icons.groups_rounded,
+                                          size: 22,
+                                          color: isAnySel ? Colors.white : AppColors.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Any Specialist',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Auto-assigned',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 10.5,
+                                          color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+
+                            final stylist = matchingStylists[index - 1];
+                            final isSel = provider.selectedStylist?.id == stylist.id;
+                            return SVStylistCard(
+                              stylist: stylist,
+                              isSelected: isSel,
+                              onTap: () => provider.selectStylist(stylist),
+                            );
+                          },
+                        ),
+                      ),
+                const SizedBox(height: 20),
+              ],
+            );
+          }(),
+
+          // 5. Promo Code Entry
           SVSectionHeader(
             title: 'Promo & Discount',
             subtitle: 'Have a coupon or voucher code?',

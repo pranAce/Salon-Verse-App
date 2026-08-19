@@ -11,6 +11,8 @@ import 'package:salonverse/shared/design_system/sv_cards.dart';
 import 'package:salonverse/shared/design_system/sv_button.dart';
 import 'package:salonverse/shared/design_system/sv_feedback_states.dart';
 import 'package:salonverse/shared/design_system/sv_selection_widgets.dart';
+import 'package:salonverse/features/salons/services/review_service.dart';
+import 'package:salonverse/core/network/api_result.dart';
 
 class BookingHistoryPage extends StatefulWidget {
   const BookingHistoryPage({super.key});
@@ -394,6 +396,141 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     );
   }
 
+  void _showReviewModal(BuildContext context, BookingModel booking) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    int selectedRating = 5;
+    final TextEditingController commentController = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                18,
+                20,
+                MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurface : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkBorder : Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Rate Your Experience',
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${booking.serviceName} at ${booking.salonName}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 1-5 Star Rating Selector
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starVal = index + 1;
+                      final isFilled = starVal <= selectedRating;
+                      return IconButton(
+                        iconSize: 36,
+                        icon: Icon(
+                          isFilled ? Icons.star_rounded : Icons.star_border_rounded,
+                          color: isFilled ? const Color(0xFFF59E0B) : (isDark ? AppColors.darkTextTertiary : Colors.grey.shade400),
+                        ),
+                        onPressed: () {
+                          setModalState(() => selectedRating = starVal);
+                        },
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Comment Input
+                  TextField(
+                    controller: commentController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Share your feedback about the salon & specialist (optional)...',
+                      hintStyle: GoogleFonts.plusJakartaSans(fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Submit Button
+                  SVButton(
+                    text: 'Submit Review',
+                    icon: Icons.check_circle_rounded,
+                    isFullWidth: true,
+                    isLoading: isSubmitting,
+                    onPressed: () async {
+                      setModalState(() => isSubmitting = true);
+                      final service = ReviewService();
+                      final result = await service.submitReview(
+                        salonId: booking.salonId,
+                        bookingId: booking.id,
+                        rating: selectedRating.toDouble(),
+                        comment: commentController.text.trim(),
+                      );
+                      setModalState(() => isSubmitting = false);
+
+                      if (context.mounted) {
+                        Navigator.pop(ctx);
+                        if (result is Success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Thank you! Your review has been submitted.'),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                          context.read<BookingProvider>().fetchBookings();
+                        } else if (result is Failure) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text((result as Failure).message),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -480,6 +617,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           onTap: () => _showReceiptModal(context, booking),
           onCancel: isActive ? () => _showCancelDialog(context, booking) : null,
           onReschedule: isActive ? () => _showRescheduleModal(context, booking) : null,
+          onLeaveReview: booking.status.toLowerCase() == 'completed' && !booking.reviewed
+              ? () => _showReviewModal(context, booking)
+              : null,
           onDownloadPdf: () async {
             await ReceiptPdfHelper.generateAndDownloadReceipt(
               context: context,

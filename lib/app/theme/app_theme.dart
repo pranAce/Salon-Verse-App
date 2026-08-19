@@ -12,6 +12,7 @@ class AppColors {
   static const Color primaryDark = Color(0xFF8E4CB0); // Deep Purple
   static const Color primaryGradientEnd = Color(0xFFB060C0); // Orchid #B060C0
   static const Color primaryTint = Color(0xFFF6EEFB); // Soft Purple Tint
+  static const Color primaryTintDark = Color(0xFF281B35); // Soft Purple Tint (Dark)
   static const Color primaryGlow = Color(0x29A060C0);
 
   // Palette Additions from colorpallate.json
@@ -324,7 +325,7 @@ class AppThemeBuilder {
       brightness: brightness,
       primary: primaryColor,
       onPrimary: Colors.white,
-      primaryContainer: isDark ? const Color(0xFF32121E) : AppColors.primaryTint,
+      primaryContainer: isDark ? AppColors.primaryTintDark : AppColors.primaryTint,
       onPrimaryContainer: isDark ? const Color(0xFFFFD8E4) : AppColors.primaryDark,
       secondary: AppColors.primaryGradientEnd,
       onSecondary: Colors.white,

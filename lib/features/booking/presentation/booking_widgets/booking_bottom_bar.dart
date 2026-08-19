@@ -104,21 +104,13 @@ class BookingBottomBar extends StatelessWidget {
               ],
             ),
             const Spacer(),
-            if (currentStep == 0)
-              SVButton(
-                text: 'Continue',
-                onPressed: selectedService != null ? onContinueToStep2 : null,
-                icon: Icons.arrow_forward_rounded,
-                size: SVButtonSize.md,
-              )
-            else
-              SVButton(
-                text: 'Confirm Booking',
-                isLoading: provider.isLoading,
-                onPressed: () => _handleConfirmBooking(context),
-                icon: Icons.check_circle_rounded,
-                size: SVButtonSize.md,
-              ),
+            SVButton(
+              text: 'Confirm Booking',
+              isLoading: provider.isLoading,
+              onPressed: () => _handleConfirmBooking(context),
+              icon: Icons.check_circle_rounded,
+              size: SVButtonSize.md,
+            ),
           ],
         ),
       ),

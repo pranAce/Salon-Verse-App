@@ -55,6 +55,12 @@ class BookingProvider extends ChangeNotifier {
   List<BookingSlotModel> _bookedSlots = [];
   List<BookingSlotModel> get bookedSlots => _bookedSlots;
 
+  List<StylistModel> _stylists = [];
+  List<StylistModel> get stylists => _stylists;
+
+  bool _isLoadingStylists = false;
+  bool get isLoadingStylists => _isLoadingStylists;
+
   bool _isSalonClosed = false;
   String? _closureReason;
 
@@ -69,7 +75,25 @@ class BookingProvider extends ChangeNotifier {
   void selectService(ServiceModel service) {
     _selectedService = service;
     notifyListeners();
+    if (_selectedSalon != null) {
+      fetchStylistsForSalon(_selectedSalon!.id, serviceId: service.id);
+    }
     fetchDynamicSlots();
+  }
+
+  Future<void> fetchStylistsForSalon(String salonId, {String? serviceId}) async {
+    _isLoadingStylists = true;
+    notifyListeners();
+
+    final res = await _service.booking.getStylistsBySalon(salonId, serviceId: serviceId);
+    _isLoadingStylists = false;
+
+    if (res is Success<List<StylistModel>>) {
+      _stylists = res.data;
+    } else if (_selectedSalon != null && _selectedSalon!.stylists.isNotEmpty) {
+      _stylists = _selectedSalon!.stylists;
+    }
+    notifyListeners();
   }
 
   void setHomeService(bool value, {String address = '', String contact = ''}) {
@@ -100,6 +124,7 @@ class BookingProvider extends ChangeNotifier {
     _selectedSalon = salon;
     _selectedService = service;
     _selectedStylist = null; // Default: Any Specialist
+    _stylists = salon.stylists;
     _selectedDate ??= DateTime.now();
     _selectedTime = null;
     _paymentMethod = "Cash";
@@ -111,6 +136,7 @@ class BookingProvider extends ChangeNotifier {
     _error = null;
     SocketService.instance.joinSalon(salon.id);
     notifyListeners();
+    fetchStylistsForSalon(salon.id, serviceId: service.id);
     fetchDynamicSlots();
   }
 
@@ -118,6 +144,7 @@ class BookingProvider extends ChangeNotifier {
     _selectedSalon = salon;
     _selectedService = salon.services.isNotEmpty ? salon.services.first : null;
     _selectedStylist = null; // Default: Any Specialist
+    _stylists = salon.stylists;
     _selectedDate ??= DateTime.now();
     _selectedTime = null;
     _paymentMethod = "Cash";
@@ -129,6 +156,7 @@ class BookingProvider extends ChangeNotifier {
     _error = null;
     SocketService.instance.joinSalon(salon.id);
     notifyListeners();
+    fetchStylistsForSalon(salon.id, serviceId: _selectedService?.id);
     fetchDynamicSlots();
   }
 

@@ -140,7 +140,7 @@ class MainShell extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? const Color(0xFF32121E) : AppColors.primaryTint)
+              ? (isDark ? AppColors.primaryTintDark : AppColors.primaryTint)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
