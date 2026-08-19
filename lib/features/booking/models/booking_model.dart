@@ -1,4 +1,3 @@
-
 class BookingModel {
   final String id;
   final String userId;
@@ -10,6 +9,13 @@ class BookingModel {
   final String serviceId;
   final String serviceName;
   final double servicePrice;
+  final double totalAmount;
+  final double bookingFeeAmount;
+  final double amountPaid;
+  final double remainingAmount;
+  final String cancellationCutoff;
+  final double refundAmount;
+  final String refundStatus;
   final String stylistId;
   final String stylistName;
   final String date;
@@ -24,7 +30,7 @@ class BookingModel {
   final String homeAddress;
   final String contactNumber;
 
-  double get finalAmount => servicePrice;
+  double get finalAmount => totalAmount > 0 ? totalAmount : servicePrice;
   String get salonImage => salonImageUrl;
 
   BookingModel({
@@ -38,6 +44,13 @@ class BookingModel {
     required this.serviceId,
     required this.serviceName,
     required this.servicePrice,
+    double? totalAmount,
+    double? bookingFeeAmount,
+    double? amountPaid,
+    double? remainingAmount,
+    this.cancellationCutoff = '',
+    this.refundAmount = 0.0,
+    this.refundStatus = 'none',
     required this.stylistId,
     required this.stylistName,
     required this.date,
@@ -51,7 +64,19 @@ class BookingModel {
     this.isHomeService = false,
     this.homeAddress = '',
     this.contactNumber = '',
-  });
+  })  : totalAmount = totalAmount ?? servicePrice,
+        bookingFeeAmount = bookingFeeAmount ??
+            (paymentMethod.toLowerCase() == 'cash'
+                ? (servicePrice * 0.10)
+                : servicePrice),
+        amountPaid = amountPaid ??
+            (paymentMethod.toLowerCase() == 'cash'
+                ? (servicePrice * 0.10)
+                : servicePrice),
+        remainingAmount = remainingAmount ??
+            (paymentMethod.toLowerCase() == 'cash'
+                ? (servicePrice * 0.90)
+                : 0.0);
 
   BookingModel copyWith({
     String? id,
@@ -64,6 +89,13 @@ class BookingModel {
     String? serviceId,
     String? serviceName,
     double? servicePrice,
+    double? totalAmount,
+    double? bookingFeeAmount,
+    double? amountPaid,
+    double? remainingAmount,
+    String? cancellationCutoff,
+    double? refundAmount,
+    String? refundStatus,
     String? stylistId,
     String? stylistName,
     String? date,
@@ -89,6 +121,13 @@ class BookingModel {
       serviceId: serviceId ?? this.serviceId,
       serviceName: serviceName ?? this.serviceName,
       servicePrice: servicePrice ?? this.servicePrice,
+      totalAmount: totalAmount ?? this.totalAmount,
+      bookingFeeAmount: bookingFeeAmount ?? this.bookingFeeAmount,
+      amountPaid: amountPaid ?? this.amountPaid,
+      remainingAmount: remainingAmount ?? this.remainingAmount,
+      cancellationCutoff: cancellationCutoff ?? this.cancellationCutoff,
+      refundAmount: refundAmount ?? this.refundAmount,
+      refundStatus: refundStatus ?? this.refundStatus,
       stylistId: stylistId ?? this.stylistId,
       stylistName: stylistName ?? this.stylistName,
       date: date ?? this.date,
@@ -117,6 +156,13 @@ class BookingModel {
       'serviceId': serviceId,
       'serviceName': serviceName,
       'servicePrice': servicePrice,
+      'totalAmount': totalAmount,
+      'bookingFeeAmount': bookingFeeAmount,
+      'amountPaid': amountPaid,
+      'remainingAmount': remainingAmount,
+      'cancellationCutoff': cancellationCutoff,
+      'refundAmount': refundAmount,
+      'refundStatus': refundStatus,
       'stylistId': stylistId,
       'stylistName': stylistName,
       'date': date,
@@ -159,7 +205,17 @@ class BookingModel {
     final sty = json['stylist'];
 
     final bookingId = (json['id'] ?? json['_id'])?.toString() ?? '';
-    final model = BookingModel(
+    final sPrice = srv is Map && srv['price'] != null
+        ? (srv['price'] as num).toDouble()
+        : ((json['servicePrice'] as num?)?.toDouble() ?? 0.0);
+    final totAmt = (json['totalAmount'] as num?)?.toDouble() ?? sPrice;
+    final pMethod = json['paymentMethod']?.toString() ?? 'cash';
+    final isCash = pMethod.toLowerCase() == 'cash';
+    final bFee = (json['bookingFeeAmount'] as num?)?.toDouble() ?? (isCash ? (totAmt * 0.10) : totAmt);
+    final amtPaid = (json['amountPaid'] as num?)?.toDouble() ?? bFee;
+    final remAmt = (json['remainingAmount'] as num?)?.toDouble() ?? (isCash ? (totAmt - amtPaid) : 0.0);
+
+    return BookingModel(
       id: bookingId,
       userId: extractId(cust, 'userId'),
       userName: extractName(cust, 'userName'),
@@ -173,29 +229,30 @@ class BookingModel {
           : (json['salonImageUrl'] ?? '').toString().trim(),
       serviceId: extractId(srv, 'serviceId'),
       serviceName: extractName(srv, 'serviceName'),
-      servicePrice: srv is Map && srv['price'] != null
-          ? (srv['price'] as num).toDouble()
-          : ((json['servicePrice'] as num?)?.toDouble() ?? 0.0),
+      servicePrice: sPrice,
+      totalAmount: totAmt,
+      bookingFeeAmount: bFee,
+      amountPaid: amtPaid,
+      remainingAmount: remAmt,
+      cancellationCutoff: json['cancellationCutoff']?.toString() ?? '',
+      refundAmount: (json['refundAmount'] as num?)?.toDouble() ?? 0.0,
+      refundStatus: json['refundStatus']?.toString() ?? 'none',
       stylistId: extractId(sty, 'stylistId'),
       stylistName: extractName(sty, 'stylistName'),
       date: json['date'] != null ? json['date'].toString().split('T')[0] : '',
-      timeSlot:
-          json['timeSlot'] ??
+      timeSlot: json['timeSlot'] ??
           (json['startTime'] != null
               ? '${json['startTime']} - ${json['endTime']}'
               : ''),
-      paymentMethod: json['paymentMethod'] ?? 'Cash',
+      paymentMethod: pMethod,
       paymentStatus: json['paymentStatus'] ?? 'Pending',
       status: json['status'] ?? 'in_queue',
       queuePosition: (json['queuePosition'] as num?)?.toInt() ?? 0,
       createdAt: json['createdAt']?.toString() ?? '',
       reviewed: json['reviewed'] as bool? ?? false,
-      isHomeService:
-          json['isHomeService'] as bool? ?? (json['bookingType'] == 'home'),
+      isHomeService: json['isHomeService'] as bool? ?? (json['bookingType'] == 'home'),
       homeAddress: json['homeAddress'] ?? '',
-      contactNumber:
-          (json['contactNumber'] ?? json['contactPhone'])?.toString() ?? '',
+      contactNumber: (json['contactNumber'] ?? json['contactPhone'])?.toString() ?? '',
     );
-    return model;
   }
 }

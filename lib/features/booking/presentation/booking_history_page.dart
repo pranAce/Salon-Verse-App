@@ -30,28 +30,153 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     });
   }
 
-  void _showCancelDialog(BuildContext context, BookingModel booking) {
+  void _showCancelDialog(BuildContext context, BookingModel booking) async {
     final bookingProv = context.read<BookingProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final quote = await bookingProv.getCancellationQuote(booking.id);
+    if (context.mounted) Navigator.pop(context);
+
+    final isEligible = quote?['isEligibleForFullRefund'] as bool? ?? true;
+    final amountPaid = (quote?['amountPaid'] as num?)?.toDouble() ?? booking.amountPaid;
+    final refundAmount = (quote?['refundAmount'] as num?)?.toDouble() ?? (isEligible ? amountPaid : 0.0);
+
+    if (!context.mounted) return;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Cancel Appointment?',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+          'Cancel Booking?',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+          ),
         ),
-        content: Text(
-          'Are you sure you want to cancel your booking for "${booking.serviceName}" at ${booking.salonName}?',
-          style: GoogleFonts.plusJakartaSans(fontSize: 13.5),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isEligible)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.error.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '24-hour cancellation period has passed.',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Text(
+              '${booking.serviceName} at ${booking.salonName}',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceSecondary,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Amount Paid',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                        ),
+                      ),
+                      Text(
+                        CurrencyFormatter.formatNPR(amountPaid),
+                        style: GoogleFonts.outfit(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Refund Amount',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      Text(
+                        CurrencyFormatter.formatNPR(refundAmount),
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: refundAmount > 0 ? AppColors.success : AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              isEligible
+                  ? 'Refund will be processed automatically according to our cancellation policy.'
+                  : 'According to policy, late cancellations after the 24-hour cutoff are non-refundable.',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11.5,
+                color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Keep Appointment'),
+            child: Text(
+              'Keep Booking',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: isEligible ? AppColors.error : Colors.grey.shade700,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -60,9 +185,11 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               if (context.mounted) {
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Appointment cancelled successfully.'),
-                      backgroundColor: AppColors.error,
+                    SnackBar(
+                      content: Text(isEligible
+                          ? 'Booking cancelled. Refund of ${CurrencyFormatter.formatNPR(refundAmount)} initiated.'
+                          : 'Booking cancelled. No refund available for late cancellation.'),
+                      backgroundColor: isEligible ? AppColors.success : AppColors.error,
                     ),
                   );
                 } else {
@@ -75,7 +202,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                 }
               }
             },
-            child: const Text('Confirm Cancel'),
+            child: Text(isEligible ? 'Cancel Booking' : 'Cancel Anyway'),
           ),
         ],
       ),

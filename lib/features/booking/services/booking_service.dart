@@ -194,12 +194,21 @@ class BookingService {
     );
   }
 
-  Future<ApiResult<BookingModel>> cancelBooking(String bookingId) async {
-    return _client.request<BookingModel>(
-      "PATCH",
-      "/api/v1/bookings/$bookingId/status",
+  Future<ApiResult<Map<String, dynamic>>> getCancellationQuote(String bookingId) async {
+    return _client.request<Map<String, dynamic>>(
+      "GET",
+      "/api/v1/bookings/$bookingId/cancellation-quote",
       auth: true,
-      body: {'status': 'cancelled'},
+      onSuccess: (data) => Map<String, dynamic>.from(data),
+    );
+  }
+
+  Future<ApiResult<BookingModel>> cancelBooking(String bookingId, {String? cancelReason}) async {
+    return _client.request<BookingModel>(
+      "POST",
+      "/api/v1/bookings/$bookingId/cancel",
+      auth: true,
+      body: {'cancelReason': cancelReason ?? ''},
       onSuccess: (data) =>
           BookingModel.fromJson(Map<String, dynamic>.from(data)),
     );

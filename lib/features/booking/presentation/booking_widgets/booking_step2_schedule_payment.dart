@@ -454,37 +454,56 @@ class _BookingStep2SchedulePaymentState extends State<BookingStep2SchedulePaymen
           const SizedBox(height: 20),
 
           // 6. Pricing Breakdown Card
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+          () {
+            final isCash = provider.paymentMethod.toLowerCase() == 'cash';
+            final onlineFee = isCash ? (finalPrice * 0.10) : finalPrice;
+            final payAtSalon = isCash ? (finalPrice * 0.90) : 0.0;
+
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurface : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                ),
               ),
-            ),
-            child: Column(
-              children: [
-                _buildPriceRow('Service Fee', CurrencyFormatter.formatNPR(servicePrice), isDark),
-                if (discount > 0) ...[
+              child: Column(
+                children: [
+                  _buildPriceRow('Total Service Price', CurrencyFormatter.formatNPR(servicePrice), isDark),
+                  if (discount > 0) ...[
+                    const SizedBox(height: 8),
+                    _buildPriceRow(
+                      'Promo Discount (${provider.appliedPromoCode})',
+                      '- ${CurrencyFormatter.formatNPR(discount)}',
+                      isDark,
+                      isHighlight: true,
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   _buildPriceRow(
-                    'Promo Discount (${provider.appliedPromoCode})',
-                    '- ${CurrencyFormatter.formatNPR(discount)}',
+                    isCash ? '10% Online Booking Fee (Paid Now)' : '100% Online Payment (Paid Now)',
+                    CurrencyFormatter.formatNPR(onlineFee),
                     isDark,
                     isHighlight: true,
                   ),
+                  const SizedBox(height: 8),
+                  _buildPriceRow(
+                    'Pay at Salon upon Service',
+                    CurrencyFormatter.formatNPR(payAtSalon),
+                    isDark,
+                  ),
+                  const Divider(height: 20),
+                  _buildPriceRow(
+                    'Total Service Amount',
+                    CurrencyFormatter.formatNPR(finalPrice),
+                    isDark,
+                    isBold: true,
+                  ),
                 ],
-                const Divider(height: 20),
-                _buildPriceRow(
-                  'Total Payable',
-                  CurrencyFormatter.formatNPR(finalPrice),
-                  isDark,
-                  isBold: true,
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          }(),
 
           const SizedBox(height: 80),
         ],

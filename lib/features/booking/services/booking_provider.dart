@@ -459,12 +459,23 @@ class BookingProvider extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> cancelBooking(String bookingId) async {
+  Future<Map<String, dynamic>?> getCancellationQuote(String bookingId) async {
+    final result = await _service.booking.getCancellationQuote(bookingId);
+    if (result is Success<Map<String, dynamic>>) {
+      return result.data;
+    } else if (result is Failure<Map<String, dynamic>>) {
+      _error = (result as Failure).message;
+      notifyListeners();
+    }
+    return null;
+  }
+
+  Future<bool> cancelBooking(String bookingId, {String? cancelReason}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
-    final result = await _service.cancelBooking(bookingId);
+    final result = await _service.booking.cancelBooking(bookingId, cancelReason: cancelReason);
 
     _isLoading = false;
     final idx = _bookings.indexWhere((b) => b.id == bookingId);
@@ -472,6 +483,12 @@ class BookingProvider extends ChangeNotifier {
       if (idx != -1) {
         _bookings[idx] = result.data;
       }
+      notifyListeners();
+      return true;
+    } else if (result is Failure<BookingModel>) {
+      _error = (result as Failure).message;
+      notifyListeners();
+      return false;
     } else if (idx != -1) {
       _bookings[idx] = _bookings[idx].copyWith(status: 'cancelled');
     }
