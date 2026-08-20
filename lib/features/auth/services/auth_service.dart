@@ -7,6 +7,11 @@ import 'package:salonverse/features/auth/models/user_model.dart';
 import 'package:salonverse/features/salons/services/salon_service.dart';
 
 class AuthService {
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  static AuthService get instance => _instance;
+  AuthService._internal();
+
   final BaseClient _client = BaseClient.instance;
   static const String _tokenKey = 'backend_access_token';
 
